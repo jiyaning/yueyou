@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>动态发布</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dynamic_edit.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">发布动态</h1>
+					<div @click="post" class="header-right">
+						<span>发布</span>
+					</div>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="edit-wrap">
+					<textarea v-model="form.description" placeholder="这一刻的想法..."></textarea>
+					<div class="edit-media">
+						<div v-if="!!imgUrl" class="img-wrap">
+							<i @click="deleteImg" class="iconfont icon-guanbi"></i>
+							<img :src="imgUrl" alt="">
+						</div>
+						<div v-if="!!audioUrl" @click="playVoice" class="voice-wrap">
+							<i @click="deleteAudio" class="iconfont icon-guanbi"></i>
+							<img :src="audioIcon" alt="" style="width:60%;height: 60%;">
+							<span>{{form.audio_timer}}"</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<p class="dynamicstyle">
+				<span>
+						动态类型：
+				</span>
+			</p>
+			<div class="stylelist">
+				<div class="item">
+					<label for="wurao">
+						<span>日常</span>
+					</label>
+					<div class="right">
+						<input  value="1" type="radio" name="gifts" id="radio1"  class="chk_1" @click="checkedtype"/>
+						<label for="radio1"></label>
+					</div>
+				</div>
+				<div class="item">
+					<label for="wurao">
+						<span>ASMR</span>
+					</label>
+					<div class="right">
+						<input  value="2" type="radio" name="gifts" id="radio2" class="chk_1"  @click="checkedtype"/>
+						<label for="radio2"></label>
+					</div>
+				</div>
+				<div class="item">
+					<label for="houtai">
+						<span>唱歌</span>
+					</label>
+					<div class="right">
+						<input  value="3" type="radio" name="gifts" id="radio3"  class="chk_1"  @click="checkedtype"/>
+						<label for="radio3"></label>
+					</div>
+				</div>
+			</div>
+			<div class="stylelist">
+				<div class="item" style="width:50%">
+					<label for="wurao">
+						<span>电台&读文</span>
+					</label>
+					<div class="right">
+						<input  value="4" type="radio" name="gifts" id="radio4"  class="chk_1"  @click="checkedtype"/>
+						<label for="radio4"></label>
+					</div>
+				</div>
+				<div class="item" style="width:50%">
+					<label for="wurao">
+						<span>声优&剧情</span>
+					</label>
+					<div class="right">
+						<input  value="5" type="radio" name="gifts" id="radio5"  class="chk_1"  @click="checkedtype"/>
+						<label for="radio5"></label>
+					</div>
+				</div>
+			</div>
+			<div class="btn-wrap">
+				<div @click="uploadImgActionSheet" class="btn-item">
+					<i class="iconfont icon-ElecfansAPPiCON-"></i>
+					<div>上传图片</div>
+				</div>
+				<div @touchstart="voiceTouchstart" @touchend="voiceTouchend" class="btn-item">
+					<i class="iconfont icon-fabu-yuyin"></i>
+					<div>发表语音</div>
+				</div>
+			</div>
+			<div v-if="voiceGif" class="voice-gif">
+				<img src="../image/voice.gif" alt="">
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				form: {
+					uid: $api.getStorage('uid'),
+					description: '',
+					audio: '',
+					audio_timer: '',
+					images: '',
+					type: 1,
+					audio_type:'',
+				},
+				qiniuToken: '',
+				imgUrl: '',
+				audioIcon: '../image/stop.png',
+				audioUrl: '',
+				voiceGif: false,
+			},
+			created: function () {
+				this.getQiniuToken();
+			},
+			mounted: function () {},
+			methods: {
+				checkedtype: function(){
+					var _this = this;
+					_this.form.audio_type =$api.dom('input[name=gifts]:checked').value;
+				},
+				post: function () {
+					var _this = this;
+					if (_this.form.description == '') {
+						api.toast({
+							msg: '请填写你想表达的内容',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.images == '') {
+						api.toast({
+							msg: '请选择图片',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.audio == '') {
+						api.toast({
+							msg: '请上传语音',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.audio_timer < 5) {
+						api.toast({
+							msg: '语音时长不能低于5秒',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.audio_timer > 300) {
+						api.toast({
+							msg: '语音时长限时为5分钟',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.audio_type == '') {
+						api.toast({
+							msg: '请选择动态类型',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('DynamicAdd', _this.form, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							api.sendEvent({
+								name: 'refreshDynamics',
+							});
+							api.closeWin();
+						}
+					})
+				},
+				// 获取七牛token
+				getQiniuToken: function () {
+					var _this = this;
+					$$.ajaxData('qniu', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.qiniuToken = ret.data;
+						}
+					})
+				},
+				uploadImgActionSheet: function () {
+					var _this = this;
+					api.actionSheet({
+						title: '',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: ['拍照', '相册']
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.buttonIndex == 1) {
+								_this.getImageFile('camera');
+							}
+							if (ret.buttonIndex == 2) {
+								_this.getImageFile('library');
+							}
+						}
+					});
+				},
+				getImageFile: function (type) {
+					var _this = this;
+					api.getPicture({
+						sourceType: type,
+						encodingType: 'png',
+						mediaValue: 'pic',
+						destinationType: 'url',
+						allowEdit: false,
+						// quality: 100,
+						// targetWidth: 500,
+						// targetHeight: 500,
+						saveToPhotoAlbum: false
+					}, function (ret, err) {
+						if (ret) {
+							_this.uploadFiles(ret.data, 'img')
+						}
+					});
+				},
+				voiceTouchstart: function () {
+					this.voiceGif = true;
+					api.startRecord({
+						path: 'fs://ziyue_' + (+new Date()) + '.amr'
+					});
+				},
+				voiceTouchend: function () {
+					var _this = this;
+					_this.voiceGif = false;
+					api.stopRecord(function (ret, err) {
+						if (ret) {
+							//_this.audioDuration = ret.duration;
+							_this.form.audio_timer = ret.duration;
+							_this.audioUrl = ret.path;
+							_this.uploadFiles(ret.path, 'voice');
+						}
+					});
+				},
+				// 播放语音
+				playVoice: function () {
+					var _this = this;
+					_this.audioIcon = '../image/playing.gif';
+					api.startPlay({
+						path: _this.audioUrl
+					}, function (ret, err) {
+						_this.audioIcon = '../image/stop.png';
+					});
+				},
+				uploadFiles: function (fileUrl, type) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							if (type == 'img') {
+								_this.form.images = ret.key;
+								_this.imgUrl = qiniuImageUrl + ret.key + '?imageView2/1/w/300';
+							}
+							if (type == 'voice') {
+								_this.form.audio = ret.key;
+							}
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				deleteAudio: function () {
+					this.audioUrl = '';
+					this.form.audio = '';
+				},
+				deleteImg: function () {
+					this.imgUrl = '';
+					this.form.images = '';
+				}
+			}
+		})
+	}
+
+	function addphotos() {
+		api.getPicture({
+			sourceType: 'library',
+			encodingType: 'jpg',
+			mediaValue: 'pic',
+			destinationType: 'url',
+			allowEdit: true,
+			quality: 50,
+			targetWidth: 100,
+			targetHeight: 100,
+			saveToPhotoAlbum: false
+		}, function (ret, err) {
+			if (ret) {
+				alert(JSON.stringify(ret));
+			} else {
+				alert(JSON.stringify(err));
+			}
+		});
+	}
+
+	function addRecord() {
+		api.startRecord({
+			path: 'fs://a.amr'
+		});
+	}
+</script>
+
+</html>

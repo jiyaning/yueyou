@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>消息</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/im.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="im-header header-wrap">
+					<div class="header-left">
+						<i @click="goback" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">{{toName}}</h1>
+					<div class="header-right">
+						<i class="iconfont icon-gengduo" @click="openMore"></i>
+					</div>
+				</div>
+			</header>
+			<div id="im-main" class="im-main flex-con">
+				<div id="message-list" class="message-list">
+					<div v-for="(item, i) in messageList" :key="i" :class="['message-item', item.mode]">
+						<div class="avatar" @click="openMemberDetail(item.id)">
+							<img :src="item.avatar" alt="">
+						</div>
+						<div class="message-con">
+							<div v-if="item.type == 'RC:TxtMsg'" class="message-text">{{item.con}}</div>
+							<div v-if="item.type == 'RC:ImgTextMsg'" class="message-imgText">
+								<div v-if="item.title == 'give_gift_message'" class="give-gift-message" v-html="item.con">
+								</div>
+								<div v-if="item.title == 'call_message'" class="call-message">
+									<span v-if="item.mode == 'SEND'">{{item.con}}</span>
+									<img :src="item.imageUrl" alt="">
+									<span v-if="item.mode == 'RECEIVE'">{{item.con}}</span>
+								</div>
+								<div v-if="item.title == 'dating_message'" class="call-message">
+									<img :src="item.imageUrl" alt="">
+									<span v-if="item.mode == 'SEND'">{{item.con}}</span>
+									<span v-if="item.mode == 'RECEIVE'">{{item.con}}</span>
+								</div>
+							</div>
+							<div v-if="item.type == 'RC:ImgMsg'" class="message-img">
+								<img @click="showPhoto(i)" :src="item.con" alt="">
+							</div>
+							<div v-if="item.type == 'RC:VcMsg'" class="message-voice" :style="{ width: (item.con.duration/60)*100 + '%' }"
+							 @click="playVoice(i, item)">
+								<div v-if="item.mode == 'SEND'" class="voice">
+									<span>{{item.con.duration}}"</span>
+									<img :id="'voice' + i" src="../image/stop1.png" alt="">
+								</div>
+								<div v-if="item.mode == 'RECEIVE'" class="voice">
+									<img :id="'voice' + i" src="../image/stop.png" alt="">
+									<span>{{item.con.duration}}"</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="im-footer">
+				<div class="input-wrap">
+					<input v-model="message" type="text">
+					<button @click="sendMessageText" type="button">发送</button>
+				</div>
+				<div class="fMenu-wrap">
+					<div @click="sendMessageImage('library')" class="fMenu fMenu-img">
+						<i class="iconfont icon-img"></i>
+					</div>
+					<div @click="sendMessageImage('camera')" class="fMenu fMenu-xiangji">
+						<i class="iconfont icon-xiangji"></i>
+					</div>
+					<div @touchstart="voiceTouchstart" @touchend="voiceTouchend" class="fMenu fMenu-yuyin">
+						<i class="iconfont icon-yuyin"></i>
+					</div>
+					<div class="fMenu fMenu-gift" @click="openGiftFrame">
+						<i class="iconfont icon-gift"></i>
+					</div>
+					<div @click="showActionSheet" class="fMenu fMenu-call">
+						<i class="iconfont icon-call"></i>
+					</div>
+				</div>
+			</div>
+			<div v-if="voiceGif" class="voice-gif">
+				<img src="../image/voice.gif" alt="">
+			</div>
+			<div v-if="giveGiftNotice.length > 0" class="give-gift-notice-private-wrap notice1">
+				<div v-for="(item, index) in giveGiftNotice" :key="index" class="notice-item">
+					<div class="notice-info">
+						<div class="fromName">{{item.fromName}}</div>
+						<div class="giftName">送出<span>{{item.GiftName}}</span></div>
+					</div>
+					<div class="notice-img">
+						<div class="giftImg">
+							<img :src="item.GiftImg" alt="">
+						</div>
+						<div class="giftNumber">x{{item.GiftNumber}}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="svgaCanvas"></div>
+	<div id="svgaCanvas_tips"></div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/svga.min.js"></script>
+<script>
+	var app, rong, dialogBox, photoBrowser;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+      style: 'light'
+    });
+		dialogBox = api.require('dialogBox');
+		photoBrowser = api.require('photoBrowser');
+		rong = api.require('rongCloud2');
+		var player = new SVGA.Player('#svgaCanvas');
+		var parser = new SVGA.Parser('#svgaCanvas');
+		app = new Vue({
+			el: '#app',
+			data: {
+				id: $api.getStorage('uid'),
+				name: $api.getStorage('uname'),
+				avatar: $api.getStorage('uavatar'),
+				toId: '',
+				toName: '',
+				toAvatar: '',
+				message: '',
+				messageList: [],
+				voiceGif: false,
+				voicePlaying: false,
+				voicePlayingIndex: '',
+				isPhotoBrowser: false,
+				isCallFrame: {
+					status: false,
+					isMax: false
+				},
+				svgaShow: false,
+				voiceStart: false,
+				giveGiftNotice: []
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refreshIM'
+				}, function (ret, err) {
+					_this.messageList.push(ret.value);
+					setTimeout(function () {
+						_this.msgScrollToBottom();
+					}, 200);
+				});
+				api.addEventListener({
+					name: 'keyback'
+				}, function (ret, err) {
+					if (_this.isPhotoBrowser) {
+						_this.isPhotoBrowser = false;
+						photoBrowser.close();
+					} else if (_this.isGiftsFrame) {
+						_this.isGiftsFrame = false;
+						api.closeFrame({
+							name: 'gift2_frame'
+						});
+					} else {
+						api.closeWin();
+					}
+				});
+				api.addEventListener({
+					name: 'updateIM'
+				}, function (ret, err) {
+					var tempExtra = JSON.parse(ret.value.result.message.content.extra);
+					if (tempExtra.fromId == _this.toId) {
+						var userid, username, useravatar, msgCon, title = '', imageUrl = '';
+						if (ret.value.result.message.messageDirection == 'SEND') {
+							userid = _this.id;
+							username = _this.name;
+							useravatar = _this.avatar;
+						}
+						if (ret.value.result.message.messageDirection == 'RECEIVE') {
+							userid = _this.toId;
+							username = _this.toName;
+							useravatar = _this.toAvatar;
+						}
+						if (ret.value.result.message.objectName == 'RC:TxtMsg') {
+							msgCon = ret.value.result.message.content.text;
+						}
+						if (ret.value.result.message.objectName == 'RC:ImgMsg') {
+							msgCon = ret.value.result.message.content.imageUrl;
+						}
+						if (ret.value.result.message.objectName == 'RC:VcMsg') {
+							msgCon = ret.value.result.message.content;
+						}
+						if (ret.value.result.message.objectName == 'RC:ImgTextMsg') {
+							title = ret.value.result.message.content.title;
+							imageUrl = ret.value.result.message.content.imageUrl;
+							if (title == 'give_gift_message') {
+								msgCon = '<span class="text">赠送给你<em>' + tempExtra.GiftName + '</em></span><img src="'+ imageUrl +'" alt=""><span class="number">x' + tempExtra.GiftNumber + '</span>';
+							} else {
+								msgCon = ret.value.result.message.content.description;
+							}
+						}
+						_this.messageList.push({
+							type: ret.value.result.message.objectName,
+							title: title,
+							con: msgCon,
+							imageUrl: imageUrl,
+							mode: ret.value.result.message.messageDirection,
+							id: userid,
+							name: username,
+							avatar: useravatar
+						})
+						setTimeout(function () {
+							_this.msgScrollToBottom();
+						}, 200);
+						rong.setMessageReceivedStatus({
+							messageId: ret.value.result.message.messageId,
+							receivedStatus: 'READ'
+						}, function (ret, err) {})
+					}
+				});
+				api.addEventListener({
+					name: 'give_gift_notice_private'
+				}, function(ret, err){
+					var message_content = JSON.parse(ret.value.result.message.content.data)
+					if (message_content.fromId != _this.toId) {
+						return false;
+					}
+					if(message_content.GiftSvga != '') {
+						$api.text($api.byId('svgaCanvas_tips'), message_content.fromName + '送' + message_content.toName + message_content.GiftName + 'x' + message_content.GiftNumber);
+						$api.css($api.byId('svgaCanvas'), 'display: block;');
+						$api.css($api.byId('svgaCanvas_tips'), 'display: block;');
+						parser.load(message_content.GiftSvga, function(videoItem) {
+							player.loops = 1;
+							player.setVideoItem(videoItem);
+							player.startAnimation();
+							player.onFinished(function() {
+								$api.css($api.byId('svgaCanvas'),'display: none;');
+								$api.css($api.byId('svgaCanvas_tips'),'display: none;');
+							});
+						})
+					} else {
+						if (parseInt(message_content.GiftGold) * parseInt(message_content.GiftNumber) < 1000) {
+							_this.giveGiftNotice.push({
+								fromName: message_content.fromName,
+								GiftName: message_content.GiftName,
+								GiftImg: message_content.GiftImg,
+								GiftNumber: message_content.GiftNumber,
+							})
+							setTimeout(function () {
+								_this.giveGiftNotice.pop();
+							}, 5000);
+						} else {
+							api.openFrame({
+								name: 'give_gift_notice_frame',
+								url: 'give_gift_notice_frame.html',
+								bounces: false,
+								rect: {
+									x: 0,
+									y: 200,
+									w: api.winWidth,
+									h: 200
+								},
+								pageParam: {
+									type: 'private',
+									con: message_content
+								}
+							});
+							setTimeout(function () {
+								api.closeFrame({
+									name: 'give_gift_notice_frame'
+								});
+							}, 5000);
+						}
+					}
+				});
+				api.addEventListener({
+					name: 'give_gift_notice'
+				}, function(ret, err){
+					var extraContent = JSON.parse(ret.value.result.message.content.data)
+					if ($api.getStorage('uid') == extraContent.extra.fromId || $api.getStorage('uid') == extraContent.extra.toId) {
+						// 自己送的礼物或者别人送给自己的礼物
+					} else {
+						api.openFrame({
+							name: 'give_gift_notice_frame',
+							url: 'give_gift_notice_frame.html',
+							bounces: false,
+							rect: {
+								x: 0,
+								y: 200,
+								w: api.winWidth,
+								h: 200
+							},
+							pageParam: {
+								type: 'all',
+								con: extraContent.extra
+							}
+						});
+						setTimeout(function () {
+							api.closeFrame({
+								name: 'give_gift_notice_frame'
+							});
+						}, 5000);
+					}
+				});
+				api.addEventListener({
+					name: 'give_gift_notice_self'
+				}, function(ret, err){
+					if (ret.value.GiftSvga != '') {
+						$api.text($api.byId('svgaCanvas_tips'), ret.value.fromName + '送' + ret.value.toName + ret.value.GiftName + 'x' + ret.value.GiftNumber);
+						$api.css($api.byId('svgaCanvas'), 'display: block;');
+						$api.css($api.byId('svgaCanvas_tips'), 'display: block;');
+						parser.load(ret.value.GiftSvga, function(videoItem) {
+							player.loops = 1;
+							player.setVideoItem(videoItem);
+							player.startAnimation();
+							player.onFinished(function() {
+								$api.css($api.byId('svgaCanvas'),'display: none;');
+								$api.css($api.byId('svgaCanvas_tips'),'display: none;');
+							});
+						})
+					} else {
+						if (parseInt(ret.value.GiftGold) * parseInt(ret.value.GiftNumber) < 1000) {
+							_this.giveGiftNotice.push({
+								fromName: ret.value.fromName,
+								GiftName: ret.value.GiftName,
+								GiftImg: ret.value.GiftImg,
+								GiftNumber: ret.value.GiftNumber,
+							})
+							setTimeout(function () {
+								_this.giveGiftNotice.pop();
+							}, 5000);
+						} else {
+							api.openFrame({
+								name: 'give_gift_notice_frame',
+								url: 'give_gift_notice_frame.html',
+								bounces: false,
+								rect: {
+									x: 0,
+									y: 200,
+									w: api.winWidth,
+									h: 200
+								},
+								pageParam: {
+									type: 'private',
+									con: ret.value
+								}
+							});
+							setTimeout(function () {
+								api.closeFrame({
+									name: 'give_gift_notice_frame'
+								});
+							}, 5000);
+						}
+					}
+				});
+			},
+			mounted: function () {
+				this.getPageParam();
+				this.getRecentMessages();
+				this.clearMessagesUnreadStatus();
+			},
+			methods: {
+				// 获取页面传参
+				getPageParam: function () {
+					if (api.pageParam.fromId == this.id) {
+						this.toId = api.pageParam.toId;
+						this.toName = api.pageParam.toName;
+						this.toAvatar = api.pageParam.toAvatar;
+					} else {
+						this.toId = api.pageParam.fromId;
+						this.toName = api.pageParam.fromName;
+						this.toAvatar = api.pageParam.fromAvatar;
+					}
+				},
+
+				// 更多
+				openMore: function () {
+					var _this = this;
+					api.actionSheet({
+						title: '',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: ['用户详情', '举报']
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.buttonIndex == 1) {
+								api.openWin({
+									name: 'member_detail',
+									url: 'member_detail.html',
+									slidBackEnabled: false,
+									pageParam: {
+										member_id: _this.toId
+									}
+								});
+							}
+							if (ret.buttonIndex == 2) {
+								api.openWin({
+									name: 'report',
+									url: 'report.html'
+								});
+							}
+						}
+					});
+				},
+
+				// 获取最近消息
+				getRecentMessages: function () {
+					var _this = this;
+					rong.getLatestMessages({
+						conversationType: 'PRIVATE',
+						targetId: _this.toId,
+						count: 10
+					}, function (ret, err) {
+						// api.alert({
+						// 	title: 'getLatestMessages',
+						// 	msg: JSON.stringify(ret)
+						// })
+						if (ret.status == 'success') {
+							for (var i = 0; i < ret.result.length; i++) {
+								var userid, username, useravatar, msgCon, title = '', imageUrl = '';
+								if (ret.result[i].messageDirection == 'SEND') {
+									userid = _this.id;
+									username = _this.name;
+									useravatar = _this.avatar;
+								}
+								if (ret.result[i].messageDirection == 'RECEIVE') {
+									userid = _this.toId;
+									username = _this.toName;
+									useravatar = _this.toAvatar;
+								}
+								if (ret.result[i].objectName == 'RC:TxtMsg') {
+									msgCon = ret.result[i].content.text;
+								}
+								if (ret.result[i].objectName == 'RC:ImgMsg') {
+									msgCon = ret.result[i].content.imageUrl;
+								}
+								if (ret.result[i].objectName == 'RC:VcMsg') {
+									msgCon = ret.result[i].content;
+								}
+								if (ret.result[i].objectName == 'RC:ImgTextMsg') {
+									title = ret.result[i].content.title;
+									msgCon = ret.result[i].content.description;
+									imageUrl = ret.result[i].content.imageUrl;
+									if (title == 'give_gift_message') {
+										msgCon = '<span class="text">赠送给你<em>' + JSON.parse(ret.result[i].content.extra).GiftName + '</em></span><img src="'+ imageUrl +'" alt=""><span class="number">x' + JSON.parse(ret.result[i].content.extra).GiftNumber + '</span>';
+									} else {
+										msgCon = ret.result[i].content.description;
+									}
+								}
+								_this.messageList.push({
+									type: ret.result[i].objectName,
+									title: title,
+									con: msgCon,
+									imageUrl: imageUrl,
+									mode: ret.result[i].messageDirection,
+									id: userid,
+									name: username,
+									avatar: useravatar
+								})
+							}
+							_this.messageList.reverse();
+							setTimeout(function () {
+								_this.msgScrollToBottom();
+							}, 200);
+						}
+					})
+				},
+
+				// 清除未读状态
+				clearMessagesUnreadStatus: function () {
+					rong.clearMessagesUnreadStatus({
+						conversationType: 'PRIVATE',
+						targetId: this.toId
+					}, function (ret, err) {
+						// api.toast({ msg: ret.status });
+					})
+				},
+
+				// 滚动到底部
+				msgScrollToBottom: function () {
+					var ele = $api.dom('#im-main');
+					ele.scrollTop = ele.scrollHeight;
+				},
+
+				// 发送文本消息
+				sendMessageText: function () {
+					var _this = this;
+					if (_this.message == '') {
+						api.toast({
+							msg: '消息不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (!$api.getStorage('isNoFirstSendIM')) {
+						api.alert({
+							title: '提醒',
+							msg: '每条信息收费1钻石',
+							buttons: ['知道了，以后不再提醒']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								$api.setStorage('isNoFirstSendIM', true)
+							}
+						});
+					}
+					$$.ajaxData('CollectionDiamonds', {
+						uid: $api.getStorage('uid'),
+						member_id: _this.toId,
+						type: 5,
+					}, function (ret, err) {
+						if (ret.status) {
+							_this.messageList.push({
+								type: 'RC:TxtMsg', // RC:TxtMsg RC:VcMsg RC:ImgMsg
+								con: _this.message,
+								mode: 'SEND',
+								id: _this.id,
+								name: _this.name,
+								avatar: _this.avatar
+							})
+							setTimeout(function () {
+								_this.msgScrollToBottom();
+							}, 200);
+							var tempExtra = {
+								fromId: _this.id,
+								fromName: _this.name,
+								fromAvatar: _this.avatar,
+								toId: _this.toId,
+								toName: _this.toName,
+								toAvatar: _this.toAvatar,
+							};
+							rong.sendTextMessage({
+								conversationType: 'PRIVATE',
+								targetId: _this.toId,
+								text: _this.message,
+								extra: JSON.stringify(tempExtra)
+							}, function (ret, err) {
+								_this.message = '';
+								if (err) {
+									switch (err.code) {
+										case 30014:
+											api.toast({ msg: '发送处理失败' });
+											break;
+										case 30003:
+											api.toast({ msg: '服务器超时' });
+											break;
+										case 31009:
+											api.toast({ msg: '用户被屏蔽' });
+											break;
+										case -10000:
+											api.toast({ msg: '未连接到服务器，请重新登录' });
+											break;
+										case -10001:
+											api.toast({ msg: '未连接到服务器，请重新登录' });
+											break;
+										case -10002:
+											api.toast({ msg: '未连接到服务器，请重新登录' });
+											break;
+										case 405:
+											api.toast({ msg: '用户在黑名单中' });
+											break;
+										default:
+											break;
+									}
+								}
+							});
+						} else {
+							api.toast({
+								msg: ret.msg
+							})
+						}
+					})
+				},
+
+				openMemberDetail: function (id) {
+					if ($api.getStorage('uid') == id) {
+						api.openWin({
+							name: 'my_info',
+							url: 'my_info.html',
+							slidBackEnabled: false
+						});
+					} else {
+						api.openWin({
+							name: 'member_detail',
+							url: 'member_detail.html',
+							slidBackEnabled: false,
+							pageParam: {
+								member_id: id
+							}
+						});
+					}
+				},
+
+				// 发送图片消息
+				sendMessageImage: function (type) {
+					var _this = this;
+					if (!$api.getStorage('isNoFirstSendIM')) {
+						api.alert({
+							title: '提醒',
+							msg: '每条信息收费1钻石',
+							buttons: ['知道了，以后不再提醒']
+						}, function(ret, err) {
+							if (ret.buttonIndex == 1) {
+								$api.setStorage('isNoFirstSendIM', true)
+							}
+						});
+					}
+					$$.ajaxData('CollectionDiamonds', {
+						uid: $api.getStorage('uid'),
+						member_id: _this.toId
+					}, function (ret, err) {
+						if (ret.status) {
+							api.getPicture({
+								sourceType: type,
+								encodingType: 'png',
+								mediaValue: 'pic',
+								destinationType: 'url'
+							}, function (ret, err) {
+								if (ret && ret.data != '') {
+									_this.messageList.push({
+										type: 'RC:ImgMsg', // RC:TxtMsg RC:VcMsg RC:ImgMsg
+										con: ret.data,
+										mode: 'SEND',
+										id: _this.id,
+										name: _this.name,
+										avatar: _this.avatar
+									})
+									setTimeout(function () {
+										_this.msgScrollToBottom();
+									}, 200);
+									var tempExtra = {
+										fromId: _this.id,
+										fromName: _this.name,
+										fromAvatar: _this.avatar,
+										toId: _this.toId,
+										toName: _this.toName,
+										toAvatar: _this.toAvatar,
+									};
+									rong.sendImageMessage({
+										conversationType: 'PRIVATE',
+										targetId: _this.toId,
+										imagePath: ret.data,
+										extra: JSON.stringify(tempExtra)
+									}, function (ret, err) {
+										if (err) {
+											switch (err.code) {
+												case 30014:
+													api.toast({ msg: '发送处理失败' });
+													break;
+												case 30003:
+													api.toast({ msg: '服务器超时' });
+													break;
+												case 31009:
+													api.toast({ msg: '用户被屏蔽' });
+													break;
+												case -10000:
+													api.toast({ msg: '未连接到服务器，请重新登录' });
+													break;
+												case -10001:
+													api.toast({ msg: '未连接到服务器，请重新登录' });
+													break;
+												case -10002:
+													api.toast({ msg: '未连接到服务器，请重新登录' });
+													break;
+												case 405:
+													api.toast({ msg: '用户在黑名单中' });
+													break;
+												default:
+													break;
+											}
+										}
+									});
+								} else if (ret.data == '') {
+									if (type == 'library') {
+										api.toast({
+											msg: '未选择图片'
+										})
+									}
+									if (type == 'camera') {
+										api.toast({
+											msg: '取消拍照'
+										})
+									}
+								}
+							});
+						} else {
+							api.toast({
+								msg: ret.msg
+							})
+						}
+					})
+				},
+
+				voiceTouchstart: function (e) {
+					e.preventDefault();
+					var _this = this;
+					$$.ajaxData('CollectionDiamonds', {
+						uid: $api.getStorage('uid'),
+						member_id: _this.toId
+					}, function (ret, err) {
+						if (ret.status) {
+							_this.voiceGif = true;
+							api.startRecord({
+								path: 'fs://ziyue_' + (+new Date()) + '.amr'
+							});
+						} else {
+							api.toast({
+								msg: ret.msg
+							})
+						}
+					})
+				},
+
+				voiceTouchend: function () {
+					var _this = this;
+					setTimeout(function () {
+						if (_this.voiceGif) {
+							_this.voiceGif = false;
+							api.stopRecord(function (ret, err) {
+								if (ret) {
+									if (ret.duration < 1) {
+										api.toast({
+											msg: '录音时间太短'
+										})
+									} else {
+										_this.messageList.push({
+											type: 'RC:VcMsg',
+											con: {
+												duration: ret.duration,
+												voicePath: ret.path
+											},
+											mode: 'SEND',
+											id: _this.id,
+											name: _this.name,
+											avatar: _this.avatar
+										})
+										setTimeout(function () {
+											_this.msgScrollToBottom();
+										}, 200);
+										var tempExtra = {
+											fromId: _this.id,
+											fromName: _this.name,
+											fromAvatar: _this.avatar,
+											toId: _this.toId,
+											toName: _this.toName,
+											toAvatar: _this.toAvatar
+										};
+										rong.sendVoiceMessage({
+											conversationType: 'PRIVATE',
+											targetId: _this.toId,
+											voicePath: ret.path,
+											duration: ret.duration,
+											extra: JSON.stringify(tempExtra)
+										}, function (ret, err) {
+											if (err) {
+												switch (err.code) {
+													case 30014:
+														api.toast({ msg: '发送处理失败' });
+														break;
+													case 30003:
+														api.toast({ msg: '服务器超时' });
+														break;
+													case 31009:
+														api.toast({ msg: '用户被屏蔽' });
+														break;
+													case -10000:
+														api.toast({ msg: '未连接到服务器，请重新登录' });
+														break;
+													case -10001:
+														api.toast({ msg: '未连接到服务器，请重新登录' });
+														break;
+													case -10002:
+														api.toast({ msg: '未连接到服务器，请重新登录' });
+														break;
+													case 405:
+														api.toast({ msg: '用户在黑名单中' });
+														break;
+													default:
+														break;
+												}
+											}
+										});
+									}
+								}
+							});
+						}
+					}, 600);
+				},
+
+				// 播放语音
+				playVoice: function (index, item) {
+					var _this = this;
+					if (_this.voicePlaying) {
+						api.stopPlay();
+						if (item.mode == 'SEND') {
+							$api.attr($api.dom('#voice' + _this.voicePlayingIndex), 'src', '../image/stop1.png');
+						}
+						if (item.mode == 'RECEIVE') {
+							$api.attr($api.dom('#voice' + _this.voicePlayingIndex), 'src', '../image/stop.png');
+						}
+					} else {
+						_this.voicePlaying = true;
+					}
+					_this.voicePlayingIndex = index;
+					if (item.mode == 'SEND') {
+						$api.attr($api.dom('#voice' + index), 'src', '../image/playing1.gif');
+					}
+					if (item.mode == 'RECEIVE') {
+						$api.attr($api.dom('#voice' + index), 'src', '../image/playing.gif');
+					}
+					api.startPlay({
+						path: item.con.voicePath
+					}, function (ret, err) {
+						if (item.mode == 'SEND') {
+							$api.attr($api.dom('#voice' + index), 'src', '../image/stop1.png');
+						}
+						if (item.mode == 'RECEIVE') {
+							$api.attr($api.dom('#voice' + index), 'src', '../image/stop.png');
+						}
+					});
+				},
+
+				// 展示照片
+				showPhoto: function (index) {
+					var _this = this;
+					_this.isPhotoBrowser = true;
+					var imagelist = [];
+					var imageNum = 0;
+					var imageIndex = 0;
+					for (var i = 0; i < _this.messageList.length; i++) {
+						if (_this.messageList[i].type == 'RC:ImgMsg') {
+							imagelist.push(_this.messageList[i].con);
+							imageNum++;
+							if (index == i) {
+								imageIndex = imageNum - 1;
+							}
+						}
+					}
+					photoBrowser.open({
+						activeIndex: imageIndex,
+						images: imagelist,
+						placeholderImg: 'widget://image/image_pre.png',
+						bgColor: '#000'
+					}, function(ret, err) {
+						if (ret && ret.eventType == 'click') {
+							_this.isPhotoBrowser = false;
+							photoBrowser.close();
+						} 
+						if (err) {
+							api.toast(JSON.stringify(err));
+						}
+					});
+				},
+
+				showActionSheet: function () {
+					var _this = this;
+					api.actionSheet({
+						title: '',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: ['语音通话']
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.buttonIndex == 1) {
+								_this.call('voiceCall');
+							}
+						}
+					});
+				},
+
+				call: function (type) {
+					var _this = this;
+					$$.ajaxData('ImCallStart', {
+						uid: $api.getStorage('uid'),
+						member_id: _this.toId,
+						type: '1'
+					}, function (ret, err) {
+						if (ret.status) {
+							var tempExtra = {
+								fromId: _this.id,
+								fromName: _this.name,
+								fromAvatar: _this.avatar,
+								toId: _this.toId,
+								toName: _this.toName,
+								toAvatar: _this.toAvatar,
+							};
+							api.sendEvent({
+								name: 'callFrame',
+								extra: {
+									extra: tempExtra,
+									type: type,
+									u_info: ret.data.u_info,
+									m_info: ret.data.m_info,
+									u_extra: ret.extra
+								}
+							});
+							api.closeToWin({
+								name: 'main'
+							});
+						} else {
+							api.toast({
+								msg: ret.msg,
+							});
+						}
+					})
+				},
+
+				openGiftFrame: function () {
+					var _this = this;
+					_this.isGiftsFrame = true;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('My', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							api.openFrame({
+								name: 'gifts_frame',
+								url: 'gifts_frame.html',
+								rect: {
+									x: 0,
+									y: 0,
+									w: api.winWidth,
+									h: api.winHeight
+								},
+								pageParam: {
+									gold: ret.data.gold,
+									costtype: 1,
+									member: {
+										member_id: _this.toId,
+										name: _this.toName
+									},
+								}
+							});
+						}
+					})
+				},
+				
+				goback: function () {
+					api.closeWin();
+				},
+
+			},
+		})
+	}
+</script>

@@ -1,0 +1,255 @@
+// out: ../css/myprofit.css
+@import 'common';
+#wrap,
+#app,
+#main {
+  height: auto;
+}
+
+html,
+body {
+  background-color: #24232b;
+  color: #fff;
+}
+
+header{
+position: fixed;
+width: 100%;
+}
+
+.profitlist {
+  padding-top: 70px;
+  width: 100%;
+  .profit {
+    background-color: #222129;
+    padding: 10px 0;
+    border-bottom: 1px solid #353535;
+    box-sizing: border-box;
+    .namebox {
+      // height: 80px;
+      display: flex;
+      .imgbox {
+        width: 20%;
+        .imgbox1 {
+          width: 60px;
+          height: 60px;
+          margin: auto;
+          border-radius: 50%;
+          img {
+            width: 100%;
+            border-radius: 50%;
+          }
+        }
+      }
+      .nametitle {
+        width: 80%;
+        .cost {
+          display: flex;
+          .zuanshibox {
+            width: 20px;
+            height: 20px;
+            margin: auto 5px;
+            img {
+              width: 100%;
+            }
+          }
+        }
+        .names {
+          line-height: 40px;
+          color: #cac5c5;
+          span {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+    .giftbox {
+      height: 75px;
+      padding: 0 15%;
+      display: flex;
+      .imgbox {
+        width: 20%;
+        margin: auto;
+        .imgbox1 {
+          width: 60px;
+          height: 60px;
+          margin: auto;
+          img {
+            width: 100%;
+          }
+        }
+      }
+      .nametitle {
+        width: 80%;
+        padding-left: 20px;
+        P {
+          line-height: 25px;
+          .gift {
+            color: #cac5c5;
+          }
+          .redgift {
+            width: 125px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: -9px;
+          }
+        }
+        div {
+          height: 25px;
+          line-height: 25px;
+          display: flex;
+          .zuanshibox {
+            width: 20px;
+            height: 20px;
+            margin: auto 5px;
+            img {
+              width: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.empty-data {
+  width: 100%;
+  text-align: center;
+  .empty-img {
+    width: 150px;
+    margin: 80px auto 10px;
+    display: block;
+  }
+  .empty-text {
+    font-size: 12px;
+    text-align: center;
+    display: block;
+  }
+}
+
+//红包领取列表
+.content {
+  padding-top: 20px;
+  .fromman {
+    .manavatar {
+      line-height: 70px;
+      .avatarbox {
+        width: 60px;
+        height: 60px;
+        margin: auto;
+        img {
+          width: 100%;
+          border-radius: 50%;
+        }
+      }
+    }
+    p {
+      text-align: center;
+    }
+  }
+  .getinfo {
+    padding: 0 10px;
+    color: @font-color;
+  }
+  .bangdanlist {
+    color: #fffcff;
+    width: 100%;
+    margin-top: 15px;
+    .bangdan {
+      width: 100%;
+      height: 70px;
+      border-bottom: 1px solid rgba(52, 42, 83, .7);
+      box-sizing: border-box;
+      display: flex;
+      .paiming {
+        // float: left;
+        width: 6%;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        margin: 10px 4px;
+        .iconfont {
+          font-size: 18px;
+          color: #f0f33b;
+        }
+      }
+      .personname {
+        // float: left;
+        width: 13%;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        margin: 10px 0;
+        .hezi {
+          width: 50px;
+          height: 50px;
+          img {
+            height: 100%;
+            border-radius: 25px;
+          }
+        }
+      }
+      .info {
+        // float: left;
+        height: 50px;
+        margin: 10px;
+        margin-right: 0;
+        span {
+          height: 25px;
+          line-height: 25px;
+          .icon-ziyuan {
+            color: #d044ff;
+          }
+        }
+        .name1 {
+          margin-right: 10px;
+        }
+        .sty1 {
+          background-color: rgb(158, 51, 245);
+          color: #fff;
+          font-weight: bold;
+          width: 16px;
+          height: 16px;
+          text-align: center;
+          line-height: 18px;
+          margin-left: 10px;
+        }
+        .sty2 {
+          background-color: rgb(245, 77, 155);
+          color: #fff;
+          font-weight: bold;
+          width: 16px;
+          height: 16px;
+          text-align: center;
+          line-height: 18px;
+          margin-left: 10px;
+        }
+        .address {
+          color: #958da5;
+          font-size: 12px;
+        }
+      }
+      .myid {
+        // float: right;
+        flex: 1;
+        display: flex;
+        height: 50px;
+        line-height: 50px;
+        text-align: right;
+        margin: 10px;
+        margin-right: 20px;
+        flex-direction: row-reverse;
+        .zuanshibox {
+          width: 20px;
+          height: 20px;
+          line-height: 60px;
+          margin: 0 5px;
+          img {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}

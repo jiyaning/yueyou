@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我邀请的人列表</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/mypromote.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我邀请的人</h1>
+					<div class="header-right">
+						<p @click="changestatus">
+							<span style="display:inline;margin-right: 4px;" :class="[zIndex == 1 ? 'fSelected' :'']">周</span>
+							<span style="display:inline;">|</span><span style="display:inline;margin-left: 4px;" :class="[zIndex == 2 ? 'fSelected' :'']">总</span></p>
+					</div>
+				</div>
+			</header>
+			<div class="empty-data" v-if="mypromoteslist.length == 0">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无邀请的人~</div>
+			</div>
+			<div class="friendslist" v-if="mypromoteslist.length != 0">
+				<div class="friend flex-wrap">
+					<p style="text-align: center;width: 100%;line-height: 50px;">邀请的人</p>
+				</div>
+				<div class="profit">
+					<p>充钻返利</p>
+				</div>
+				<div class="profit">
+					<p>收益返利</p>
+				</div>
+				<div class="profit">
+					<p>总返利</p>
+				</div>
+			</div>
+			<div class="friendslist" v-if="mypromoteslist.length != 0" v-for="(item ,index) in mypromoteslist" :key="item.id"
+			 @click="openpromotedetail(item.member_id)">
+				<div class="friend flex-wrap" style="justify-content:center;">
+					<div class="personname">
+						<div class="hezi">
+							<img id="avatar" :src="item.avatar" alt="">
+						</div>
+					</div>
+					<div class="info">
+						<span>{{item.name}}</span>
+						<p>{{item.member_random_id}}</p>
+					</div>
+				</div>
+				<div class="profit">
+					<span>{{item.Recharge}}</span>
+					<div class="imgbox">
+						<img src="../image/zuanshi.png" alt="">
+					</div>
+				</div>
+				<div class="profit">
+					<span>{{item.Income}}</span>
+					<div class="imgbox">
+						<img src="../image/zuanshi.png" alt="">
+					</div>
+				</div>
+				<div class="profit">
+					<span>{{item.sum}}</span>
+					<div class="imgbox">
+						<img src="../image/zuanshi.png" alt="">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				mypromoteslist: [],
+				mystatus: 'week',
+				zIndex: 1,
+			},
+			mounted: function () {
+				this.mypromotelist();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				changestatus: function () {
+					var _this = this;
+					if (_this.zIndex == 1) {
+						_this.zIndex = 2;
+						_this.mystatus = '';
+						_this.mypromotelist();
+					} else {
+						_this.zIndex = 1;
+						_this.mystatus = 'week';
+						_this.mypromotelist();
+					}
+				},
+				mypromotelist: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyPromoteDetail', {
+						uid: $api.getStorage('uid'),
+						status: _this.mystatus,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.mypromoteslist = ret.data;
+
+						}
+					})
+				},
+				openpromotedetail: function (id) {
+					api.openWin({
+						name: 'mypromotedetail',
+						url: 'mypromotedetail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+		})
+	}
+</script>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>大神榜</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/ranking_list.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">大神榜</h1>
+				</div>
+				<nav id="nav" class="nav flex-wrap">
+					<p id="1" class="fSelected" tapmode @click="meilibang">魅力榜</span>
+						<p id="2" tapmode @click="caifubang">富豪榜</span>
+				</nav>
+				<nav id="nav1">
+					<p><span class="menu selected" tapmode @click="yesterday">日榜</span></p>
+					<p><span class="menu" tapmode @click="all">总榜</span></p>
+				</nav>
+			</header>
+			<div id="main" class="content flex-con">
+				<ul>
+					<li>
+						<div class="hezi second" @click="openMemberDetail(ranklist[2].member_id)">
+							<img class="touxiang" :src="ranklist[1].avatar" alt="">
+							<img class="bg" :src="'../image/'+ status +'2.png'" alt="">
+							<p class="name1">{{ranklist[1].name}}</p>
+							<p class="name1">{{ranklist[1].member_random_id}}</p>
+							<p class="sale">{{ranklist[1].sale_column}}</p>
+						</div>
+					</li>
+					<li>
+						<div class="hezi first" @click="openMemberDetail(ranklist[0].member_id)">
+							<img class="touxiang" :src="ranklist[0].avatar" alt="">
+							<img class="bg" :src="'../image/'+ status +'1.png'" alt="">
+							<p class="name1">{{ranklist[0].name}}</p>
+							<p class="name1">{{ranklist[0].member_random_id}}</p>
+							<p class="sale">{{ranklist[0].sale_column}}</p>
+						</div>
+					</li>
+					<li>
+						<div class="hezi third" @click="openMemberDetail(ranklist[1].member_id)">
+							<img class="touxiang" :src="ranklist[2].avatar" alt="">
+							<img class="bg" :src="'../image/'+ status +'3.png'" alt="">
+							<p class="name1">{{ranklist[2].name}}</p>
+							<p class="name1">{{ranklist[2].member_random_id}}</p>
+							<p class="sale">{{ranklist[2].sale_column}}</p>
+						</div>
+					</li>
+				</ul>
+				<div class="bangdanlist" id="bangdanlist">
+					<div v-if="index>2" v-for="(item,index) in ranklist" :key="item.id" class="bangdan">
+						<div class="paiming">{{index+1}}
+						</div>
+						<div class="personname" @click="openMemberDetail(item.member_id)">
+							<div class="hezi">
+								<img :src="item.avatar" alt="">
+							</div>
+						</div>
+						<div class="info">
+							<span class="name1">{{item.name}}</span>
+							<span>{{item.member_random_id}}</span>
+							<span v-if="item.RandomIdStatus == 1" class="sty1">靓</span><span v-if="item.RandomIdStatus == 2" class="sty2">神</span>
+							<p class="address" v-if="item.sale_column == null">暂无技能信息</p>
+							<p class="address" v-else>{{item.sale_column}}</p>
+						</div>
+						<!-- <div class="myid">{{item.charm}}</div> -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				zIndex: 1,
+				status:'yesterday_charm_value',
+				ranklist: [{
+					name: '',
+					avatar: '',
+					member_id:'',
+					member_random_id:'',
+					sale_column:'',
+				}, {
+					name: '',
+					avatar: '',
+					member_id:'',
+					member_random_id:'',
+					sale_column:'',
+				}, {
+					name: '',
+					avatar: '',
+					member_id:'',
+					member_random_id:'',
+					sale_column:'',
+				}]
+			},
+			mounted: function () {
+				this.getRanklist('yesterday_charm_value');
+			},
+			methods: {
+				caifubang: function (e) {
+					var _this = this;
+					_this.status = 'yesterday_rich_value';
+					$api.removeCls($api.dom('.fSelected'), 'fSelected');
+					$api.addCls(e.currentTarget, 'fSelected');
+					_this.zIndex = e.currentTarget.id;
+					_this.getRanklist('yesterday_rich_value');
+				},
+				meilibang: function (e) {
+					var _this = this;
+					_this.status = 'charm';
+					$api.removeCls($api.dom('.fSelected'), 'fSelected');
+					$api.addCls(e.currentTarget, 'fSelected');
+					_this.zIndex = e.currentTarget.id;
+					_this.getRanklist('charm');
+				},
+				all: function (event) {
+					var _this = this;
+					$api.removeCls($api.dom('.selected'), 'selected');
+					$api.addCls(event.currentTarget, 'selected');
+					if (_this.zIndex == 1) {
+						_this.getRanklist('charm');
+						_this.status = 'charm';
+					}
+					if (_this.zIndex == 2) {
+						_this.getRanklist('wealth');
+						_this.status = 'wealth';
+					}
+				},
+				yesterday: function (event) {
+					var _this = this;
+					_this.status = 'yesterday_rich_value';
+					$api.removeCls($api.dom('.selected'), 'selected');
+					$api.addCls(event.currentTarget, 'selected');
+					if (_this.zIndex == 1) {
+						_this.status = 'yesterday_charm_value';
+						_this.getRanklist('yesterday_charm_value');
+					}
+					if (_this.zIndex == 2) {
+						_this.status = 'yesterday_rich_value';
+						_this.getRanklist('yesterday_rich_value');
+					}
+				},
+				getRanklist: function (typeStyle) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Manito', {
+						uid: $api.getStorage('uid'),
+						status: typeStyle
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.ranklist = ret.data;
+						} else {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					})
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+		})
+	}
+</script>
+</html>

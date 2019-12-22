@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>求约详情</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/date_details.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<div class="title">{{api.pageParam.type | getValue}}</div>
+					<div class="header-right">
+						<i class="iconfont icon-shanchu" @click="opendatedel(list.id)"></i>
+					</div>
+				</div>
+			</header>
+			<div id="main" class="flex-con">
+				<div class="content">
+					<div class="top">
+						<div class="top-left">
+							<div class="box1" v-if="list.member != null">
+								<img :src="list.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="top-center" v-if="list.member != null">
+							<span class="name">{{list.member.name}}</span>
+							<p class="time1">{{list.created_at | timeFormat}}</p>
+						</div>
+						<div class="top-right">
+							<div class="bofang flex-wrap" v-if="!!list.audio">
+								<div class="imgbox">
+									<img :src="audioIcon" alt="" v-if="audioIcon == '../image/playing2.gif'" @click="stopaudio">
+									<img :src="audioIcon" alt="" v-if="audioIcon == '../image/stop11.png'" @click="playVoice(list.audio)">
+								</div>
+								<span>{{list.audio_timer}}"</span>
+							</div>
+						</div>
+					</div>
+					<div class="photo" v-if="photoList !=null && photoList !=''">
+						<span @click="getPhotoBrowser(index)" v-for="(item,index) in photoList" :key="item.id"><img :src="item.photo" alt=""></span>
+					</div>
+					<div class="label labelInfo">
+						<span class="title">个人信息:</span>
+						<p>我在{{list.member.city}},今年{{list.member.age}}岁,<br>
+							身高{{list.member.height}}cm,职业<span v-if="occupation_s.length ==0">暂无</span><span v-else>{{occupation_s}}</span>
+						</p>
+					</div>
+					<div class="label">
+						<span class="title">邀约对象:</span>
+						<p>{{list.invite_obj_s}}</p>
+					</div>
+					<div class="label">
+						<span class="title">{{api.pageParam.type | getValue1}}类型:</span>
+						<p>{{list.styles}}</p>
+					</div>
+					<div class="label">
+						<span class="title">{{api.pageParam.type | getValue1}}时间:</span>
+						<p>{{list.time}}<span v-if="api.pageParam.type==1">&nbsp;&nbsp;&nbsp;&nbsp;总计{{list.occupation}}天</span></p>
+					</div>
+					<div class="label">
+						<span class="title">{{api.pageParam.type | getValue1}}地点:</span>
+						<p>{{list.adress}}</p>
+					</div>
+					<div class="label" v-if="api.pageParam.type == 1">
+						<span class="title">费用预算:</span>
+						<p>{{button02[list.hand_require-1]}}</p>
+					</div>
+					<div class="label" v-if="api.pageParam.type == 2">
+						<span class="title">费用预算:</span>
+						<p>{{button03[list.hand_require-1]}}</p>
+					</div>
+					<div class="label" v-if="api.pageParam.type == 3">
+						<span class="title">费用预算:</span>
+						<p>{{button01[list.hand_require-1]}}</p>
+					</div>
+					<div class="label" v-if="api.pageParam.type == 3">
+						<span class="title">费用支付:</span>
+						<p>{{button1[list.Cost_requirements-1]}}</p>
+					</div>
+					<div class="label" v-if="api.pageParam.type == 2 || api.pageParam.type == 1">
+						<span class="title">费用支付:</span>
+						<p>{{button2[list.Cost_requirements-1]}}</p>
+					</div>
+					<div class="label" v-if="api.pageParam.type == 3">
+						<span class="title">服装化妆:</span>
+						<p>{{fuzhuang[list.Costume_make_up-1]}}</p>
+					</div>
+					<div class="label labelInfo" v-if="list.rule_require != ''">
+						<span class="title">求约描述:</span>
+						<p>{{list.rule_require}}</p>
+					</div>
+				</div>
+				<div class="qiuyueList">
+					<p class="pinglunnum" v-if="followlist.length > 0 && list.status == 0">你可以选择以下人进行应约</p>
+					<p class="pinglunnum" v-if="followlist.length > 0 && list.status == 1">求约已完成</p>
+					<div v-for="(item,index) in followlist" :key="item.id" class="friend flex-wrap">
+						<div class="personname" @click="openMemberDetail(item.member.member_id)">
+							<div class="hezi">
+								<img id="avatar" :src="item.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="info">
+							<span class="name">{{item.member.name}}</span>
+							<span class="sex sex1" v-if="item.member.sex==1">
+								<i class="iconfont icon-nan"></i>{{item.member.age}}
+							</span>
+							<span class="sex sex2" v-else>
+								<i class="iconfont icon-nv"></i>{{item.member.age}}
+							</span>
+							<p class="qianming" v-if="item.member.sale_column == null || item.member.sale_column == ''">暂无技能信息！</p>
+							<p class="qianming" v-else>{{item.member.sale_column}}</p>
+						</div>
+						<div class="selecteddate" v-if="list.status == 0">
+							<span @click="askYaoqing(index,item)">同意应约</span>
+						</div>
+						<div class="selecteddate" v-if="list.status == 1">
+							<span v-if="item.flag == 0 ">未应约</span>
+							<span v-if="item.flag == 1 ">应约成功</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app, rong;
+	apiready = function () {
+		rong = api.require('rongCloud2');
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				zIndexActive: null,
+				button01: ['100元及以下', '200元', '500元', '500元以上', '私聊协商', ],
+				button02: ['1000元及以下', '1000-3000元', '3000-5000元', '5000-10000元', '10000元以上', '视情况定'],
+				button03: ['100元及以下', '100-300元', '300-500元', '500-800元', '800-1500元', '1500元以上', '视情况定', ],
+				button1: ['收模特费', '收摄影师费', '互免', '私聊协商'],
+				button2: ['我付', '对方付', '私聊协商'],
+				fuzhuang: ['摄像师提供', '模特自备', '私聊协商'],
+				voiceGif: false,
+				audioIcon: '../image/stop11.png',
+				audioUrl: '',
+				uid: $api.getStorage('uid'),
+				photoList: [],
+				occupation_s: [],
+				list: {
+					weight: '',
+					height: '',
+					bwh: '',
+					appearance: '',
+					adress: '',
+					style: '',
+					member_id: '',
+					time: '',
+					Cost_requirements: '',
+					Costume_make_up: '',
+					occupation: '',
+					hand_require: '',
+					rule_require: '',
+					invite_obj: '',
+					styles: '',
+					invite_obj_s: '',
+					audio: '',
+					audio_timer: '',
+					member: {
+						avatar: '',
+						name: '',
+						level: '',
+						occupation_s: [{
+							tag: ''
+						}]
+					}
+				},
+				followlist: []
+			},
+			created: function () {},
+			mounted: function () {
+				this.getList();
+			},
+			methods: {
+				getPhotoBrowser: function (index) {
+					var _this = this;
+					var phoneImg = [];
+					for (var i = 0; i < _this.photoList.length; i++) {
+						phoneImg.push(_this.photoList[i].photo);
+					}
+					var photoBrowser = api.require('photoBrowser');
+					photoBrowser.open({
+						images: phoneImg,
+						placeholderImg: 'widget://image/image_pre.png',
+						bgColor: '#000',
+						activeIndex: index,
+						zoomEnabled: false
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.eventType == 'click') {
+								photoBrowser.close();
+							}
+						}
+					});
+				},
+				opendatedel: function (dateid) {
+					var _this = this;
+					api.confirm({
+						title: '提醒',
+						msg: '是否删除该条求约',
+						buttons: ['删除', '取消']
+					}, function (ret, err) {
+						if (ret.buttonIndex == 1) {
+							api.showProgress({
+								title: '',
+								text: ''
+							});
+							$$.ajaxData('MyNewsDynamicDelete', {
+								type: 'news',
+								news_id: dateid,
+								dynamic_id: '',
+							}, function (ret, err) {
+								api.hideProgress();
+								if (ret.status) {
+									api.toast({
+										msg: ret.msg,
+									});
+									api.sendEvent({
+										name: 'mydatedel',
+									});
+								}
+								setTimeout(function () {
+									api.closeWin();
+								}, 1000);
+							})
+						}
+						if (ret.buttonIndex == 2) {
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+					});
+				},
+				getList: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutDetail', {
+						meet_id: api.pageParam.id,
+						uid: $api.getStorage('uid')
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.list = ret.data;
+							if (_this.list.audio != '') {
+								_this.playVoice(_this.list.audio);
+							}
+							_this.followlist = ret.extra;
+							_this.photoList = ret.data.self_photos;
+							if (ret.data.member.occupation_s != null && ret.data.member.occupation_s != '') {
+								_this.occupation_s = ret.data.member.occupation_s[0].tag;
+							}
+						}
+					})
+				},
+				//选择应约人
+				askYaoqing: function (i, item) {
+					var _this = this;
+					_this.zIndexActive = i;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAbouSelect', {
+						uid: $api.getStorage('uid'),
+						meet_id: _this.list.id,
+						member_id: item.member.member_id,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							api.confirm({
+								title: '恭喜',
+								msg: '应约成功',
+								buttons: ['立即和Ta私聊吧', '稍后私聊']
+							}, function (ret, err) {
+								if (ret.buttonIndex == 1) {
+									var tempExtra = {
+										fromId: $api.getStorage('uid'),
+										fromName: $api.getStorage('uname'),
+										fromAvatar: $api.getStorage('uavatar'),
+										toId: item.member_id,
+										toName: item.member.name,
+										toAvatar: item.member.avatar,
+									}
+									rong.sendRichContentMessage({
+										conversationType: 'PRIVATE',
+										targetId: item.member_id,
+										title: 'dating_message',
+										description: '我同意了你的求约，我们开始约会吧',
+										imageUrl: '../image/dating_icon.png',
+										extra: JSON.stringify(tempExtra)
+									}, function (ret, err) {});
+									setTimeout(function () {
+										api.openWin({
+											name: 'im',
+											url: 'im.html',
+											pageParam: tempExtra
+										});
+									}, 1000);
+								}
+								if (ret.buttonIndex == 2) {
+									setTimeout(function () {
+										api.closeWin();
+									}, 1000);
+								}
+							});
+							_this.getList();
+						}
+						if (!ret.status) {
+							api.toast({
+								msg: ret.msg,
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					})
+				},
+				//暂停语音
+				stopaudio: function () {
+					var _this = this;
+					api.stopPlay();
+					_this.audioIcon = '../image/stop11.png';
+				},
+				// 播放语音
+				playVoice: function (audioUrl) {
+					var _this = this;
+					_this.audioIcon = '../image/playing2.gif';
+					api.download({
+						url: audioUrl,
+					}, function (ret, err) {
+						if (ret.state == 1) {
+							api.startPlay({
+								path: ret.savePath
+							}, function (ret, err) {
+								_this.audioIcon = '../image/stop11.png';
+							});
+						}
+					});
+				},
+				//打开个人中心
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+				getValue: function (value) {
+					if (value == 3) {
+						return '约拍详情';
+					}
+					if (value == 1) {
+						return '约游详情';
+					}
+					if (value == 2) {
+						return '同城约详情';
+					}
+				},
+				getValue1: function (value) {
+					if (value == 3) {
+						return '约拍';
+					}
+					if (value == 1) {
+						return '约游';
+					}
+					if (value == 2) {
+						return '约会';
+					}
+				},
+			}
+		})
+	}
+</script>

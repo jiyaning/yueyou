@@ -1,0 +1,780 @@
+// out: ../css/my.css
+@import 'common';
+html,
+body {
+  background-color: #f7f7f7;
+}
+
+// my.html
+.user-info {
+  &.user1 {
+    background-image: url(../image/nanbgc.jpg);
+  }
+  &.user2 {
+    background-image: url(../image/nvbgc.jpg);
+  }
+  background-position: center center;
+  background-size: 100% 100%;
+  .login {
+    padding: 30px 20px;
+    align-items: center;
+    .avatar {
+      line-height: 0;
+      img {
+        width: 60px;
+        height: 60px;
+        border-radius: 60px;
+      }
+    }
+    .info {
+      flex: 1;
+      margin-left: 10px;
+      .name {
+        margin-bottom: 5px;
+        color: #4c484c;
+        align-items: center;
+        .sex {
+          height: 16px;
+          padding: 0 6px;
+          line-height: 16px;
+          text-align: center;
+          color: #fff;
+          border-radius: 10px;
+          font-size: 10px;
+          margin-left: 5px;
+          &.sex1 {
+            background-color: @sex1-color;
+          }
+          &.sex2 {
+            background-color: @sex2-color;
+          }
+          .iconfont {
+            font-size: 10px;
+            color: #fff;
+          }
+        }
+        .iconfont {
+          color: gold;
+        }
+      }
+      .sign {
+        color: #4c484c;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.banner {
+  line-height: 26px;
+  padding: 1px;
+  box-sizing: border-box;
+  color: @font-color;
+  font-size: 12px;
+  p {
+    width: 100%;
+    border-radius: 14px;
+    background-color: #fff;
+    padding: 0 10px;
+    box-sizing: border-box;
+    .iconfont {
+      font-size: 30px;
+    }
+  }
+}
+
+.topnav {
+  height: 32px;
+  background-color: #e4e4e4;
+  color: @font-color;
+  justify-content: center;
+  p {
+    width: 10%;
+    margin: 0 33px;
+    text-align: center;
+    line-height: 32px;
+    &.fSelected {
+      border-bottom: 2px solid @main-color;
+      span {
+        color: #2d2d2d;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.menu-list {
+  .menu-item {
+    display: flex;
+    padding: 0 5px 0 15px;
+    height: 44px;
+    border-bottom: 1px solid #efefef;
+    align-items: center;
+    background-color: #fff;
+    .icon {
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      margin-right: 10px;
+      &.icon-setting {
+        background-position: -120px -40px;
+      }
+    }
+    .iconfont {
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      line-height: 24px;
+      margin-right: 10px;
+    } //钱包
+    .icon-qian {
+      color: #f9532d;
+    } //我的VIP
+    .icon-liebiaowodeiconvip {
+      color: gold;
+    } //我的推广
+    .icon-tuiguangzhuanqian {
+      color: gold;
+    } //我的等级
+    .icon-dengji3 {
+      color: #8e05f7;
+    } //价格设置  
+    .icon-jiageprice1 {
+      color: #f72b21;
+    } //我的打招呼
+    .icon-xiaoxi {
+      color: #09f5b4;
+    } //通话状态
+    .icon-dianhua1 {
+      color: #0bf13d;
+    } //我的相册
+    .icon-img {
+      color: #e671a2;
+    } //我是视频
+    .icon-shipin {
+      color: #74daf1;
+    } //我的求约
+    .icon-aiqingyuehui {
+      color: #f70707;
+    } //我的动态
+    .icon-iconfontdongtaidianji {
+      color: #aa0aec;
+    } //我的认证
+    .icon-renzheng1 {
+      color: #5fdc50;
+    } //免费获得钻石
+    .icon-icon_share {
+      color: #aa0aec;
+    } //子约玩法攻略
+    .icon-gonglve1 {
+      color: #0bcaf5;
+    } //我的礼物
+    .icon-gift {
+      color: #f50505;
+    }
+    .menu-info {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      .title {
+        font-size: 14px;
+        line-height: 44px;
+      }
+      .info {
+        font-size: 12px;
+        color: #666;
+        line-height: 44px;
+      }
+    }
+    .value {
+      font-size: 12px;
+      color: #666;
+    }
+  }
+}
+
+// setting.html
+.logout-wrap {
+  padding: 20px;
+  .logout-btn {
+    width: 80%;
+    height: 40px;
+    margin: 60px auto 0;
+    display: block;
+    line-height: 40px;
+    border-radius: 30px;
+    color: #fff;
+    background-color: @main2-color;
+  }
+}
+
+// my_status.html
+.my-status {
+  .statuslist {
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    .item {
+      height: 50px;
+      line-height: 50px;
+      border-bottom: 1px solid #efefef;
+      box-sizing: border-box;
+      .hezi {
+        float: right;
+        width: 40px;
+      }
+      span {
+        // width: 120px;
+        text-align: left;
+        font-size: 16px;
+      }
+      .right {
+        float: right;
+        .chk_1 {
+          display: none;
+        }
+        .chk_1+label {
+          background-color: #FFF;
+          border: 1px solid #C1CACA;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05);
+          padding: 9px;
+          border-radius: 5px;
+          display: inline-block;
+          position: relative;
+        }
+        .chk_1+label:active {
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .chk_1:checked+label {
+          background-color: #fff;
+          border: 1px solid #92A1AC;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05), inset 15px 10px -12px rgba(255, 255, 255, 0.1);
+          color: #243441;
+        }
+        .chk_1:checked+label:after {
+          content: '\2713';
+          position: absolute;
+          top: -16px;
+          left: 0px;
+          color: @main2-color;
+          width: 100%;
+          text-align: center;
+          font-size: 1.4em;
+          padding: 1px 0 0 0;
+          vertical-align: text-top;
+        }
+      }
+    }
+  }
+  .beizhu {
+    padding: 10px;
+    color: #b3aeae;
+    background-color: #FFF;
+    position: relative;
+    .list {
+      color: @main-color;
+    }
+    p {
+      line-height: 26px;
+      font-size: 14px;
+    }
+    .btn {
+      margin-top: -30px;
+      button {
+        width: 80%;
+        height: 40px;
+        line-height: 40px;
+        margin: 50px auto 20px;
+        display: block;
+        background-color: #573e84;
+        color: #fff;
+        border-radius: 30px;
+      }
+    }
+  }
+  .btn-wrap {
+    padding: 20px;
+    button {
+      background-color: @main2-color;
+      color: #fff;
+      width: 80%;
+      height: 40px;
+      margin: 60px auto 0;
+      display: block;
+      line-height: 40px;
+      border-radius: 30px;
+    }
+  }
+}
+
+// play_strategy.html
+.app {
+  background: url(../image/play_strategy_bg.png) 0 0 repeat;
+}
+
+.nav {
+  display: flex;
+  width: 100%;
+  padding: 10px 0;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+  justify-content: space-around;
+  .menu {
+    width: 56px;
+    height: 26px;
+    line-height: 26px;
+    color: #101010;
+    font-size: 12px;
+    padding: 0 5px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 15px;
+    background: #f7f7f7;
+    color: #555;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, .2);
+    &.selected {
+      background: #573e84;
+      color: #fff;
+    }
+  }
+}
+
+.play-con {
+  padding: 0 15px 30px;
+  .play-item {
+    padding-top: 30px;
+    position: relative;
+    p {
+      text-align: justify;
+      color: #999;
+    }
+    .icon1 {
+      font-size: 50px;
+      color: #fed1ce;
+      position: absolute;
+      left: 0;
+      top: 14px;
+    }
+    h3 {
+      font-size: 18px;
+      position: relative;
+      margin-bottom: 10px;
+      padding-left: 20px;
+    }
+    h4 {
+      font-size: 16px;
+      position: relative;
+      margin-bottom: 20px;
+      margin-top: 20px;
+    }
+    h5 {
+      font-size: 16px;
+      font-weight: normal;
+    }
+    .info {
+      margin-bottom: 15px;
+      margin-top: 15px;
+      line-height: 1.6;
+      font-size: 14px;
+      .info-title {
+        height: 30px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        span {
+          width: 30px;
+          height: 30px;
+          background: linear-gradient(left, #b7aefd, #8c6cfe);
+          background: -o-linear-gradient(left, #b7aefd, #8c6cfe);
+          background: -ms-linear-gradient(left, #b7aefd, #8c6cfe);
+          background: -moz-linear-gradient(left, #b7aefd, #8c6cfe);
+          background: -webkit-linear-gradient(left, #b7aefd, #8c6cfe);
+          border-radius: 50%;
+          line-height: 30px;
+          float: left;
+          margin-right: 10px;
+          i {
+            text-align: center;
+            font-size: 16px;
+            line-height: 30px;
+            color: #fff;
+            display: block;
+          }
+        }
+        h5 {
+          margin-left: 40px;
+          line-height: 30px;
+          font-size: 16px;
+          font-weight: normal;
+        }
+      }
+      p {
+        text-align: justify;
+        color: #999;
+      }
+    }
+  }
+}
+
+.play_btn {
+  text-align: center;
+  background-color: #573e84;
+  color: #fff;
+  width: 80%;
+  height: 40px;
+  margin: 30px auto 0;
+  display: block;
+  line-height: 40px;
+  border-radius: 30px;
+}
+
+// my_greet
+.my-greet {
+  .voice-gif {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    margin-left: -50px;
+    width: 100px;
+    height: 100px;
+    img {
+      width: 100px;
+      height: 100px;
+    }
+  }
+  .renzheng {
+    background-color: #fff;
+    margin-bottom: 4px;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    .title {
+      height: 40px;
+      font-size: 16px;
+      display: flex;
+      border-bottom: 1px solid #F7F7F7;
+      .greetbox {
+        width: 120px;
+        height: 40px;
+        margin: auto;
+        img {
+          height: 100%;
+        }
+      }
+      .btn1 {
+        width: 20%;
+        line-height: 40px;
+        text-align: right;
+        margin-left: -8px;
+        button {
+          background-color: @main2-color;
+          color: #fff;
+          width: 60px;
+          padding: 10px 0;
+          border-radius: 4px;
+        }
+      }
+      .box {
+        height: 36px;
+        width: 36px;
+        background-color: #13ca13;
+        border-radius: 50%;
+        margin-right: 10px;
+        line-height: 40px;
+        text-align: center;
+        .iconfont {
+          width: 100%;
+          border-radius: 15px;
+          display: block;
+          line-height: 36px;
+          font-size: 22px;
+          color: #fff;
+        }
+      }
+      span {
+        line-height: 40px;
+      }
+    }
+    .content {
+      display: flex;
+      .beizhu {
+        width: 70%;
+        p {
+          line-height: 36px
+        }
+        .label {
+          line-height: 30px;
+          span {
+            margin-right: 10px;
+          }
+          input {
+            outline: none;
+            line-height: 30px;
+            color: @font-color;
+            border-bottom: 1px solid #eae9e9;
+            box-sizing: border-box;
+          }
+        }
+      }
+      .beizhu1 {
+        width: 70%;
+        margin: 10px 0;
+        display: flex;
+        .label {
+          line-height: 36px;
+          width: 33%;
+          .btn-item {
+            position: relative;
+            line-height: 48px;
+            span {
+              margin-right: 10px;
+            }
+            img {
+              width: 30px;
+              height: 30px;
+            }
+            .iconfont {
+              font-size: 26px;
+              color: #666;
+              margin-top: -10px;
+            }
+          }
+          .iconfont {
+            margin-left: 5px;
+            font-size: 24px;
+          }
+          p {
+            width: 60px;
+          }
+        }
+      }
+      .btn1 {
+        width: 20%;
+        margin-top: 60px;
+        margin-left: 34px;
+        text-align: right;
+        button {
+          background-color: @main2-color;
+          color: #fff;
+          width: 60px;
+          padding: 10px 0;
+          border-radius: 4px;
+        }
+      }
+      .btn2 {
+        width: 20%;
+        margin-top: 60px;
+        margin-left: 34px;
+        text-align: right;
+        button {
+          color: @main2-color;
+          border: 1px solid @main2-color;
+          width: 60px;
+          padding: 10px 0;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+  .tijiao {
+    padding: 20px;
+    button {
+      width: 100%;
+      height: 40px;
+      border-radius: 5px;
+      color: #fff;
+      background-color: @main-color;
+    }
+  }
+  .list {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    background-image: url(../image/mygreethelp.jpg);
+    background-size: 100% 100%;
+    border-radius: 4px;
+    color: @font-color;
+    z-index: 1000;
+    box-sizing: border-box;
+    .title {
+      line-height: 40px;
+      text-align: center;
+      font-size: 16px;
+      color: #000;
+    }
+    .titlecolor {
+      font-size: 15px;
+      color: #000;
+      margin-top: 10px;
+    }
+  }
+}
+
+// my_vip.html
+.my-vip {
+  .vip {
+    background-color: #000;
+    .top {
+      background-image: url(../image/bgc.jpg);
+      background-position: top center;
+      background-repeat: no-repeat;
+      text-align: center;
+      padding-top: 36px;
+      .box {
+        height: 90px;
+        position: relative;
+        top: 10px;
+        left: 1px;
+        img {
+          width: 90px;
+          border-radius: 50%;
+          left: 50%;
+        }
+        .vip1 {
+          position: absolute;
+          top: 80px;
+          width: 34px;
+          height: 22px;
+        }
+      }
+      .name {
+        margin-top: 26px;
+        color: #fff;
+      }
+      p {
+        margin-top: 16px;
+        color: #fff;
+      }
+    }
+  }
+  .menu {
+    background-color: #000;
+    .navlist {
+      border-radius: 30px;
+      height: 40px;
+      box-sizing: border-box;
+      background-color: #1f1730;
+      padding: 5px;
+      p {
+        flex: 1;
+        color: #fff;
+        text-align: center;
+        font-weight: bold;
+        margin-top: -2px;
+        span {
+          width: 90%;
+          background-color: #1f1730;
+        }
+        .menu {
+          line-height: 34px;
+          &.selected {
+            color: #b385e6;
+            width: 90%;
+            border-radius: 30px;
+            background-color: #352651;
+          }
+        }
+      }
+    }
+  }
+  .viplist {
+    border-bottom: 1px solid #383636;
+    background-color: #222129;
+    .viplist-title {
+      line-height: 36px;
+      text-align: center;
+    }
+    .viplabel {
+      border-bottom: 1px solid #383636;
+      padding: 10px;
+      .hezi {
+        width: 40px;
+        height: 40px;
+        img {
+          width: 100%;
+          border-radius: 50%;
+        }
+      }
+      .info {
+        padding-left: 10px;
+        p {
+          line-height: 1.6;
+          color: @font-color;
+        }
+        .name {
+          font-size: 16px;
+        }
+        .label {
+          font-size: 12px;
+          color: #757477;
+        }
+      }
+    }
+    .btn {
+      margin-top: 10px;
+      button {
+        width: 80%;
+        line-height: 40px;
+        margin: 30px auto;
+        display: block;
+        background-color: #573e84;
+        color: #fff;
+        border-radius: 30px;
+      }
+    }
+  }
+  .infolist {
+    .list {
+      color: #757477;
+      padding: 5px 0;
+      line-height: 50px;
+      display: flex;
+      text-align: center;
+      border-bottom: 1px solid #383636;
+      background-color: #222129;
+      .label1 {
+        width: 15%;
+        .vipbox {
+          width: 50px;
+          height: 50px;
+          margin: auto;
+          img {
+            height: 100%;
+          }
+        }
+        button {
+          padding: 8px 12px;
+          background-color: @main2-color;
+          color: #fff;
+          border-radius: 4px;
+        }
+      }
+      .label3 {
+        width: 50%;
+        text-align: center;
+        .vipbox {
+          width: 20px;
+          height: 20px;
+          img {
+            width: 100%;
+          }
+        }
+        .song1 {
+          display: flex;
+          line-height: 28px;
+          margin-left: 30px;
+        }
+      }
+      .label {
+        width: 20%;
+        button {
+          padding: 8px;
+          background-color: @main2-color;
+          color: #fff;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+}

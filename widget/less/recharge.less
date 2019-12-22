@@ -1,0 +1,63 @@
+// out: ../css/recharge.css
+@import 'common';
+html,
+body {
+	background-color: @main1-color;
+}
+.balance-wrap {
+	display: flex;
+	align-items: center;
+	color: #fff;
+	padding: 0 20px;
+	.label {
+		line-height: 60px;
+		margin-right: 20px;
+	}
+	.balance-info {
+		display: flex;
+		align-items: center;
+		flex: 1;
+		img {
+			width: 40px;
+			height: 40px;
+			margin-right: 10px;
+		}
+		span {
+			line-height: 60px;
+		}
+	}
+}
+.product-list {
+	background: #212029;
+	.product-item {
+		display: flex;
+		align-items: center;
+		height: 60px;
+		padding: 0 20px;
+		color: #fff;
+		& + .product-item {
+			border-top: 1px solid @font-color;
+		}
+		img {
+			width: 40px;
+			height: 40px;
+		}
+		.title {
+			flex: 1;
+			margin-left: 10px;
+			.gold {
+				font-size: 14px;
+			}
+			.gift {
+				font-size: 12px;
+				color: @main-color;
+			}
+		}
+		.value {
+			font-size: 14px;
+		}
+		.iconfont {
+			font-size: 14px;
+		}
+	}
+}

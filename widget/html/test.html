@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" type="text/css" href="../css/im.css" />
+</head>
+<body>
+  <div id="svgaCanvas"></div>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/svga.min.js"></script>
+  <script>
+    $api.css($api.byId('svgaCanvas'), 'display: block;');
+    var player = new SVGA.Player('#svgaCanvas');
+    var parser = new SVGA.Parser('#svgaCanvas');
+    parser.load('http://p4mp3ryz2.bkt.clouddn.com/svga1.svga', function(videoItem) {
+      alert('1111')
+      player.loops = 1;
+      player.setVideoItem(videoItem);
+      player.startAnimation();
+      player.onFinished(function() {
+        $api.css($api.byId('svgaCanvas'),'display: none;');
+      });
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的动态列表</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dynamic.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" onclick="api.closeWin()">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 v-if="api.pageParam.id == 1" class="title">我的动态</h1>
+					<h1 v-else-if="api.pageParam.id == ''" class="title">约友动态</h1>
+					<div v-if="api.pageParam.id == 1" class="header-right">
+						<i class="iconfont icon-fabu4" @click="opendateedit()"></i>
+					</div>
+					<div v-if="api.pageParam.id != 1" class="header-right" @click="openDynamichelp">
+						<span>帮助</span>
+					</div>
+				</div>
+			</header>
+			<div class="menu">
+				<div class="aui-tab flex-wrap" id="tab">
+					<div class="aui-tab-item tapmode " @click="afferent(1)" v-bind:class="{active:indexOf==1}">语音动态</div>
+					<div class="aui-tab-item tapmode" @click="afferent(2)" v-bind:class="{active:indexOf==2}">视频动态</div>
+				</div>
+			</div>
+			<div class="dynamicedit" v-if="api.pageParam.id != 1">
+				<div class="editbox" @click="openDynamicEdit">
+					<i class="iconfont icon-fabu"></i>
+				</div>
+			</div>
+			<div class="flex-con" v-show="indexOf==1" style="margin-top:108px;">
+				<div class="empty-data" v-if="list.length == 0">
+					<img class="empty-img" src="../image/empty.png">
+					<div class="empty-text">暂无语音动态~</div>
+				</div>
+				<div v-for="(item, i) in list" :key="item.id" class="dongtai" v-if="item.description !='我的相册上传照片写入'">
+					<div>
+						<div class="title flex-wrap">
+							<div class="avatar" @click="openMemberDetail(item.member_id)">
+								<img :src="item.member.avatar" alt="">
+							</div>
+							<div class="info">
+								<div class="name">{{item.member.name}}</div>
+								<div class="address">{{item.member.city}}</div>
+							</div>
+						</div>
+						<div class="content">
+							<div class="text">{{item.description}}</div>
+							<div class="media flex-wrap">
+								<div class="imgBox"><img v-if="!!item.images" :src="item.images" alt="" @click="getPhotoBrowser1(i)"></div>
+								<div class="voice-wrap">
+									<img :src="item.audioIcon" alt="" v-if="item.audioIcon == '../image/playing2.gif'" @click="stopaudio(i)">
+									<img :src="item.audioIcon" alt="" v-if="item.audioIcon == '../image/stop11.png'" @click="playVoice(item.audio,i)">
+									<span>{{item.audio_timer}}"</span>
+								</div>
+								<div class="audiotype">
+									<span v-if="item.audio_type == 1">日常</span>
+									<span v-if="item.audio_type == 2">ASMR</span>
+									<span v-if="item.audio_type == 3">唱歌</span>
+									<span v-if="item.audio_type == 4">电台&读文</span>
+									<span v-if="item.audio_type == 5">声优&剧情</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="status">
+						<div class="time">{{item.created_at | timeFormat}}</div>
+						<div class="comment">
+							<span @click="openDynamicDetail(item.id)">
+								<i class="iconfont icon-comment"></i> {{item.comment_size}}</span>
+							<span :class="[item.is_like == 1 ? 'is_like' : '']" @click="like(item.id, i)" class="likeBtn">
+								<i class="iconfont icon-xin"></i> {{item.like_size}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="flex-con" v-show="indexOf==2" style="margin-top:108px;">
+				<div class="empty-data" v-if="audios == ''">
+					<img class="empty-img" src="../image/empty.png">
+					<div class="empty-text">暂无视频动态~</div>
+				</div>
+				<div v-else v-for="(item1,index1) in audios" :key="item1.id" class="dongtai">
+					<div>
+						<div class="title flex-wrap">
+							<div class="avatar" @click="openMemberDetail(item1.member_id)">
+								<img :src="item1.member.avatar" alt="">
+							</div>
+							<div class="info">
+								<div class="name">{{item1.member.name}}</div>
+								<div class="address">{{item1.member.city}}</div>
+							</div>
+						</div>
+						<div class="content">
+							<div class="media1">
+								<div class="imgBox">
+									<img :src="item1.photo" alt="" @click="openvedio_detail(item1.file)">
+									<div class="box12" @click="openvedio_detail(item1.file)">
+										<img src="../image/video.png" alt="">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="status">
+						<div class="time">{{item1.created_at | timeFormat}}</div>
+						<div class="comment">
+							<span @click="openDynamicDetail(item1.id)">
+								<i class="iconfont icon-comment"></i> {{item1.comment_size}}</span>
+							<span :class="[item1.is_like == 1 ? 'is_like' : '']" @click="like(item1.id, index1)" class="likeBtn">
+								<i class="iconfont icon-xin"></i> {{item1.like_size}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				list: [{
+					member: {},
+					member_id: '',
+					description: '',
+					images: '',
+					audio: '',
+					audio_type: '',
+					audio_timer: '',
+					created_at: '',
+					timeFormat: '',
+					comment_size: '',
+					is_like: '',
+					like_size: '',
+					id: '',
+					audioIcon: '../image/stop11.png',
+				}],
+				uid: '',
+				indexOf: 1,
+				audios: [],
+				file: '',
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refresh_dynamic_list'
+				}, function (ret, err) {
+					_this.getDynamicList();
+					_this.getDynamicList1();
+				})
+				api.addEventListener({
+					name: 'mydynamicdel'
+				}, function (ret, err) {
+					_this.getDynamicList();
+					_this.getDynamicList1();
+				})
+				api.setRefreshHeaderInfo({
+					bgColor: '#ccc',
+					textColor: '#fff',
+					textDown: '下拉刷新...',
+					textUp: '松开刷新...'
+				}, function (ret, err) {
+					if (!!$api.getStorage('token')) {
+						setTimeout(function () {
+							_this.getDynamicList();
+							_this.getDynamicList1();
+						}, 1000);
+					}
+				});
+				api.addEventListener({
+					name: 'refreshDynamics'
+				}, function (ret, err) {
+					_this.getDynamicList();
+					_this.getDynamicList1();
+				});
+			},
+			mounted: function () {
+				this.getDynamicList();
+				this.getDynamicList1();
+			},
+			methods: {
+				// 播放语音
+				playVoice: function (audioUrl, k) {
+					var _this = this;
+					_this.list[k].audioIcon = '../image/playing2.gif';
+					api.download({
+						url: audioUrl,
+					}, function (ret, err) {
+						if (ret.state == 1) {
+							api.startPlay({
+								path: ret.savePath
+							}, function (ret, err) {
+								_this.list[k].audioIcon = '../image/stop11.png';
+								if (k < _this.list.length - 1) {
+									_this.playVoice(_this.list[++k].audio, k)
+								}
+							});
+						}
+					});
+				},
+				//暂停语音
+				stopaudio: function (k) {
+					var _this = this;
+					api.stopPlay();
+					_this.list[k].audioIcon = '../image/stop11.png';
+				},
+				getDynamicList: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (api.pageParam.id == 1) {
+						_this.uid = $api.getStorage('uid');
+					} else if (api.pageParam.id == '') {
+						_this.uid = '';
+					} else {
+						_this.uid = api.pageParam.id;
+					}
+					$$.ajaxData('DynamicList', {
+						uid: $api.getStorage('uid'),
+						member_id: _this.uid,
+						type: 1
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.list = [];
+							for (var i = 0; i < ret.data.data.length; i++) {
+								_this.list.push({
+									description: ret.data.data[i].description,
+									member: ret.data.data[i].member,
+									audio: ret.data.data[i].audio,
+									audio_type: ret.data.data[i].audio_type,
+									member_id: ret.data.data[i].member_id,
+									images: ret.data.data[i].images,
+									audio_timer: ret.data.data[i].audio_timer,
+									created_at: ret.data.data[i].created_at,
+									timeFormat: ret.data.data[i].timeFormat,
+									comment_size: ret.data.data[i].comment_size,
+									is_like: ret.data.data[i].is_like,
+									like_size: ret.data.data[i].like_size,
+									id: ret.data.data[i].id,
+									audioIcon: '../image/stop11.png',
+								})
+							}
+						}
+					})
+				},
+				getDynamicList1: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (api.pageParam.id == 1) {
+						_this.uid = $api.getStorage('uid');
+					} else if (api.pageParam.id == '') {
+						_this.uid = '';
+					} else {
+						_this.uid = api.pageParam.id;
+					}
+					$$.ajaxData('DynamicList', {
+						uid: $api.getStorage('uid'),
+						member_id: _this.uid,
+						type: 2
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.audios = ret.data.data;
+						}
+					})
+				},
+				opendateedit: function () {
+					api.openWin({
+						name: 'dynamic_edit',
+						url: 'dynamic_edit.html',
+						bounces: false,
+					});
+				},
+				openDynamichelp: function () {
+					api.alert({
+						title: '帮助',
+						msg: '约友动态展示你关注的，你的密友，与你聊过天的约友发布的动态。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				getPhotoBrowser1: function (index) {
+					var _this = this;
+					var phoneImg = [];
+					for (var i = 0; i < _this.list.length; i++) {
+						phoneImg.push(_this.list[i].images);
+					}
+					var photoBrowser = api.require('photoBrowser');
+					photoBrowser.open({
+						images: phoneImg,
+						placeholderImg: 'widget://image/image_pre.png',
+						bgColor: '#000',
+						activeIndex: index,
+						zoomEnabled: false
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.eventType == 'click') {
+								photoBrowser.close();
+							}
+						}
+					});
+				},
+				uploadFiles: function (fileUrl) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						report: true,
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							api.showProgress({
+								title: ret.progress + '%',
+								text: ''
+							});
+							if (ret.status == 1) {
+								api.hideProgress();
+								_this.file = ret.body.key;
+								_this.phone = qiniuImageUrl + ret.body.key + '?vframe/jpg/offset/1/w/300/h/300';
+								var str = "";
+								str = "<div class='box' @click='openvedio_detail(_this.file)'>" +
+									"<img src='" + _this.phone + "' title=''/>" +
+									"</div>"
+								$api.before($api.dom('#addBtn'), str);
+								_this.submitVedio();
+							}
+						}
+						if (err) {
+							api.hideProgress();
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				// 点赞
+				like: function (id, i) {
+					var _this = this;
+					$$.ajaxData('DynamicLike', {
+						uid: $api.getStorage('uid'),
+						trendes_id: id
+					}, function (ret, err) {
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							_this.getDynamicList();
+							_this.getDynamicList1();
+						}
+					})
+				},
+				openDynamicEdit: function () {
+					api.openWin({
+						name: 'dynamic_edit',
+						url: 'dynamic_edit.html',
+						bounces: false,
+					});
+				},
+				afferent: function (index) {
+					this.indexOf = index
+					if (index == 2) {
+						api.stopPlay();
+						for (var i = 0; i < this.list.length; i++) {
+							this.list[i].audioIcon = '../image/stop11.png';
+						}
+					}
+				},
+				openDynamicDetail: function (id) {
+					api.openWin({
+						name: 'dynamic_detail',
+						url: 'dynamic_detail.html',
+						bounces: false,
+						pageParam: {
+							id: id
+						}
+					});
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+				openvedio_detail: function (file) {
+					api.openWin({
+						name: 'video_detail',
+						url: 'video_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							file: file
+						}
+					});
+				},
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>

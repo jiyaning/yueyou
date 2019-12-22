@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>个人认证</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my_auth.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" @click="goback">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">个人认证</h1>
+					<div class="header-right">
+						<span @click="openmyauthhelp()">帮助</span>
+					</div>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="renzheng">
+					<div class="title">
+						<div class="box">
+							<i class="iconfont icon-weixin"></i>
+						</div>
+						<span>认证微信</span>
+					</div>
+					<div class="content">
+						<div class="beizhu">
+							<p>认证微信</p>
+							<p>让更多的人购买你<br>的微信加你好友</p>
+						</div>
+						<div v-if="wechat_identification == 0" class="btn1" @click="openwetchatAuth">
+							<button>立即认证</button>
+						</div>
+						<div v-if="wechat_identification == 3 || wechat_identification == 1" class="btn2" @click="openwetchatAuth">
+							<button>认证中</button>
+						</div>
+						<div v-if="wechat_identification == 6" class="btn3" @click="openwetchatAuth">
+							<button>认证成功</button>
+						</div>
+						<div v-if="wechat_identification == 2" class="btn3" @click="openwetchatAuth">
+							<button>认证失败</button>
+						</div>
+					</div>
+				</div>
+				<div class="renzheng">
+					<div class="title">
+						<div class="box box1">
+							<i class="iconfont icon-shipin1"></i>
+						</div>
+						<span>认证视频</span>
+					</div>
+					<div class="content">
+						<div class="beizhu">
+							<p>认证视频</p>
+							<p>获得更高报价权利<br>让别人更喜欢你</p>
+						</div>
+						<div v-if="video_identification == 0" class="btn1" @click="openvedioAuth">
+							<button>立即认证</button>
+						</div>
+						<div v-if="video_identification == 3 || video_identification == 1" class="btn2" @click="openvedioAuth">
+							<button>认证中</button>
+						</div>
+						<div v-if="video_identification == 6" class="btn3" @click="openvedioAuth">
+							<button>认证成功</button>
+						</div>
+						<div v-if="video_identification == 2" class="btn3" @click="openvedioAuth">
+							<button>认证失败</button>
+						</div>
+					</div>
+				</div>
+				<div class="renzheng">
+					<div class="title">
+						<div class="box box2">
+							<i class="iconfont icon-ji"></i>
+						</div>
+						<span>认证极品</span>
+					</div>
+					<div class="content">
+						<div class="beizhu">
+							<p>认证极品</p>
+							<p>获得更高报价权利<br>在人群脱颖而出</p>
+						</div>
+						<div v-if="masterwork_identification == 0" class="btn1" @click="openjipinAuth">
+							<button>立即认证</button>
+						</div>
+						<div v-if="masterwork_identification == 3 || masterwork_identification == 1" class="btn2" @click="openjipinAuth">
+							<button>认证中</button>
+						</div>
+						<div v-if="masterwork_identification == 6" class="btn3" @click="openjipinAuth">
+							<button>认证成功</button>
+						</div>
+						<div v-if="masterwork_identification == 2" class="btn3" @click="openjipinAuth">
+							<button>认证失败</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				wechat_identification: null,
+				video_identification: null,
+				masterwork_identification: null,
+				myweixin:'',
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refreshMyAuth'
+				}, function (ret, err) {
+					_this.getmyAuth();
+				})
+			},
+			mounted: function () {
+				this.getmyAuth();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+					api.sendEvent({
+						name: 'refreshMy',
+					});
+				},
+				getmyAuth: function () {
+					var _this = this;
+					$$.ajaxData('MyAuthentication', {
+						uid: $api.getStorage('uid')
+					}, function (ret, err) {
+						if (ret.status) {
+							_this.wechat_identification = ret.extra.wechat_identification;
+							_this.video_identification = ret.extra.video_identification;
+							_this.masterwork_identification = ret.extra.masterwork_identification;
+							_this.myweixin = ret.extra.wechat;
+						}
+					})
+				},
+				openmyauthhelp: function () {
+					api.alert({
+						title: '帮助',
+						msg: '认证与你的收入息息相关，更影响你的展现量。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				openvedioAuth: function () {
+					var _this = this;
+					if (_this.video_identification == 1 || _this.video_identification == 3) {
+						api.toast({
+							msg: '认证中，请耐心等待审核',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (_this.video_identification == 6) {
+						api.toast({
+							msg: '已认证',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else {
+						api.openWin({
+							name: 'video_auth',
+							url: 'video_auth.html',
+							slidBackEnabled: false
+						});
+					}
+				},
+				openwetchatAuth: function () {
+					var _this = this;
+					if (_this.wechat_identification == 1 || _this.wechat_identification == 3) {
+						api.toast({
+							msg: '认证中，请耐心等待审核',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else {
+						api.openWin({
+							name: 'wechat_auth',
+							url: 'wechat_auth.html',
+							slidBackEnabled: false,
+							pageParam: {
+							wechat_identification: _this.wechat_identification,
+							myweixin:_this.myweixin,
+						}
+						});
+					}
+				},
+				openjipinAuth: function () {
+					var _this = this;
+					if (_this.masterwork_identification == 1 || _this.masterwork_identification == 3) {
+						api.toast({
+							msg: '认证中，请耐心等待审核',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}  else {
+						api.openWin({
+							name: 'master_auth',
+							url: 'master_auth.html',
+							slidBackEnabled: false,
+							pageParam: {
+							masterwork_identification: _this.masterwork_identification,
+						}
+						});
+					}
+				},
+			}
+		})
+	}
+</script>
+
+</html>

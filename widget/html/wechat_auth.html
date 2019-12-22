@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>微信认证</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/auth.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak class="flex-wrap flex-vertical">
+		<header id="header">
+			<div class="header-wrap">
+				<div class="header-left">
+					<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+				</div>
+				<h1 class="title">微信认证</h1>
+			</div>
+		</header>
+		<div id="main" class="flex-con">
+			<div class="form-wrap">
+				<div class="form-item flex-wrap">
+					<i class="iconfont icon-shouji"></i>
+					<input v-model="wechat" class="flex-con" type="tel" placeholder="请输入微信号">
+				</div>
+				<p class="helptitle">认证流程:<span style="color:#ff4744">(必看)</span></p>
+				<p class="help">1、输入你的常用微信号，必须带有朋友圈</p>
+				<p class="help">2、添加官方微信：ziyuerz，验证信息请输入：申请微信认证+你的约ID</p>
+				<p class="help">3、提交认证，等待审核</p>
+				<div class="btn-wrap">
+					<button @click="authBtn" class="btn1" id="submit-btn" type="button" v-if="wechat_identification == 0">提交认证</button>
+					<button @click="authBtn" class="btn1" id="submit-btn" type="button" v-else>重新认证</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light',
+		});
+		var app = new Vue({
+			el: '#app',
+			data: {
+				wechat: api.pageParam.myweixin,
+				wechat_identification:api.pageParam.wechat_identification,
+			},
+			created: function () {},
+			mounted: function () {},
+			methods: {
+				authBtn: function () {
+					var _this = this;
+					if (_this.wechat == '') {
+						api.alert({
+							title: '提醒',
+							msg: '请输入微信号',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					$$.ajaxData('MyAuthentication', {
+						uid: $api.getStorage('uid'),
+						wechat: _this.wechat
+					}, function (ret, err) {
+						if (ret.status) {
+							api.alert({
+								title: '提醒',
+								msg: ret.msg,
+								buttons: ['知道了']
+							});
+							api.sendEvent({
+								name: 'refreshMyAuth',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+						if (!ret.status && _this.wechat_identification != 0) {
+							api.alert({
+								title: '提醒',
+								msg: '提交成功',
+								buttons: ['知道了']
+							});
+							api.sendEvent({
+								name: 'refreshMyAuth',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+					})
+				},
+			}
+		})
+	}
+</script>

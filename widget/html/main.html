@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>约友</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/common.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div v-if="index == '0'" class="header-wrap">
+					<div class="header-left" @click="selectSex('0')">
+						<i class="iconfont icon-guolv" style="font-size: 14px;"></i>
+					</div>
+					<div class="nav-wrap" style="font-size:14px">
+						<div :class="['nav-item', meetType == 'meet_pat' ? 'active' : '']" @click="tabsDateType('meet_pat')"><span>约聊</span></div>
+						<div :class="['nav-item', meetType == 'meet_get' ? 'active' : '']" @click="tabsDateType('meet_get')"><span>同城</span></div>
+						<div :class="['nav-item', meetType == 'meet_wander' ? 'active' : '']" @click="tabsDateType('meet_wander')"><span>约游</span></div>
+						<div class="nav-item" @click="openRankingList"><span>大神榜</span></div>
+					</div>
+					<div class="header-right" @click="openSearch">
+						<i class="iconfont icon-sousuo" style="font-size: 16px;"></i>
+					</div>
+				</div>
+				<div v-if="index == '1'" class="header-wrap">
+					<div class="title">{{frames[index].title}}</div>
+					<div class="header-right" @click="alertHelp('1')">
+						<span>帮助</span>
+					</div>
+				</div>
+				<div v-if="index == '2'" class="header-wrap">
+					<div class="header-left" @click="selectSex('2')">
+						<i class="iconfont icon-guolv" style="font-size: 14px;"></i>
+					</div>
+					<div class="title">{{frames[index].title}}</div>
+					<div class="header-right" @click="openDatingEdit" style="font-size: 15px;">
+						<i class="iconfont icon-fabu4"></i>
+					</div>
+				</div>
+				<div v-if="index == '3'" class="header-wrap">
+					<div class="title">{{frames[index].title}}</div>
+					<div class="header-right" @click="alertHelp('3')">
+						<span>帮助</span>
+					</div>
+				</div>
+				<div v-if="index == '4'" class="header-wrap">
+					<div class="title">{{frames[index].title}}</div>
+					<div class="header-right">
+						<i class="iconfont icon-fabu4" @click="openMyInfoEdit"></i>
+					</div>
+				</div>
+			</header>
+			<div id="main" class="flex-con"></div>
+			<div id="footer">
+				<ul class="flex-wrap">
+					<li v-for="(item, i) in frames" :key="i" tapmode="hover" @click="randomSwitchBtn(i);" :class="['flex-con', index == i ? 'active' : '']">
+						<i :class="['icon', 'icon-tab' + i]"></i>
+						<div class="title">{{item.title}}</div>
+						<span v-if="i == 3 && messageBadge" class="messageBadge"></span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app, rong;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light'
+		});
+		app = new Vue({
+			el: '#app',
+			data: {
+				meetType: 'meet_pat',
+				frames: [{
+						name: 'date',
+						title: '首页',
+						url: 'date.html',
+						bgColor: 'rgba(0,0,0,0)',
+						bounces: true
+					},
+					{
+						name: 'loving_list',
+						title: '爱意墙',
+						url: 'loving_list.html',
+						bgColor: 'rgba(0,0,0,0)',
+						bounces: true
+					},
+					{
+						name: 'dating_list',
+						title: '求约墙',
+						url: 'dating_list.html',
+						bgColor: 'rgba(0,0,0,0)',
+						bounces: true
+					},
+					{
+						name: 'message',
+						title: '消息',
+						url: 'message.html',
+						bgColor: 'rgba(0,0,0,0)',
+						bounces: true
+					}, {
+						name: 'my',
+						title: '我的',
+						url: 'my.html',
+						bgColor: 'rgba(0,0,0,0)',
+						bounces: true
+					}
+				],
+				index: !!$api.getStorage('index') ? $api.getStorage('index') : '0',
+				curHomeBackTriggerTimes: 1,
+				maxHomeBackTriggerTimes: 2,
+				messageBadge: false,
+				isAnswerFrame: {
+					status: false,
+					isMax: false
+				},
+				isCallFrame: {
+					status: false,
+					isMax: false
+				},
+				myInfo:{},
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'cleanMessageBadge'
+				}, function (ret, err) {
+					_this.messageBadge = false;
+				});
+				api.addEventListener({
+					name: 'answerFrameMaximize'
+				}, function (ret, err) {
+					_this.isAnswerFrame.status = true;
+					_this.isAnswerFrame.isMax = true;
+				});
+				api.addEventListener({
+					name: 'answer_hangup'
+				}, function (ret, err) {
+					_this.isAnswerFrame.status = false;
+					_this.isAnswerFrame.isMax = false;
+				});
+				api.addEventListener({
+					name: 'callFrame'
+				}, function(ret, err){
+					_this.isCallFrame.status = true;
+					_this.isCallFrame.isMax = true;
+					api.openFrame({
+						name: 'call',
+						url: 'call.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						progress: {
+							type: 'default'
+						},
+						pageParam: {
+							extra: ret.value.extra,
+							type: ret.value.type,
+							u_info: ret.value.u_info,
+							m_info: ret.value.m_info,
+							u_extra: ret.value.u_extra
+						},
+						animation: {
+							type: 'movein',
+							subType: 'from_bottom',
+							duration: 300
+						}
+					});
+				});
+				api.addEventListener({
+          name: 'callFrameMaximize'
+        }, function(ret, err){
+          _this.isCallFrame.status = true;
+          _this.isCallFrame.isMax = true;
+        });
+				api.addEventListener({
+					name: 'call_hangup'
+				}, function(ret, err){
+					_this.isCallFrame.status = false;
+          _this.isCallFrame.isMax = false;
+				});
+			},
+			mounted: function () {
+				this.androidFinishApp();
+				this.funIniGroup();
+				this.rongConnect();
+				this.getMyInfo();
+			},
+			methods: {
+				// 点击返回两次退出应用
+				androidFinishApp: function () {
+					var _this = this;
+					api.addEventListener({
+						name: 'keyback'
+					}, function (ret, err) {
+						if (_this.isCallFrame.status) {
+							if (_this.isCallFrame.isMax) {
+								api.confirm({
+									title: '提醒',
+									msg: '打开悬浮窗',
+									buttons: ['确定', '取消']
+								}, function (ret, err) {
+									if (ret.buttonIndex == 1) {
+										api.sendEvent({
+											name: 'callFrameMinimize',
+											extra: {key:' value'}
+										});
+										_this.isCallFrame.isMax = false;
+									}
+								});
+							} else {
+								api.confirm({
+									title: '提醒',
+									msg: '要退出语音通话吗',
+									buttons: ['确定', '取消']
+								}, function (ret, err) {
+									if (ret.buttonIndex == 1) {
+										api.sendEvent({
+											name: 'callHangUp',
+											extra: {key:' value'}
+										});
+									}
+								});
+							}
+							return false;
+						}
+						if (_this.isAnswerFrame.status) {
+							if (_this.isAnswerFrame.isMax) {
+								api.confirm({
+									title: '提醒',
+									msg: '打开悬浮窗',
+									buttons: ['确定', '取消']
+								}, function (ret, err) {
+									if (ret.buttonIndex == 1) {
+										api.sendEvent({
+											name: 'answerFrameMinimize',
+											extra: {
+												key: ' value'
+											}
+										});
+										_this.isAnswerFrame.isMax = false;
+									}
+								});
+							} else {
+								api.confirm({
+									title: '提醒',
+									msg: '要退出语音通话吗',
+									buttons: ['确定', '取消']
+								}, function (ret, err) {
+									if (ret.buttonIndex == 1) {
+										api.sendEvent({
+											name: 'answerHangUp',
+											extra: {
+												key: ' value'
+											}
+										});
+									}
+								});
+							}
+							return false;
+						}
+						if (_this.curHomeBackTriggerTimes === _this.maxHomeBackTriggerTimes) {
+							api.closeWidget({
+								id: api.appId,
+								silent: true
+							});
+						} else {
+							api.toast({
+								msg: api.appName + '：再按一次退出应用'
+							})
+						}
+						_this.curHomeBackTriggerTimes++;
+						setTimeout(function () {
+							_this.curHomeBackTriggerTimes--;
+						}, 2000);
+					});
+				},
+
+				funIniGroup: function () {
+					api.openFrameGroup({
+						name: 'group',
+						scrollEnabled: false,
+						rect: {
+							x: 0,
+							y: $api.dom('#header').offsetHeight,
+							w: api.winWidth,
+							h: $api.dom('#main').offsetHeight
+						},
+						index: this.index,
+						frames: this.frames
+					}, function (ret, err) {});
+				},
+
+				randomSwitchBtn: function (index) {
+					if (index == this.index) {
+						return false;
+					} else {
+						this.index = index;
+						$api.setStorage('index', index);
+						api.setFrameGroupIndex({
+							name: 'group',
+							index: index
+						});
+					}
+				},
+				getMyInfo: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Profile', {
+						uid: $api.getStorage('uid'),
+						member_id: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.myInfo = ret.data;
+						}
+					})
+				},
+				openMyInfoEdit: function () {
+					var _this = this;
+					api.openWin({
+						name: 'my_info_edit',
+						url: 'my_info_edit.html',
+						bounces: false,
+						pageParam: {
+							avatar: _this.myInfo.avatar,
+							audio : _this.myInfo.audio,
+							audio_timer:_this.myInfo.audio_timer,
+							name: _this.myInfo.name,
+							sex: _this.myInfo.sex,
+							signature: _this.myInfo.signature,
+							occupation_s: _this.myInfo.occupation_s,
+							age: _this.myInfo.age,
+							height: _this.myInfo.height,
+							weight: _this.myInfo.weight,
+							bwh: _this.myInfo.bwh,
+							sale_column: _this.myInfo.sale_column,
+							like_type_s: _this.myInfo.like_type_s,
+							live_line_s: _this.myInfo.live_line_s,
+							character_tags_s: _this.myInfo.character_tags_s
+						}
+					});
+				},
+				openDatingEdit: function () {
+					api.openWin({
+						name: 'dating_edit',
+						url: 'dating_edit.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+
+				alertHelp: function (index) {
+					var msg = '';
+					if (index == '1') {
+						msg = '每个人送的礼物都会在爱意墙展示，送礼物多的前十名为头条，将被置顶展示，接受大家祝福。';
+					}
+					if (index == '3') {
+						msg = '为避免广告，非密友聊天需收费每条1钻石。消费XX钻石即可成为密友。';
+					}
+					api.alert({
+						title: '帮助',
+						msg: msg,
+						buttons: ['知道了']
+					});
+				},
+
+				selectSex: function (index) {
+					var _this = this;
+					var sendEventName;
+					if (index == '0') {
+						sendEventName = 'sexDateType'
+					}
+					if (index == '2') {
+						sendEventName = 'sexlovingDateType'
+					}
+					api.actionSheet({
+						title: '请选择展示性别',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: ['男生', '女生']
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.buttonIndex == 1) {
+								api.sendEvent({
+									name: sendEventName,
+									extra: {
+										sex: 1
+									}
+								});
+							}
+							if (ret.buttonIndex == 2) {
+								api.sendEvent({
+									name: sendEventName,
+									extra: {
+										sex: 2
+									}
+								});
+							}
+							if (ret.buttonIndex == 3) {
+								api.sendEvent({
+									name: sendEventName,
+									extra: {
+										sex: 2
+									}
+								});
+							}
+						}
+					});
+				},
+
+				openSearch: function () {
+					api.openWin({
+						name: 'search',
+						url: 'search.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+
+				tabsDateType: function (type) {
+					var _this = this;
+					_this.meetType = type;
+					api.sendEvent({
+						name: 'tabsDateType',
+						extra: {
+							meetType: type
+						}
+					});
+				},
+
+				// 跳转大神榜
+				openRankingList: function () {
+					api.openWin({
+						name: 'ranking_list',
+						url: 'ranking_list.html',
+						slidBackEnabled: false
+					});
+				},
+
+				// 连接融云IM 设置接收消息监听器
+				rongConnect: function () {
+					var _this = this;
+					rong = api.require('rongCloud2');
+					rong.init(function (ret, err) {
+						if (ret.status == 'success') {
+							rong.connect({
+								token: $api.getStorage('token')
+							}, function (ret, err) {
+								if (err) {
+									switch (err.code) {
+										case 31003:
+											api.toast({
+												msg: '服务器不可用'
+											});
+											break;
+										case 31004:
+											api.toast({
+												msg: '错误的令牌（Token）'
+											});
+											break;
+										case 31002:
+											api.toast({
+												msg: '错误的 AppKey'
+											});
+											break;
+										case 33002:
+											api.toast({
+												msg: '服务端数据库错误'
+											});
+											break;
+										case 31000:
+											api.toast({
+												msg: '服务器超时'
+											});
+											break;
+										default:
+											break;
+									}
+								}
+								if (ret.status == 'success') {
+									rong.setOnReceiveMessageListener(function (ret, err) {
+										// api.alert({
+										// 	title: 'setOnReceiveMessageListener',
+										// 	msg: JSON.stringify(ret)
+										// })
+										if (ret.result.message.objectName == 'RC:CmdMsg') {
+											if (ret.result.message.content.name == 'voiceCall') {
+												if ((ret.result.message.receivedTime - ret.result.message.sentTime) > 30000) {
+													api.toast({
+														msg: '您有一个未接电话',
+														duration: 2000,
+														location: 'bottom'
+													});
+													$api.setStorage('index', 3);
+													api.setFrameGroupIndex({
+														name: 'group',
+														index: 3
+													});
+													return false;
+												}
+												// 接到语音通话邀请
+												_this.isAnswerFrame.status = true
+												_this.isAnswerFrame.isMax = true
+												api.closeToWin({
+													name: 'main'
+												});
+												api.openFrame({
+													name: 'answer',
+													url: 'answer.html',
+													rect: {
+														x: 0,
+														y: 0,
+														w: api.winWidth,
+														h: api.winHeight
+													},
+													progress: {
+														type: 'default'
+													},
+													pageParam: ret.result.message.content,
+													animation: {
+														type: 'movein',
+														subType: 'from_bottom',
+														duration: 300
+													}
+												});
+												// api.openWin({
+												// 	name: 'answer',
+												// 	url: 'answer.html',
+												// 	slidBackEnabled: false,
+												// 	pageParam: ret.result.message.content
+												// });
+											}
+											if (ret.result.message.content.name == 'answer') {
+												// 接听
+												api.sendEvent({
+													name: 'answer',
+													extra: ret
+												});
+											}
+											if (ret.result.message.content.name == 'hangUp') {
+												// 挂断
+												api.sendEvent({
+													name: 'hangUp',
+													extra: ret
+												});
+											}
+											if (ret.result.message.content.name == 'give_gift_notice_private') {
+												// 1v1赠送礼物显示通知
+												if ((ret.result.message.receivedTime - ret.result.message.sentTime) > 30000) {
+													api.toast({
+														msg: '您收到礼物了',
+														duration: 2000,
+														location: 'bottom'
+													});
+													$api.setStorage('index', 3);
+													api.setFrameGroupIndex({
+														name: 'group',
+														index: 3
+													});
+													return false;
+												}
+												api.sendEvent({
+													name: 'give_gift_notice_private',
+													extra: ret
+												});
+											}
+											if (ret.result.message.content.name == 'give_gift_notice') {
+												// 全服赠送礼物显示通知
+												if ((ret.result.message.receivedTime - ret.result.message.sentTime) > 30000) {
+													return false;
+												}
+												api.sendEvent({
+													name: 'give_gift_notice',
+													extra: ret
+												});
+											}
+											if (ret.result.message.content.name == 'give_red_notice') {
+												// 发布红包约显示通知
+												api.sendEvent({
+													name: 'give_newred_notice',
+													extra: ret
+												});
+											}
+											if (ret.result.message.content.name == 'seal_notice') {
+												// 封禁用户
+												var messageData = JSON.parse(ret.result.message.content.data);
+												api.alert({
+													title: '警告',
+													msg: messageData.content
+												}, function (ret, err) {
+													if (ret.buttonIndex == 1) {
+														$$.ajaxData('LoginOut', {
+															uid: $api.getStorage('uid')
+														}, function (ret, err) {
+															if (ret.status) {
+																$api.rmStorage('uid');
+																$api.rmStorage('uname');
+																$api.rmStorage('uavatar');
+																$api.rmStorage('umobile');
+																$api.rmStorage('token');
+																$api.rmStorage('index');
+																api.closeToWin({
+																	name: 'root'
+																});
+															}
+														})
+													}
+												});
+											}
+										} else {
+											_this.messageBadge = true;
+											api.sendEvent({
+												name: 'updateConversationList',
+												extra: ret
+											});
+											api.sendEvent({
+												name: 'updateIM',
+												extra: ret
+											})
+										}
+									})
+								}
+							});
+						} else {
+							if (err.code == -10002) {
+								api.toast({
+									msg: 'appKey参数错误'
+								});
+							}
+						}
+					});
+				},
+
+			},
+		})
+	}
+</script>

@@ -1,0 +1,224 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>注册流程3</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/register.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="wrap" class="flex-wrap flex-vertical">
+      <header id="header">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-fanhui"></i>
+          </div>
+          <h1 class="title">注册</h1>
+        </div>
+      </header>
+      <div id="main" class="flex-con">
+        <div class="form-wrap">
+          <div class="tags-wrap">
+            <div class="title">魅力标签：</div>
+            <div class="tags-list">
+              <span v-for="(item, index) in tags_personality" :key="item.id" :class="['tags-item', item.is_selected2 == true ? 'checked' : '']"
+                @click="personality_select(index)">{{item.tag}}</span>
+            </div>
+            <div class="title1">请认真选择3-6项，我们将根据你的标签推荐喜欢你的异性。</div>
+          </div>
+          <div class="tags-wrap">
+            <div class="title">喜欢的异性标签：</div>
+            <div class="tags-list">
+              <span v-for="(item, index) in tags_like" :key="item.id" :class="['tags-item', item.is_selected1 == true ? 'checked' : '']"
+                @click="like_select(index)">{{item.tag}}</span>
+            </div>
+            <div class="title1">请认真选择3-6项，我们将根据你的标签推荐你喜欢的异性。</div>
+          </div>
+          <div class="btn-wrap">
+            <button @click="register" id="submit-btn" type="button">进入APP，开启约友之旅</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'light',
+    });
+    app = new Vue({
+      el: '#app',
+      data: {
+        like_type: '',
+        personality: '',
+        occupationlabel: '',
+        tags_like: [{
+          is_selected1: false
+        }],
+        tags_personality: [{
+          is_selected2: false
+        }],
+        clickNum1: 0,
+        clickNum2: 0,
+        occupation: api.pageParam.occupation,
+      },
+      created: function () {},
+      mounted: function () {
+        this.getTags('like');
+        this.getTags('personality');
+      },
+      methods: {
+        goback: function () {
+          api.closeWin();
+        },
+        getTags: function (type) {
+          var _this = this;
+          $$.ajaxData('Tags', {
+            name: type,
+            sex: api.pageParam.sex,
+          }, function (ret, err) {
+            if (ret.status) {
+              if (type == 'like') {
+                _this.tags_like = [];
+                for (var i = 0; i < ret.data.length; i++) {
+                  _this.tags_like.push({
+                    name: ret.data[i].name,
+                    id: ret.data[i].id,
+                    tag: ret.data[i].tag,
+                    is_selected1: false
+                  })
+                }
+              }
+              if (type == 'personality') {
+                _this.tags_personality = [];
+                for (var j = 0; j < ret.data.length; j++) {
+                  _this.tags_personality.push({
+                    name: ret.data[j].name,
+                    id: ret.data[j].id,
+                    tag: ret.data[j].tag,
+                    is_selected2: false
+                  })
+                }
+              }
+            }
+          })
+        },
+
+        personality_select: function (index) {
+          var _this = this;
+          if (!_this.tags_personality[index].is_selected2) {
+            if (_this.clickNum1 < 6) {
+              _this.tags_personality[index].is_selected2 = true;
+              _this.clickNum1++;
+            } else {
+              api.toast({
+                msg: '您最多只能选择6个魅力标签',
+                duration: 2000,
+                location: 'bottom'
+              });
+            }
+          } else {
+            _this.tags_personality[index].is_selected2 = false;
+            _this.clickNum1--;
+          }
+        },
+
+        like_select: function (index) {
+          var _this = this;
+          if (!_this.tags_like[index].is_selected1) {
+            if (_this.clickNum2 < 6) {
+              _this.tags_like[index].is_selected1 = true;
+              _this.clickNum2++;
+            } else {
+              api.toast({
+                msg: '您最多只能选择6个喜欢的异性标签',
+                duration: 2000,
+                location: 'bottom'
+              });
+            }
+          } else {
+            _this.tags_like[index].is_selected1 = false;
+            _this.clickNum2--;
+          }
+        },
+
+        register: function () {
+          var _this = this;
+          var temp_like_type = [];
+          var temp_personality = [];
+          var temp_occupation = [];
+          for (var i = 0; i < _this.tags_like.length; i++) {
+            if (_this.tags_like[i].is_selected1) {
+              temp_like_type.push(_this.tags_like[i].id);
+            }
+          }
+          for (var i = 0; i < _this.tags_personality.length; i++) {
+            if (_this.tags_personality[i].is_selected2) {
+              temp_personality.push(_this.tags_personality[i].id);
+            }
+          }
+          for (var i = 0; i < _this.occupation.length; i++) {
+            temp_occupation.push(_this.occupation[i].id);
+          }
+          _this.like_type = temp_like_type.join(',');
+          _this.personality = temp_personality.join(',');
+          _this.occupationlabel = temp_occupation.join(',');
+          if (_this.personality == '') {
+            api.toast({
+              msg: '请选择魅力标签',
+            });
+            return false;
+          }
+          if (_this.like_type == '') {
+            api.toast({
+              msg: '请选择喜欢的异性标签',
+            });
+            return false;
+          }
+          if (_this.clickNum1 < 3) {
+            api.toast({
+              msg: '您最少要选择3个魅力标签',
+            });
+            return false;
+          }
+          if (_this.clickNum2 < 3) {
+            api.toast({
+              msg: '您最少要选择3个喜欢的异性标签',
+            });
+            return false;
+          }
+          api.openWin({
+            name: 'invite',
+            url: 'invite.html',
+            pageParam: {
+              mobile: api.pageParam.mobile,
+              password: api.pageParam.password,
+              avatar: api.pageParam.avatar,
+              username: api.pageParam.username,
+              sex: api.pageParam.sex,
+              city: api.pageParam.city,
+              age: api.pageParam.age,
+              occupation: _this.occupationlabel,
+              like_type: _this.like_type,
+              personality: _this.personality,
+              tid: '0',
+              cid: '0',
+            }
+          });
+        },
+      }
+    })
+  }
+</script>

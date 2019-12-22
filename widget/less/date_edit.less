@@ -1,0 +1,233 @@
+// out: ../css/date_edit.css
+@import 'common';
+html,
+body {
+  background-color: #fff;
+}
+
+nav {
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  background-color: #fff;
+  justify-content: space-around;
+  display: flex;
+  .menu {
+    width: 60px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 5px;
+    color: #101010;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 15px;
+    background: #f7f7f7;
+    color: #555;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, .2);
+    &.selected {
+      background: #573e84;
+      color: #fff;
+    }
+  }
+}
+
+.content {
+  background-color: #f7f7f7;
+  .label {
+    margin: 2px 0;
+    padding: 0 10px;
+    display: flex;
+    background-color: #fff;
+    box-sizing: border-box;
+    color: #666;
+    .title {
+      color: #000;
+      width: 100px; // display: block;
+      line-height: 48px;
+    }
+    input {
+      display: block;
+      flex: 1;
+      outline: none;
+      line-height: 48px;
+      height: 48px;
+      box-sizing: border-box;
+    }
+    i {
+      float: right;
+      line-height: 48px;
+      color: #666;
+    }
+    input[type="date"] {
+      padding-top: 14px;
+      color: #666;
+    }
+    .datetime-input {
+      display: flex;
+      flex: 1;
+      position: relative;
+      .placeholder {
+        position: absolute;
+        line-height: 48px;
+        color: #666;
+      }
+    }
+    p.text {
+      width: 74%;
+      flex: 1; // display: block;
+      line-height: 48px;
+      .labelStyle {
+        margin: 12px 6px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 12px;
+        padding: 0 6px;
+        color: #fff;
+        display: inline-block;
+        border-radius: 6px;
+        box-sizing: border-box;
+        background: #fd8787;
+      }
+      i {
+        float: right;
+      }
+    }
+    .btn-item {
+      width: 74%;
+      float: right;
+      position: relative;
+      line-height: 48px;
+      display: flex;
+      span {
+        margin-right: 10px;
+      }
+      img {
+        width: 20px;
+        height: 20px;
+        margin-top: 12px;
+      }
+      .iconfont {
+        font-size: 14px;
+        color: #666;
+      }
+    }
+  }
+  .label p>span.labelStyle:nth-child(2) {
+    background-color: #74daf1;
+  }
+  .label p>span.labelStyle:nth-child(3) {
+    background-color: #e89bdb;
+  }
+  .label p>span.labelStyle:nth-child(4) {
+    background-color: #fbdd48;
+  }
+  .label p>span.labelStyle:nth-child(5) {
+    background-color: #95b3ea;
+  }
+  .info-item {
+    border-bottom: 2px solid #f7f7f7;
+    padding: 0 10px;
+    display: flex;
+    background-color: #fff;
+    box-sizing: border-box;
+    color: #666;
+    .title {
+      color: #000;
+      width: 100px;
+      display: block;
+      line-height: 48px;
+    }
+    textarea {
+      display: block;
+      flex: 1;
+      outline: none;
+      line-height: 24px;
+      box-sizing: border-box;
+    }
+  }
+  .help {
+    line-height: 30px;
+    background-color: #fff;
+    padding: 0 10px;
+    color: @main-color;
+  }
+  .helplist {
+    background-color: #fff;
+    padding: 0 10px;
+    color: #666;
+    p {
+      line-height: 24px;
+    }
+  }
+}
+
+.envelope {
+  background-color: #fff;
+  border-bottom: 1px solid #efefef;
+  span.title {
+    display: block;
+    padding-left: 10px;
+    line-height: 48px;
+  }
+  .gifts {
+    width: 100%;
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 10px 0;
+      li {
+        width: 20%;
+        text-align: center;
+        margin-bottom: 10px;
+        .giftBox {
+          width: 60px;
+          height: 60px;
+          padding: 4px 0;
+          margin: 0 auto;
+          img {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border-radius: 50%;
+          }
+        }
+        .giftSelected {
+          border: 1px solid #fd8787;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+}
+
+footer {
+  padding: 0 20px;
+  margin: 30px 0 50px;
+  .btn-wrap {
+    button {
+      background-color: #573e84;
+      color: #fff;
+      width: 80%;
+      height: 40px;
+      margin: 0 auto 0;
+      display: block;
+      line-height: 40px;
+      border-radius: 30px
+    }
+  }
+}
+
+.voice-gif {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -50px;
+  margin-top: -50px;
+  width: 100px;
+  height: 100px;
+  img {
+    width: 100px;
+    height: 100px;
+  }
+}

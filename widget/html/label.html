@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>标签列表</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/label.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="wrap" class="flex-wrap flex-vertical">
+      <header id="header">
+        <div class="header-wrap">
+          <div class="header-left">
+            <i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+          </div>
+          <div class="title">{{titleTxt}}</div>
+          <div class="header-right" @click="baocun">
+            <span>保存</span>
+          </div>
+        </div>
+      </header>
+      <div class="label flex-con">
+        <span @click="selectLabel(index)" :class="[item.is_selected == true ? 'selectLabel' : '']" v-for="(item,index) in labelList"
+          :key="item.id">{{item.tag}}</span>
+      </div>
+      <p>最多只能选择{{labelNum}}个标签</p>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    app = new Vue({
+      el: '#app',
+      data: {
+        titleTxt: '',
+        labelList: [{
+          name: 'meet_pat',
+          id: 36,
+          tag: '小清新',
+          is_selected: false
+        }],
+        selectedList: [{
+          id: '',
+          tag: ''
+        }],
+        clickNum: 0,
+        labelNum: 3,
+        sex: api.pageParam.sex,
+      },
+      created: function () {},
+      mounted: function () {
+        if (api.pageParam.index == 12) { //约游类型
+          this.labelNum = 3;
+          this.getlabel('meet_type_wander');
+        }
+        if (api.pageParam.index == 11) { //约会类型
+          this.labelNum = 3;
+          this.getlabel('meet_type_get');
+        }
+        if (api.pageParam.index == 10) { //约拍风格
+          this.labelNum = 3;
+          this.getlabel('meet_type_pat');
+        }
+        if (api.pageParam.index == 7) { //约游邀约对象
+          this.labelNum = 3;
+          this.getlabel('invited_obj_wander');
+        }
+        if (api.pageParam.index == 8) { //约拍邀约对象
+          this.labelNum = 1;
+          this.getlabel('invited_obj_pat');
+        }
+        if (api.pageParam.index == 9) { //约会邀约对象
+          this.labelNum = 3;
+          this.getlabel('invited_obj_get');
+        }
+        if (api.pageParam.index == 5) { //魅力标签
+          this.labelNum = 6;
+          this.getlabel('personality');
+        }
+        if (api.pageParam.index == 6) { //喜欢类型
+          this.labelNum = 6;
+          this.getlabel('like');
+        }
+        if (api.pageParam.index == 13) { //职业
+          this.labelNum = 3;
+          this.getlabel('occupation');
+        }
+      },
+      methods: {
+        getlabel: function (nameValue) {
+          var _this = this;
+          api.showProgress({
+            title: '',
+            text: ''
+          });
+          $$.ajaxData('Tags', {
+            name: nameValue,
+            sex: _this.sex,
+          }, function (ret, err) {
+            api.hideProgress();
+            if (ret.status) {
+              _this.labelList = [];
+              for (var i = 0; i < ret.data.length; i++) {
+                _this.labelList.push({
+                  name: ret.data[i].name,
+                  id: ret.data[i].id,
+                  tag: ret.data[i].tag,
+                  is_selected: false
+                })
+              }
+              if (nameValue == 'meet_type_pat') {
+                _this.titleTxt = '约拍风格列表';
+              } else if (nameValue == 'meet_type_wander') {
+                _this.titleTxt = '约游类型列表';
+              } else if (nameValue == 'meet_type_get') {
+                _this.titleTxt = '约会类型列表';
+              } else if (nameValue == 'invited_obj_wander') {
+                _this.titleTxt = '约游邀约对象';
+              } else if (nameValue == 'invited_obj_pat') {
+                _this.titleTxt = '约拍邀约对象';
+              } else if (nameValue == 'invited_obj_get') {
+                _this.titleTxt = '约会邀约对象';
+              } else if (nameValue == 'personality') {
+                _this.titleTxt = '魅力标签列表';
+              } else if (nameValue == 'like') {
+                _this.titleTxt = '喜欢类型列表';
+              } else if (nameValue == 'occupation') {
+                _this.titleTxt = '职业类型列表';
+              }
+            } else {
+              api.toast({
+                msg: '网络错误，请稍后再试',
+                duration: 2000,
+                location: 'bottom'
+              });
+            }
+          })
+        },
+        selectLabel: function (index) {
+          var _this = this;
+          if (api.pageParam.index == 5 || api.pageParam.index == 6) {
+            if (!_this.labelList[index].is_selected) {
+              if (_this.clickNum < 6) {
+                _this.labelList[index].is_selected = true;
+                _this.clickNum++;
+              } else {
+                api.toast({
+                  msg: '您最多只能选择6个标签',
+                  duration: 2000,
+                  location: 'bottom'
+                });
+              }
+            } else {
+              _this.labelList[index].is_selected = false;
+              _this.clickNum--;
+            }
+          } else if (api.pageParam.index == 10 || api.pageParam.index == 11 || api.pageParam.index == 12 || api
+            .pageParam.index == 7 || api.pageParam.index == 9 || api.pageParam.index == 13) {
+            if (!_this.labelList[index].is_selected) {
+              if (_this.clickNum < 3) {
+                _this.labelList[index].is_selected = true;
+                _this.clickNum++;
+              } else {
+                api.toast({
+                  msg: '您最多只能选择3个标签',
+                  duration: 2000,
+                  location: 'bottom'
+                });
+              }
+            } else {
+              _this.labelList[index].is_selected = false;
+              _this.clickNum--;
+            }
+          } else if (api.pageParam.index == 8) {
+            if (!_this.labelList[index].is_selected) {
+              if (_this.clickNum < 1) {
+                _this.labelList[index].is_selected = true;
+                _this.clickNum++;
+              } else {
+                api.toast({
+                  msg: '您最多只能选择1个标签',
+                  duration: 2000,
+                  location: 'bottom'
+                });
+              }
+            } else {
+              _this.labelList[index].is_selected = false;
+              _this.clickNum--;
+            }
+          }
+        },
+        baocun: function () {
+          var _this = this;
+          if (_this.clickNum == 0) {
+            api.toast({
+              msg: '您至少需要选择1个标签',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          _this.selectedList = [];
+          for (var i = 0; i < _this.labelList.length; i++) {
+            if (_this.labelList[i].is_selected == true) {
+              _this.selectedList.push({
+                id: _this.labelList[i].id,
+                tag: _this.labelList[i].tag
+              })
+            }
+          }
+          api.sendEvent({
+            name: 'myEvent' + api.pageParam.index,
+            extra: {
+              key1: _this.selectedList
+            }
+          });
+          setTimeout(function () {
+            api.closeWin();
+          }, 1000);
+        }
+      },
+    })
+  }
+</script>

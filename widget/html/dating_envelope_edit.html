@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>求约发布</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/date_edit.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="content">
+			<div class="label">
+				<span class="title">红包类型:</span>
+				<p class="text" @click="openList">{{envelopTxt}}
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="label">
+				<span class="title">红包数量:</span>
+				<input v-model="form.red_pack" type="text" placeholder="1">
+			</div>
+			<div class="label">
+				<span class="title">红包金额:</span>
+				<span style="line-height:48px;">{{form.red_pack*form.gift_gold}}</span><img style="width:22px;height:14px;margin-top: 16px;"
+				 src="../image/zuanshi.png" alt="">
+			</div>
+			<div class="label">
+				<span class="title">任务时间:</span>
+				<p class="text" @click="typeActionSheet(button1,1)">{{timeTxt}}
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="label" style="border-bottom:2px solid #f7f7f7">
+				<span class="title">对象设置:</span>
+				<p class="text" @click="typeActionSheet(button,2)">{{menkuanTxt}}
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<p class="help"><span @click="helpshow">{{title1}}</span></p>
+			<div class="helplist" v-if="helplist == true">
+				<p>1、发布红包约之后，抢红包者需按你的任务与时间要求完成任务。</p>
+				<p>2、如遇到未完成者，请及时举报投诉，我们将为您追回损失，并给予违约者处罚，给予你等同于红包价值的50%补偿。</p>
+				<p @click="play">3、更多详情请参考玩转攻略-特权。</p>
+				<p style="line-height:30px;color:#000;text-align: center"><span @click="helphide">收回</span></p>
+			</div>
+		</div>
+		<footer>
+			<div class="btn-wrap">
+				<button @click="fabu" id="submit-btn" type="button">确定发布</button>
+			</div>
+		</footer>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		app = new Vue({
+			el: '#app',
+			data: {
+				form: {
+					uid: $api.getStorage('uid'),
+					type: 4,
+					gift_id: '',
+					gift_gold: '',
+					red_pack: 1,
+					time: '',
+					threshold_requirement: '',
+					flag: '',
+				},
+				myInfo: {},
+				timeTxt: '请选择任务时间',
+				menkuanTxt: '请选择对象类型',
+				button: ['异性', 'VIP异性', '全部'],
+				button1: ['30分钟', '60分钟', '90分钟'],
+				envelopTxt: '请选择红包类型',
+				title1: '红包约规则 >>>',
+				helplist: false,
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'envelopEvent'
+				}, function (ret, err) {
+					_this.form.gift_id = ret.value.key1;
+					_this.envelopTxt = ret.value.key2;
+					_this.form.gift_gold = ret.value.key3;
+				});
+			},
+			mounted: function () {
+				this.getMyInfo();
+			},
+			methods: {
+				getMyInfo: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Profile', {
+						uid: $api.getStorage('uid'),
+						member_id: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.myInfo = ret.data;
+							_this.vipnum = ret.data.ask_about;
+						}
+					})
+				},
+				openList: function () {
+					api.openFrame({
+						name: 'envelope_frame',
+						url: 'envelope_frame.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						}
+					});
+				},
+				typeActionSheet: function (button, i) {
+					var _this = this;
+					api.actionSheet({
+						title: '',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: button
+					}, function (ret, err) {
+						if (ret) {
+							if (i == 1) {
+								_this.form.time = _this.button1[ret.buttonIndex - 1];
+								_this.timeTxt = _this.button1[ret.buttonIndex - 1];
+							}
+							if (i == 2) {
+								_this.form.threshold_requirement = ret.buttonIndex;
+								_this.menkuanTxt = _this.button[ret.buttonIndex - 1];
+							}
+						}
+					});
+				},
+				helpshow: function () {
+					this.helplist = true;
+					this.title1 = "红包约规则";
+				},
+				helphide: function () {
+					this.helplist = false;
+					this.title1 = "红包约规则 >>>";
+				},
+				play: function () {
+					api.openWin({
+						name: 'play_strategy',
+						url: 'play_strategy.html',
+						bounces: false
+					});
+				},
+				fabu: function () {
+					var _this = this;
+					var reg = /^\+?[1-9][0-9]*$/;
+					if (_this.form.gift_id == '') {
+						api.alert({
+							title: '提醒',
+							msg: '红包类型未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.red_pack == '') {
+						api.alert({
+							title: '提醒',
+							msg: '红包数量不能为空',
+							buttons: ['知道了']
+						});
+						return false;
+					} else if (!reg.test(_this.form.red_pack)) {
+						api.alert({
+							title: '提醒',
+							msg: '红包数量必须为整数',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.time == '' || _this.form.time == 4) {
+						api.alert({
+							title: '提醒',
+							msg: '任务时间未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.threshold_requirement == '' || _this.form.threshold_requirement == 4) {
+						api.alert({
+							title: '提醒',
+							msg: '对象类型未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutAdd', _this.form, function (ret, err) {
+						api.hideProgress();
+						if (ret.code == 200) {
+							api.toast({
+								msg: ret.msg,
+							});
+							api.sendEvent({
+								name: 'refreshMYDateredpack',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 2000);
+						}
+						if (ret.code == 201) {
+							api.confirm({
+								title: '提醒',
+								msg: ret.msg,
+								buttons: ['充值钻石', '取消']
+							}, function (ret, err) {
+								if (ret.buttonIndex == 1) {
+									api.openWin({
+										name: 'recharge',
+										url: 'recharge.html',
+										bounces: false
+									});
+								}
+								if (ret.buttonIndex == 2) {
+									setTimeout(function () {
+										api.closeWin();
+									}, 1000);
+								}
+							});
+						}
+					})
+				}
+			},
+		})
+	}
+</script>
+
+</html>

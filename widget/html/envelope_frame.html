@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+	/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>求约发布</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/envelope_frame.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<div @click="closeFrame" class="flex-con"></div>
+			<div class="envelope">
+				<div @click="selectEnvelope(item.id,item.name,index,item.gold)" class="envelopeList" v-for="(item,index) in giftslist" :key="item.id">
+					<img :src="item.file" alt="">
+					<p :class="isGiftIndex == index ? 'active' : ''">{{item.name}}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		app = new Vue({
+			el: '#app',
+			data: {
+				gift_id:'',
+				gift_name:'',
+				gift_gold:'',
+				isGiftIndex:null,
+				giftslist: [{	
+					id:'',				
+					name: '',
+					file: '',
+					gold:'',					
+				}],
+			},
+			created: function () {
+
+			},
+			mounted: function () {
+				this.getEnvelope();
+			},
+			methods: {
+				//红包列表
+				getEnvelope:function(){
+					var _this = this;
+					$$.ajaxData('Gifts', {
+						type: 3,
+					}, function (ret, err) {
+						if (ret.status) {
+							_this.giftslist = ret.data;
+						}
+					})
+				},
+				closeFrame: function () {
+					api.closeFrame({
+						name: 'envelope_frame'
+					});
+				},
+				selectEnvelope:function(id,name,index,gold){
+					var _this = this;
+					_this.gift_id = id;
+					_this.gift_name = name;
+					_this.isGiftIndex = index;
+					_this.gift_gold = gold;
+					api.sendEvent({
+						name: 'envelopEvent',
+						extra: {
+							key1: _this.gift_id,
+							key2: _this.gift_name,
+							key3: _this.gift_gold,
+						}
+					});
+					api.closeFrame({
+						name: 'envelope_frame'
+					});
+				},				
+				
+			},
+		})
+	}
+</script>
+
+</html>

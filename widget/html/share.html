@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>免费获得钻石</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/share.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" onclick="api.closeWin();">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">免费获得钻石</h1>
+				</div>
+			</header>
+			<div class="getlist">
+				<div class="label">
+					<div class="num">
+						<p>已累计邀请</p>
+						<p>0人</p>
+					</div>
+					<div class="num">
+						<p>已累计获得奖励</p>
+						<p>0钻石</p>
+					</div>
+				</div>
+				<div class="label1" @click="show1can">
+					<div class="content">
+						<img src="../image/share_img1.png" alt="">
+					</div>
+				</div>
+				<div class="label1" @click="show2can">
+					<div class="content">
+						<img src="../image/share_img2.png" alt="">
+					</div>
+				</div>
+				<div class="label1" @click="show3can">
+					<div class="content">
+						<img src="../image/share_img3.png" alt="">
+					</div>
+				</div>
+				<div class="label" @click="share">
+					<div class="num3">
+						<p>立即分享</p>
+					</div>
+				</div>
+				<div class="label" @click="openMyInfoEdit">
+					<div class="num3">
+						<p>完善资料</p>
+					</div>
+				</div>
+				<div class="label" @click="openofficial">
+					<p class="people">获得更多免费钻石>>></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				sharelist: {},
+			},
+			mounted: function () {
+				this.getMyShare();
+				this.getMyInfo();
+			},
+			methods: {
+				getMyShare: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyShare', {
+						member_id: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.sharelist = ret.data[0];
+						}
+					})
+				},
+				openofficial: function () {
+					api.openWin({
+						name: 'official',
+						url: 'official.html',
+						bounces: false,
+						width: 400,
+						height: 400
+					});
+				},
+				show1can: function () {
+					api.alert({
+						title: '完善介绍',
+						msg: '完善资料，完美展示自己，免费获得5钻石。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				show2can: function () {
+					api.alert({
+						title: '注册介绍',
+						msg: '每邀请一个好友或陌生人注册成功，免费获得5钻石。和我们一起推广吧。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				show3can: function () {
+					api.alert({
+						title: '提成介绍',
+						msg: '你邀请用户充值的钻石与赚取的礼物收益,你皆可获得各5%钻石提成。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				getMyInfo: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Profile', {
+						uid: $api.getStorage('uid'),
+						member_id: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.myInfo = ret.data;
+							_this.labels = ret.data.tags;
+							_this.pictures = ret.data.member_photo;
+							_this.audios = ret.data.member_video;
+							_this.liwu = ret.data.member_gifts;
+							_this.dongtai = ret.data.member_dynamic;
+							_this.qiuyue = ret.data.member_meet;
+							_this.liveLabel = ret.data.live_line_s;
+							_this.occupation_s = ret.data.occupation_s;
+						}
+					})
+				},
+				openMyInfoEdit: function () {
+					var _this = this;
+					api.openWin({
+						name: 'my_info_edit',
+						url: 'my_info_edit.html',
+						bounces: false,
+						pageParam: {
+							avatar: _this.myInfo.avatar,
+							audio : _this.myInfo.audio,
+							audio_timer:_this.myInfo.audio_timer,
+							name: _this.myInfo.name,
+							sex: _this.myInfo.sex,
+							signature: _this.myInfo.signature,
+							occupation_s: _this.myInfo.occupation_s,
+							age: _this.myInfo.age,
+							height: _this.myInfo.height,
+							weight: _this.myInfo.weight,
+							bwh: _this.myInfo.bwh,
+							sale_column: _this.myInfo.sale_column,
+							like_type_s: _this.myInfo.like_type_s,
+							live_line_s: _this.myInfo.live_line_s,
+							character_tags_s: _this.myInfo.character_tags_s
+						}
+					});
+				},
+				share: function () {
+					var _this = this;
+					var dialogBox = api.require('dialogBox');
+					dialogBox.actionMenu({
+						rect: {
+							h: 150
+						},
+						items: [{
+								text: '微信好友',
+								icon: 'widget://image/circular-WeChat.png'
+							},
+							{
+								text: '微信朋友圈',
+								icon: 'widget://image/circle-friend.png'
+							},
+							{
+								text: 'QQ空间',
+								icon: 'widget://image/circular-qq_space.png'
+							},
+							{
+								text: 'QQ好友',
+								icon: 'widget://image/circular-QQ.png'
+							}
+						],
+						styles: {
+							bg: '#FFF',
+							column: 4,
+							itemText: {
+								color: '#000',
+								size: 14,
+								marginT: 15
+							},
+							itemIcon: {
+								size: 60
+							}
+						},
+						tapClose: true
+					}, function (ret) {
+						if (ret.index == 0) {
+							var wx = api.require('wx');
+							wx.shareWebpage({
+								apiKey: wx_apiKey,
+								scene: 'session',
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								thumb: _this.sharelist.img,
+								contentUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+						if (ret.index == 1) {
+							var wx = api.require('wx');
+							wx.shareWebpage({
+								apiKey: wx_apiKey,
+								scene: 'timeline',
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								thumb: _this.sharelist.img,
+								contentUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+						if (ret.index == 2) {
+							var qq = api.require('QQPlus');
+							qq.shareNews({
+								type: 'QZone',
+								url: _this.sharelist.url,
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								imgUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+						if (ret.index == 3) {
+							var qq = api.require('QQPlus');
+							qq.shareNews({
+								type: 'QFriend',
+								url: _this.sharelist.url,
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								imgUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+					})
+				},
+			}
+		})
+	}
+</script>
+
+</html>

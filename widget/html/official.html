@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>官方推广员</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/official.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" @click="goback">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">申请官方推广员</h1>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="info-list">
+					<div class="info-item">
+						<div class="info-title">
+							<span class="icon">
+								<i class="iconfont icon-vip"></i>
+							</span>官方提成：
+						</div>
+						<p>成为官方推广员，推广的越多获得倍数越高，最高可达3倍。</p>
+					</div>
+					<div class="info-item">
+						<div class="info-title">
+							<span class="icon">
+								<i class="iconfont icon-vip"></i>
+							</span>充值提成比例：
+						</div>
+						<p>8%：推广人数达到100人，或邀请用户每月消费超15万元</p>
+						<p>11%：推广人数达到500人，且邀请用户每月消费超50万元</p>
+						<p>15%：推广人数达到1000人，且邀请用户每月消费超130万元</p>
+					</div>
+					<div class="info-item">
+						<div class="info-title">
+							<span class="icon">
+								<i class="iconfont icon-vip"></i>
+							</span>收益提成比例：
+						</div>
+						<p>8%：推广人数达到30人，或邀请用户每月收益超30万元</p>
+						<p>11%：推广人数达到60人，且邀请用户每月收益超100万元</p>
+						<p>15%：推广人数达到120人，且邀请用户每月收益超200万元</p>
+					</div>
+					<div class="info-item">
+						<div class="info-title">
+							<span class="icon">
+								<i class="iconfont icon-weixin"></i>
+							</span>官方微信：
+						</div>
+						<p>了解更多详情请添加官方微信：ziyuerz</p>
+					</div>
+					<div class="info-item">
+						<p>警告：任何作弊违法行为，官方有权立即封停账号，不予提成。</p>
+					</div>
+				</div>
+				<div class="btn">
+					<button type="button" @click="apply">申请</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {},
+			created: function () {},
+			mounted: function () {},
+			methods: {
+				goback: function () {
+					api.closeWin();
+				},
+				apply: function () {
+					api.toast({
+						msg: '申请已提交，请耐心等待',
+						duration: 2000,
+						location: 'bottom'
+					});
+				}
+			}
+		})
+	}
+</script>
+
+</html>

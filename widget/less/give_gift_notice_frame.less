@@ -1,0 +1,71 @@
+// out: ../css/give_gift_notice_frame.css
+@import 'common';
+
+html,
+body {
+  background: rgba(0, 0, 0, 0);
+}
+
+.give-gift-notice {
+  position: relative;
+  .bg {
+    display: block;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .notice {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-top: -25px;
+    margin-left: -135px;
+    em {
+      font-style: normal;
+      width: 50px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .fromMember, .toMember {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 50px;
+      img {
+        display: block;
+        width: 30px;
+        height: 30px;
+        border-radius: 30px;
+      }
+      span {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 20px;
+        color: #fff;
+      }
+    }
+
+    .gift {
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+      img {
+        width: 40px;
+        height: 40px;
+      }
+      .giftNum {
+        margin-left: 10px;
+        font-weight: bold;
+        font-size: 18px;
+        color: #fff;
+        max-width: 50px;
+      }
+    }
+  }
+}

@@ -1,0 +1,97 @@
+ <widget id="A6026370240833"  version="0.0.1">
+
+    <name>子约</name>
+
+    <description>
+
+        子约app.
+
+    </description>
+
+    <author email="developer@apicloud.com" href="http://www.apicloud.com">
+
+        Developer
+
+    </author>
+
+    <content src="index.html" />
+
+    <access origin="*" />
+
+    <preference name="pageBounce" value="false"/>
+
+	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="windowBackground" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>
+
+	<preference name="hScrollBarEnabled" value="false"/>
+
+	<preference name="vScrollBarEnabled" value="false"/>
+
+	<preference name="autoLaunch" value="true"/>
+
+	<preference name="fullScreen" value="false"/>
+
+	<preference name="autoUpdate" value="true" />
+
+	<preference name="smartUpdate" value="false" />
+
+	<preference name="debug" value="true"/>
+
+	<preference name="statusBarAppearance" value="true"/>
+
+	<preference name="appCertificateVerify" value="false" />
+
+	<permission name="readPhoneState" />
+
+	<permission name="camera" />
+
+	<permission name="record" />
+
+	<permission name="location" />
+
+	<permission name="fileSystem" />
+
+	<permission name="internet" />
+
+	<permission name="bootCompleted" />
+
+	<permission name="hardware" />
+
+	<preference name="backgroundMode" value="audio"/>
+
+	<preference name="softInputMode" value="auto"/>
+
+	<intent-filter>
+		<action name="android.intent.action.VIEW"/>
+		<category name="android.intent.category.DEFAULT"/>
+		<data scheme="rong" host="ziyue.com.tcentpay.ziyue" pathPrefix="/conversation/"/>
+	</intent-filter>
+
+	<feature name="rongCloud2">
+		<param name="appKey" value="cpj2xarlc755n" />
+	</feature>
+
+	<feature name="QQPlus">
+		<param name="urlScheme" value="tencent101513223" />
+		<param name="apiKey" value="101513223" />
+	</feature>
+
+	<feature name="wx">
+		<param name="urlScheme" value="wx3e0b614b1d47b4ac"/>
+		<param name="apiKey" value="wx3e0b614b1d47b4ac"/>
+		<param name="apiSecret" value="09c93ccc24b64a9706e02c87145d7690"/>
+	</feature>
+
+	<permission name="internet" />
+
+  <preference name="urlScheme" value="fkpf8422" />
+
+  <feature name="shareInstall">
+  	<param name="com.shareinstall.APP_KEY" value="FEBKFA7KRFAA7A" />
+  </feature>
+
+</widget>
+

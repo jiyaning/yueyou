@@ -1,0 +1,287 @@
+// out: ../css/datedetails.css
+@import 'common';
+html,
+body {
+    background-color: #f7f7f7;
+}
+
+.content {
+    color: #555;
+    background-color: #fff;
+    font-family: Arial;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    .top {
+        display: flex;
+        .top-left {
+            width: 20%;
+            .box1 {
+                height: 60px;
+                width: 100%;
+                margin: 8px;
+                img {
+                    height: 100%;
+                    border-radius: 30px;
+                }
+            }
+        }
+        .top-center {
+            width: 36%;
+            padding: 10px;
+            box-sizing: border-box;
+            span {
+                height: 26px;
+                line-height: 25px;
+                .iconfont {
+                    color: gold;
+                    font-size: 20px;
+                }
+            }
+            .time1 {
+                color: #bbafaf;
+            }
+        }
+        .top-right {
+            width: 40%;
+            margin-top: 20px;
+            margin-left: 20px;
+            .bofang {
+                width: 50px;
+                height: 24px;
+                font-size: 14px;
+                line-height: 24px;
+                padding-left: 6px;
+                background: green;
+                border-radius: 6px;
+                color: #fff;
+                position: relative;
+                img {
+                    width: 16px;
+                    height: 16px;
+                    margin-top: 4px;
+                }
+                span {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    right: 0;
+                    top: 0px;
+                    text-align: center;
+                    padding-left: 6px;
+                    box-sizing: border-box;
+                }
+                .iconfont {
+                    position: absolute;
+                    right: -2px;
+                    top: -5px;
+                    font-size: 14px;
+                    width: 14px;
+                    height: 14px;
+                    line-height: 14px;
+                }
+            }
+        }
+    }
+    .label {
+        display: flex;
+        padding: 0 10px;
+        background-color: #fff;
+        box-sizing: border-box;
+        border-bottom: 1px solid #efefef;
+        p {
+            height: 44px;
+            line-height: 44px;
+            flex: 1;
+        }
+        input {
+            outline: none;
+            width: 74%;
+            float: right;
+            line-height: 44px;
+        }
+        .title {
+            width: 20%;
+            line-height: 44px;
+        }
+        .info {
+            margin: 0 16px;
+        }
+        i {
+            float: right;
+        }
+        .iconfont {
+            font-size: 30px;
+            color: #635a5a;
+        }
+    }
+    .labelInfo {
+        height: 70px;
+        p {
+            line-height: 1.8;
+            padding-top: 12px;
+            height: auto;
+        }
+        .list {
+            display: flex;
+            .num {
+                width: 70%;
+            }
+            .box {
+                width: 30%;
+            }
+        }
+    }
+    .help {
+        line-height: 30px;
+        background-color: #fff;
+        padding: 0 10px;
+        color: @main-color;
+    }
+    .helplist {
+        background-color: #fff;
+        padding: 0 10px;
+        color: #666;
+        p {
+            line-height: 24px;
+        }
+    }
+}
+
+.photo {
+    width: 100%;
+    box-sizing: border-box;
+    height: 140px;
+    background: #f7f7f7;
+    display: flex;
+    span {
+        width: 120px;
+        height: 120px;
+        padding: 10px;
+        display: block;
+        overflow: hidden;
+        img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: hidden;
+        }
+    }
+}
+
+footer {
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
+    font-size: 16px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    span {
+        text-align: center;
+        background-color: #573e84;
+        color: #fff;
+        width: 80%;
+        height: 40px;
+        margin: 30px auto 0;
+        display: block;
+        line-height: 40px;
+        border-radius: 30px;
+    }
+}
+
+.beizhu {
+    padding: 10px 20px;
+    margin-top: 20px;
+    color: #b3aeae;
+    background-color: #fff;
+    p {
+        line-height: 22px;
+    }
+}
+
+.qiuyueList {
+    width: 100%;
+    .pinglunnum {
+        width: 100%;
+        height: 30px;
+        line-height: 30px;
+        padding-left: 20px;
+        background: #f7f7f7;
+        margin: 5px 0;
+        box-sizing: border-box;
+    }
+    .friend {
+        width: 100%;
+        height: 60px;
+        border-bottom: 1px solid #d9d9d9;
+        position: relative;
+        .personname {
+            float: left;
+            width: 13%;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            margin: 10px;
+            .hezi {
+                width: 40px;
+                height: 40px;
+                img {
+                    height: 100%;
+                    border-radius: 20px;
+                }
+            }
+        }
+        .info {
+            line-height: 20px;
+            padding-top: -10px;
+            .vip {
+                color: @main-color;
+                .icon-vip1 {
+                    font-size: 16px;
+                    color: gold;
+                }
+            }
+            span {
+                height: 25px;
+                line-height: 25px;
+            }
+            .name {
+                font-size: 16px;
+            }
+            .sex {
+                width: 40px;
+                height: 16px;
+                line-height: 16px;
+                text-align: center;
+                margin: 6px 0;
+                margin-top: 20px;
+                background-color: @main-color;
+                color: #fff;
+                border-radius: 4px;
+                .iconfont {
+                    font-size: 14px;
+                }
+            }
+            .guanzhusex {
+                width: 14%;
+            }
+            .qianming {
+                color: #4e4d4d;
+            }
+        }
+        .guanzhuinfo {
+            width: 80%;
+        }
+        .money {
+            float: right;
+            width: 18%;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            margin: 10px 4px;
+        }
+    }
+    .zIndexActive {
+        background: #cdd6d8;
+    }
+}

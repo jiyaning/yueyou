@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>编辑</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myinfoedit.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">编辑资料</h1>
+				</div>
+			</header>
+			<div id="main" class="flex-con">
+				<div class="touxiang flex-wrap">
+					<span class="avatarimg">头像:</span>
+					<div class="imgbox" @click="uploadImgActionSheet">
+						<img id="avatar" :src="file" alt="">
+					</div>
+					<span class="iconyou">
+						<i class="iconfont icon-xiangyou"></i>
+					</span>
+				</div>
+				<div class="label">
+					<span class="title">昵称:</span>
+					<input v-model="form.name" maxlength="7" type="text" placeholder="请输入昵称">
+				</div>
+				<div class="label">
+					<span class="title">语音:</span>
+					<div v-if="form.audio_timer != 0" class="btn-item">
+						<img :src="audioIcon" alt="" @click="playVoice(form.audio)">
+						<span>{{form.audio_timer}}"</span>
+						<i @click="deleteAudio" class="iconfont icon-guanbi"></i>
+					</div>
+					<div v-else class="btn-item" @touchstart="voiceTouchstart" @touchend="voiceTouchend">
+						<span>发表语音</span>
+						<i class="iconfont icon-fabu-yuyin"></i>
+					</div>
+				</div>
+				<div class="label label_scale">
+					<span class="title">我的技能:</span>
+					<textarea maxlength="55" v-model="form.sale_column" placeholder="请按示例填写：无敌美少女，处对象、玩游戏、约游找我。王者-300钻/半小时。哄睡-500钻/半小时。叫醒-100钻/次3分钟。"></textarea>
+				</div>
+				<div class="label">
+					<span class="title">魅力标签:</span>
+					<div class="info" @click="openLabel(5,form.sex)">
+						<span v-if="personalityLabel == null" class="tishi">请选择魅力标签</span>
+						<div class="labelBox" v-else>
+							<span class="labelStyle" v-if="index<3" v-for="(item,index) in personalityLabel">{{item.tag}}</span>
+						</div>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="label">
+					<span class="title" v-if="form.sex==2">入驻版块:</span>
+					<span class="title" v-if="form.sex==1">展示版块:</span>
+					<div class="info" @click="openInfoLabel(form.sex)">
+						<span v-if="liveLabel == null && form.sex==2" class="tishi">请选择入驻版块</span>
+						<span v-if="liveLabel == null && form.sex==1" class="tishi">请选择展示版块</span>
+						<div class="labelBox" v-else>
+							<span class="labelStyle" v-if="index<4" v-for="(item,index) in liveLabel">{{item.parent_category}}</span>
+						</div>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="label">
+					<span class="title">喜欢类型:</span>
+					<div class="info" @click="openLabel(6,form.sex)">
+						<span v-if="likeLabel == null" class="tishi">请选择喜欢的类型</span>
+						<div class="labelBox" v-else>
+							<span class="labelStyle" v-if="index<3" v-for="(item,index) in likeLabel">{{item.tag}}</span>
+						</div>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="label">
+					<span class="title">职业:</span>
+					<div class="info" @click="openLabel(13,form.sex)">
+						<span v-if="occupationLabel.length == 0" class="tishi">请选择职业</span>
+						<div class="labelBox" v-else>
+							<span class="labelStyle" v-if="index<3" v-for="(item,index) in occupationLabel">{{item.tag}}</span>
+						</div>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="labelInfo">
+					<p class="tit">年龄/身高/体重</p>
+					<div class="ipt">
+						<input type="tel" v-model="form.age" placeholder="请输入年龄">岁&nbsp;
+						<input type="tel" v-model="form.height" placeholder="请输入身高">cm&nbsp;
+						<input type="tel" v-model="form.weight" placeholder="请输入体重">kg&nbsp;
+					</div>
+				</div>
+				<div class="labelInfo" v-if="form.sex==2">
+					<p class="tit"><span>胸围/腰围/臀围</span></p>
+					<div class="ipt">
+						<input type="tel" v-model="form.bwh1" placeholder="请输入胸围">cm&nbsp;
+						<input type="tel" v-model="form.bwh2" placeholder="请输入腰围">cm&nbsp;
+						<input type="tel" v-model="form.bwh3" placeholder="请输入臀围">cm&nbsp;
+					</div>
+				</div>
+				<div class="myphoto flex-wrap">
+					<span>我的照片:</span>
+					<div class="myphotolabel">
+						<span @click="openmyphoto">请上传照片</span><i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="myphoto flex-wrap">
+					<div class="photolists flex-wrap">
+						<div class="photobox" v-for="(item,index) in myphotolist" v-if="index<4">
+							<img :src="item.photo" alt="">
+						</div>
+					</div>
+				</div>
+				<footer>
+					<div class="btn-wrap">
+						<button @click="baocun" id="submit-btn" type="button">保存</button>
+					</div>
+				</footer>
+			</div>
+		</div>
+		<div v-if="FNImageClipShow" class="FNImageClip-control">
+			<span @click="FNImageClip_cancel">取消</span>
+			<span @click="FNImageClip_enter">确定</span>
+		</div>
+		<div v-if="voiceGif" class="voice-gif">
+			<img src="../image/voice.gif" alt="">
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		FNImageClip = api.require('FNImageClip');
+		app = new Vue({
+			el: '#app',
+			data: {
+				form: {
+					uid: $api.getStorage('uid'),
+					avatar: $api.getStorage('uavatar'),
+					name: $api.getStorage('uname'),
+					sex: api.pageParam.sex,
+					occupation: '',
+					age: api.pageParam.age,
+					height: api.pageParam.height,
+					weight: api.pageParam.weight,
+					bwh: api.pageParam.bwh,
+					bwh1: '',
+					bwh2: '',
+					bwh3: '',
+					sale_column: api.pageParam.sale_column,
+					live_line: '',
+					like_type: '',
+					audio: api.pageParam.audio,
+					audio_timer: api.pageParam.audio_timer,
+					audioUrl: api.pageParam.audioUrl,
+					character_tags: ''
+				},
+				file: api.pageParam.avatar,
+				qiniuToken: '',
+				qiniuToken1: '',
+				FNImageClipShow: false,
+				personalityLabel: api.pageParam.character_tags_s,
+				likeLabel: api.pageParam.like_type_s,
+				liveLabel: api.pageParam.live_line_s,
+				occupationLabel: api.pageParam.occupation_s,
+				voiceGif: false,
+				audioIcon: '../image/stop.png',
+				myphotolist: [],
+				myphoto: '',
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'myEventOcc'
+				}, function (ret, err) {
+					_this.occupationLabel = ret.value.key1;
+				});
+				api.addEventListener({
+					name: 'refreshmyphotolist'
+				}, function (ret, err) {
+					_this.photos();
+				});
+				api.addEventListener({
+					name: 'myEvent5'
+				}, function (ret, err) {
+					_this.personalityLabel = ret.value.key1;
+				});
+				api.addEventListener({
+					name: 'myEventInfo'
+				}, function (ret, err) {
+					_this.liveLabel = ret.value.key1;
+				});
+				api.addEventListener({
+					name: 'myEvent6'
+				}, function (ret, err) {
+					_this.likeLabel = ret.value.key1;
+					_this.likeLabel
+				})
+				api.addEventListener({
+					name: 'myEvent13'
+				}, function (ret, err) {
+					_this.occupationLabel = ret.value.key1;
+				})
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getQiniuToken();
+				_this.getbwh();
+				_this.photos();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				//获取拼接三围
+				getbwh: function () {
+					var _this = this;
+					if (_this.form.bwh != null) {
+						_this.form.bwh1 = _this.form.bwh[0] + _this.form.bwh[1];
+						_this.form.bwh2 = _this.form.bwh[3] + _this.form.bwh[4];
+						_this.form.bwh3 = _this.form.bwh[6] + _this.form.bwh[7];
+					}
+				},
+				// 获取七牛token
+				getQiniuToken: function () {
+					var _this = this;
+					$$.ajaxData('qniu', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.qiniuToken = ret.data;
+						}
+					})
+				},
+				//录音开始
+				voiceTouchstart: function () {
+					var _this = this;
+					_this.voiceGif = true;
+					_this.form.audio = '';
+					api.startRecord({
+						path: 'fs://ziyue_' + (+new Date()) + '.amr'
+					});
+				},
+				//录音结束
+				voiceTouchend: function () {
+					var _this = this;
+					_this.voiceGif = false;
+					api.stopRecord(function (ret, err) {
+						if (ret) {
+							_this.form.audio_timer = ret.duration;
+							_this.audioUrl = ret.path;
+							_this.uploadImg(ret.path, 'voice');
+						}
+					});
+				},
+				// 播放语音
+				playVoice: function (audioUrl) {
+					var _this = this;
+					_this.audioIcon = '../image/playing.gif';
+					api.download({
+						url: audioUrl,
+					}, function (ret, err) {
+						if (ret.state == 1) {
+							api.startPlay({
+								path: ret.savePath
+							}, function (ret, err) {
+								_this.audioIcon = '../image/stop.png';
+							});
+						}
+					});
+				},
+				//删除语音
+				deleteAudio: function () {
+					this.audioUrl = '';
+					this.form.audio = '';
+					this.form.audio_timer = ''
+				},
+				uploadImgActionSheet: function () {
+					var _this = this;
+					api.actionSheet({
+						title: '',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: ['拍照', '相册']
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.buttonIndex == 1) {
+								_this.getImageFile('camera');
+							}
+							if (ret.buttonIndex == 2) {
+								_this.getImageFile('library');
+							}
+						}
+					});
+				},
+				getImageFile: function (type) {
+					var _this = this;
+					api.getPicture({
+						sourceType: type,
+						mediaValue: 'pic',
+						destinationType: 'url',
+						allowEdit: false,
+						saveToPhotoAlbum: false
+					}, function (ret, err) {
+						if (ret) {
+							FNImageClip.open({
+								rect: {
+									x: 0,
+									y: 0,
+									w: api.winWidth,
+									h: api.winHeight - 50
+								},
+								srcPath: ret.data,
+								style: {
+									mask: 'rgba(0,0,0,0.5)',
+									clip: {
+										w: 300,
+										h: 300,
+										y: 200,
+										borderColor: '#0f0',
+										borderWidth: 1,
+										appearance: 'rectangle'
+									}
+								},
+								mode: 'image',
+								fixedOn: api.frameName
+							}, function (ret, err) {
+								if (ret) {
+									_this.FNImageClipShow = true;
+								} else {
+									api.toast({
+										msg: '请开启访问相册权限'
+									})
+								}
+							});
+						}
+					});
+				},
+				FNImageClip_cancel: function () {
+					var _this = this;
+					_this.FNImageClipShow = false;
+					FNImageClip.close();
+				},
+				FNImageClip_enter: function () {
+					var isclick = true;
+					var _this = this;
+					if (isclick) {
+						isclick = false;
+						api.showProgress({
+							title: '',
+							text: ''
+						});
+						FNImageClip.save({
+							destPath: 'fs://imageClip/liaola_' + (+new Date()) + '.png',
+							copyToAlbum: false,
+							quality: 1
+						}, function (ret, err) {
+							api.hideProgress();
+							if (ret) {
+								isclick = true;
+								if (ret.destPath == undefined) {
+									api.toast({
+										msg: '图片保存失败'
+									})
+									this.FNImageClipShow = false;
+									FNImageClip.close();
+								} else {
+									_this.uploadImg(ret.destPath, 'img')
+								}
+							} else {
+								api.toast({
+									msg: '图片保存失败'
+								})
+								_this.FNImageClipShow = false;
+								FNImageClip.close();
+							}
+						});
+					}
+				},
+				// 上传头像
+				uploadImg: function (fileUrl, type) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						data: {
+							values: {
+								token: this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							if (type == 'img') {
+								_this.FNImageClipShow = false;
+								FNImageClip.close();
+								_this.file = qiniuImageUrl + ret.key + '?imageView2/1/w/300';
+								_this.form.avatar = ret.key;
+							}
+							if (type == 'voice') {
+								_this.form.audio = ret.key;
+							}
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				openmyphoto: function () {
+					api.openWin({
+						name: 'photo_list',
+						url: 'photo_list.html',
+						bounces: false,
+						pageParam: {
+							id: ''
+						}
+					});
+				},
+				photos: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyPhoto', {
+						uid: $api.getStorage('uid'),
+						type: 'photo',
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							if (ret.data.data.length != 0) {
+								_this.myphotolist = ret.data.data
+							}
+						}
+					})
+				},
+				openLabel: function (i, k) {
+					api.openWin({
+						name: 'label',
+						url: 'label.html',
+						slidBackEnabled: false,
+						pageParam: {
+							index: i,
+							sex: k,
+						}
+					});
+				},
+				openInfoLabel: function (k) {
+					api.openWin({
+						name: 'label_info',
+						url: 'label_info.html',
+						slidBackEnabled: false,
+						pageParam: {
+							sex: k,
+						}
+					});
+				},
+				baocun: function () {
+					var _this = this;
+					if (_this.occupationLabel.length > 0) {
+						for (var i = 0; i < _this.occupationLabel.length; i++) {
+							_this.form.occupation += _this.occupationLabel[i].id + ',';
+						}
+					}
+					if (_this.liveLabel.length > 0) {
+						for (var i = 0; i < _this.liveLabel.length; i++) {
+							_this.form.live_line += _this.liveLabel[i].id + ',';
+						}
+					}
+					if (_this.likeLabel.length > 0) {
+						for (var i = 0; i < _this.likeLabel.length; i++) {
+							_this.form.like_type += _this.likeLabel[i].id + ',';
+						}
+					}
+					if (_this.personalityLabel.length > 0) {
+						for (var i = 0; i < _this.personalityLabel.length; i++) {
+							_this.form.character_tags += _this.personalityLabel[i].id + ',';
+						}
+					}
+					if (_this.form.name == '') {
+						api.toast({
+							msg: '请上传头像',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.occupation == '') {
+						api.toast({
+							msg: '职业不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.audio == '') {
+						api.toast({
+							msg: '语音不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.audio_timer < 5) {
+						api.toast({
+							msg: '语音时长不能低于5秒',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.age == '') {
+						api.toast({
+							msg: '年龄不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (isNaN(_this.form.age) || (Math.floor(_this.form.age) != _this.form.age) || _this.form.age < 16 ||
+						_this.form.age > 99) {
+						api.toast({
+							msg: '请输入正确的年龄',
+						});
+						return false;
+					}
+					if (_this.form.height == '') {
+						api.toast({
+							msg: '身高不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (isNaN(_this.form.height) || _this.form.height < 150 || _this.form.height > 199 || (Math.floor(_this
+							.form.height) != _this.form.height)) {
+						api.toast({
+							msg: '请输入正确的身高',
+						});
+						return false;
+					}
+					if (_this.form.weight == '') {
+						api.toast({
+							msg: '体重不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (isNaN(_this.form.weight) || _this.form.weight < 40 || _this.form.weight > 150 || (Math.floor(_this.form
+							.weight) != _this.form.weight)) {
+						api.toast({
+							msg: '请输入正确的体重',
+						});
+						return false;
+					}
+					if (_this.form.sex == 2) {
+						if (_this.form.bwh1 == '') {
+							api.toast({
+								msg: '胸围不能为空',
+								duration: 2000,
+								location: 'bottom'
+							});
+							return false;
+						} else if (isNaN(_this.form.bwh1) || _this.form.bwh1 < 60 || _this.form.bwh1 > 120 || (Math.floor(_this.form.bwh1) !=
+								_this.form.bwh1)) {
+							api.toast({
+								msg: '请输入正确的胸围',
+							});
+							return false;
+						}
+						if (_this.form.bwh2 == '') {
+							api.toast({
+								msg: '腰围不能为空',
+								duration: 2000,
+								location: 'bottom'
+							});
+							return false;
+						} else if (isNaN(_this.form.bwh2) || _this.form.bwh2 < 40 || _this.form.bwh2 > 80 || (Math.floor(_this.form.bwh2) !=
+								_this.form.bwh2)) {
+							api.toast({
+								msg: '请输入正确的腰围',
+							});
+							return false;
+						}
+						if (_this.form.bwh3 == '') {
+							api.toast({
+								msg: '臀围不能为空',
+								duration: 2000,
+								location: 'bottom'
+							});
+							return false;
+						} else if (isNaN(_this.form.bwh3) || _this.form.bwh3 < 60 || _this.form.bwh3 > 120 || (Math.floor(_this.form.bwh3) !=
+								_this.form.bwh3)) {
+							api.toast({
+								msg: '请输入正确的臀围',
+							});
+							return false;
+						}
+					}
+					_this.form.bwh = _this.form.bwh1 + '/' + _this.form.bwh2 + '/' + _this.form.bwh3;
+					if (_this.form.sale_column == '') {
+						api.toast({
+							msg: '技能不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.live_line == '') {
+						api.toast({
+							msg: '请选择入驻版块',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.like_type == '') {
+						api.toast({
+							msg: '请选择喜欢类型',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.character_tags == '') {
+						api.toast({
+							msg: '请选择魅力标签',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.myphotolist.length < 2) {
+						api.toast({
+							msg: '请上传至少两张图片',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('ProfileEdit', _this.form, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							api.sendEvent({
+								name: 'refresh111',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+					})
+				}
+			},
+		})
+	}
+</script>
+
+</html>

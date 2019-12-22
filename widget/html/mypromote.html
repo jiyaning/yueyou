@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的推广</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/mypromote.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的推广</h1>
+					<div class="header-right">
+						<p @click="changestatus">
+							<span style="display:inline;margin-right: 4px;" :class="[zIndex == 1 ? 'fSelected' :'']">周</span>
+							<span style="display:inline;">|</span><span style="display:inline;margin-left: 4px;" :class="[zIndex == 2 ? 'fSelected' :'']">总</span>
+						</p>
+					</div>
+				</div>
+			</header>
+			<div class="list" v-if="show1">
+				<div class="title">
+					<span>推广规则</span>
+				</div>
+				<p>1、你邀请的人点击你分享的链接注册成会员，对方就会自动成为你的下线，注册成功你可以获得XX钻石奖励。</p>
+				<p>2、对方充值钻石你可以获得X%的返利。</p>
+				<p>3、对方收到的礼物与接语音电话赚取的收益你也可以获得X%的返利。</p>
+				<p>4、你下线邀请的人，你也可以获得对方充值钻石与收取礼物及接语音电话赚取的收益X%的返利。</p>
+				<p class="titlecolor">备注：</p>
+				<p>1、子约交友的推广链接为免邀请码分享，只要点击你的分享的专属链接或扫描你分享的二维码就自动成为你的下线。</p>
+				<p>2、如果在某些推广渠道，你没办法分享你的推广链接及二维码，你只要告诉对方你的专属邀请码，对方第一次登陆时手动输入，就可以成为你的下线。</p>
+				<p>3、如果你想获得更高比例的返利，你还可以成为官方推广合伙人，添加微信XXXXX，并备注推广合伙人。</p>
+				<div class="title" @click="show1nocan" style="border-top:1px solid #f7f7f7;margin-top: 20px;">
+					<span style="background-color:#573e84;color: #fff;padding: 5px 30px;border-radius: 8px;height: 24px;line-height: 24px;margin-top: 20px;">知道了</span>
+				</div>
+			</div>
+			<div class="myinfo">
+				<div class="myavater">
+					<img :src="myavater" alt="">
+				</div>
+				<div class="myname">
+					<p>
+						<span>{{myname}}</span>
+						<span>{{mymember_random_id}}</span>
+					</p>
+					<p v-if="mysale_column== 'null'">暂无技能信息</p>
+					<p v-else>{{mysale_column}}</p>
+				</div>
+			</div>
+			<div class="promotelist">
+				<div class="listall">
+					<div class="list1">
+						<span>推广人数:</span>
+					</div>
+					<div class="list2">
+						<span>{{promotelist.sum}}人</span>
+					</div>
+				</div>
+				<div class="listall">
+					<div class="list1">
+						<span>注册奖励:</span>
+					</div>
+					<div class="list2">
+						<span>{{promotelist.Registered_data}}</span>
+						<div class="imgbox">
+							<img src="../image/zuanshi.png" alt="">
+						</div>
+					</div>
+				</div>
+				<div class="listall">
+					<div class="list1">
+						<span>充钻返利:</span>
+					</div>
+					<div class="list2">
+						<span>{{promotelist.Recharge_data}}</span>
+						<div class="imgbox">
+							<img src="../image/zuanshi.png" alt="">
+						</div>
+					</div>
+				</div>
+				<div class="listall">
+					<div class="list1">
+						<span>收益返利:</span>
+					</div>
+					<div class="list2">
+						<span>{{promotelist.Income_data}}</span>
+						<div class="imgbox">
+							<img src="../image/zuanshi.png" alt="">
+						</div>
+					</div>
+				</div>
+				<div class="listall">
+					<div class="list1">
+						<span>总返利:</span>
+					</div>
+					<div class="list2">
+						<span>{{promotelist.sum}}</span>
+						<div class="imgbox">
+							<img src="../image/zuanshi.png" alt="">
+						</div>
+					</div>
+				</div>
+				<div class="listall" style="border-bottom: 1px solid #573e84">
+					<div class="list1">
+						<span>我的邀请码:</span>
+					</div>
+					<div class="list2">
+						<span>{{promotelist.invitation_code}}</span>
+					</div>
+				</div>
+			</div>
+			<div class="promotecon">
+				<p><span @click="show1can">推广规则>>></span><span @click="openmypromotelist">查看详情>>></span></p>
+				<div class="gopromote">
+					<button @click="share">立即邀请</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				promotelist: {},
+				show1: false,
+				mystatus: 'week',
+				zIndex: 1,
+				myname: api.pageParam.myname,
+				myavater: api.pageParam.myavatar,
+				mymember_random_id: api.pageParam.mymember_random_id,
+				mysale_column: api.pageParam.mysale_column,
+			},
+			created: function () {},
+			mounted: function () {
+				this.mypromote();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				show1can: function () {
+					var _this = this;
+					_this.show1 = true;
+				},
+				show1nocan: function () {
+					var _this = this;
+					_this.show1 = false;
+				},
+				changestatus: function () {
+					var _this = this;
+					if (_this.zIndex == 1) {
+						_this.zIndex = 2;
+						_this.mystatus = '';
+						_this.mypromote();
+					} else {
+						_this.zIndex = 1;
+						_this.mystatus = 'week';
+						_this.mypromote();
+					}
+				},
+				mypromote: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyPromote', {
+						uid: $api.getStorage('uid'),
+						status: _this.mystatus,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.promotelist = ret.data;
+						}
+					})
+				},
+				share: function () {
+					var _this = this;
+					var dialogBox = api.require('dialogBox');
+					dialogBox.actionMenu({
+						rect: {
+							h: 150
+						},
+						items: [{
+								text: '微信好友',
+								icon: 'widget://image/circular-WeChat.png'
+							},
+							{
+								text: '微信朋友圈',
+								icon: 'widget://image/circle-friend.png'
+							},
+							{
+								text: 'QQ空间',
+								icon: 'widget://image/circular-qq_space.png'
+							},
+							{
+								text: 'QQ好友',
+								icon: 'widget://image/circular-QQ.png'
+							}
+						],
+						styles: {
+							bg: '#FFF',
+							column: 4,
+							itemText: {
+								color: '#000',
+								size: 14,
+								marginT: 15
+							},
+							itemIcon: {
+								size: 60
+							}
+						},
+						tapClose: true
+					}, function (ret) {
+						if (ret.index == 0) {
+							var wx = api.require('wx');
+							wx.shareWebpage({
+								apiKey: wx_apiKey,
+								scene: 'session',
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								thumb: _this.sharelist.img,
+								contentUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+						if (ret.index == 1) {
+							var wx = api.require('wx');
+							wx.shareWebpage({
+								apiKey: wx_apiKey,
+								scene: 'timeline',
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								thumb: _this.sharelist.img,
+								contentUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+						if (ret.index == 2) {
+							var qq = api.require('QQPlus');
+							qq.shareNews({
+								type: 'QZone',
+								url: _this.sharelist.url,
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								imgUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+						if (ret.index == 3) {
+							var qq = api.require('QQPlus');
+							qq.shareNews({
+								type: 'QFriend',
+								url: _this.sharelist.url,
+								title: _this.sharelist.title,
+								description: _this.sharelist.content,
+								imgUrl: _this.sharelist.url
+							}, function (ret, err) {
+								closdialg();
+								if (ret.status) {
+									api.toast({
+										msg: '分享成功'
+									});
+								} else {
+									api.toast({
+										msg: '分享失败'
+									});
+								}
+							});
+						}
+					})
+				},
+				openmypromotelist: function () {
+					api.openWin({
+						name: 'mypromotelist',
+						url: 'mypromotelist.html',
+						bounces: false
+					});
+				},
+				openmypromotehelp: function () {
+					api.openWin({
+						name: 'mypromotehelp',
+						url: 'mypromotehelp.html',
+						bounces: false
+					});
+				}
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>
+
+</html>

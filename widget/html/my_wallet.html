@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的钱包</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/mypurse.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" @click="goback">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的钱包</h1>
+				</div>
+			</header>
+			<div class="balance">
+				<div class="profit diamonds">
+					<span>钻石余额</span>
+					<div class="num">
+						<span style="margin-bottom:4px;">{{purselist.gold}}</span>
+						<div class="box1"><img style="height:30px;margin-bottom: -4px;" src="../image/zuanshi1.png" alt=""></div>
+					</div>
+					<button @click="openRecharge()">充值</button>
+				</div>
+				<div class="profit">
+					<span>粉钻余额</span>
+					<div class="num">
+						<span>{{purselist.pink_diamond}}</span>
+						<div class="box1"><img src="../image/fenzuan.png" alt=""></div>
+					</div>
+					<button v-if="purselist.charm==0" class="nocan">兑换</button>
+					<button v-else @click="openExchange()">兑换</button>
+				</div>
+			</div>
+			<div class="remark">
+				<p>粉钻可提现兑换成人民币亦可兑换成钻石！</p>
+			</div>
+			<div class="purselist">
+				<div class="label" @click="openMyExpend()">
+					<i class="iconfont icon-xiaofei"></i>
+					<span>我的消费</span>
+				</div>
+				<div class="label" @click="openMyIncome()">
+					<i class="iconfont icon-shouru"></i>
+					<span>我的收益</span>
+				</div>
+				<div class="label" @click="openGiftList()">
+					<i class="iconfont icon-gift"></i>
+					<span>我的礼物</span>
+				</div>
+			</div>
+			<footer>
+				<button class="can1" @click="openShare">免费获得钻石</button>
+				<button v-if="purselist.charm < 100" class="nocan">提现</button>
+				<button v-if="purselist.charm > 100" class="can" @click="openAuthPhone()">提现</button>
+			</footer>
+			<div class="beizhu">
+				<p>余额未满100，不能提现。</p>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				purselist: {},
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refreshMyWallet'
+				}, function (ret, err) {
+					_this.purse();
+				})
+			},
+			mounted: function () {
+				this.purse();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+					api.sendEvent({
+						name: 'refreshMy',
+					});
+				},
+				purse: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyMoney', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.purselist = ret.data;
+						}
+					})
+				},
+				openMyExpend: function () {
+					api.openWin({
+						name: 'my_expend',
+						url: 'my_expend.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+				openExchange: function () {
+					var _this = this;
+					api.openWin({
+						name: 'exchange',
+						url: 'exchange.html',
+						slidBackEnabled: false,
+						pageParam: {
+							charm: _this.purselist.pink_diamond,
+							Change_into_diamonds: _this.purselist.Change_into_diamonds / 100,
+						}
+					});
+				},
+				openMyIncome: function () {
+					api.openWin({
+						name: 'my_income',
+						url: 'my_income.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+				openGiftList: function () {
+					api.openWin({
+						name: 'gift_list',
+						url: 'gift_list.html',
+						bounces: false,
+						pageParam: {
+							id: ''
+						}
+					});
+				},
+				openAuthPhone: function () {
+					var _this = this;
+					api.openWin({
+						name: 'auth_phone',
+						url: 'auth_phone.html',
+						bounces: false,
+						pageParam: {
+							price: _this.purselist.price,
+						}
+					});
+				},
+				openRecharge: function () {
+					api.openWin({
+						name: 'recharge',
+						url: 'recharge.html',
+						bounces: false,
+						slidBackEnabled: false,
+						pageParam: {
+							myGold: this.purselist.gold
+						}
+					});
+				},
+				openShare: function () {
+					api.openWin({
+						name: 'share',
+						url: 'share.html',
+						bounces: false
+					});
+				},
+			},
+		})
+	}
+</script>
+
+</html>

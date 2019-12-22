@@ -1,0 +1,65 @@
+// out: ../css/hisgifts.css
+@import 'common';
+html,
+body {
+  background-color: #222129;
+}
+
+.gifts {
+  width: 100%;
+  padding: 0 10px;
+  margin: 4px 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+  ul {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px 0 30px;
+    li {
+      width: 25%;
+      height: 120px;
+      text-align: center;
+      margin-bottom: 10px;
+      p {
+        color: @font-color;
+        margin-top: 10px;
+      }
+      span {
+        color: @main-color;
+        border-radius: 4px;
+        line-height: 14px;
+        padding: 2px 4px;
+        box-sizing: border-box;
+        width: 44px;
+        margin: 6px 0;
+      }
+      .imgbox {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        margin: auto;
+        img {
+          width: 110%;
+        }
+      }
+    }
+  }
+}
+
+.empty-data {
+  width: 100%;
+  text-align: center;
+  .empty-img {
+    width: 150px;
+    margin: 80px auto 10px;
+    display: block;
+  }
+  .empty-text {
+    font-size: 12px;
+    text-align: center;
+    display: block;
+  }
+}

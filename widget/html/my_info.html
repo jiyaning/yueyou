@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的个人中心</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myinfo.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header" :style="opacityStyle">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i class="iconfont icon-fanhui" onclick="api.closeWin()"></i>
+					</div>
+					<span class="title">{{myInfo.name}}</span>
+					<div class="header-right">
+						<i class="iconfont icon-fabu4" @click="openMyInfoEdit()"></i>
+					</div>
+				</div>
+			</header>
+			<div class="portrait">
+				<img :src="myInfo.avatar" alt="" class="portrait-img">
+				<div v-if="myInfo.audio_timer != 0" class="play">
+					<img :src="audioIcon" alt="" v-if="audioIcon == '../image/playing.gif'" @click="stopaudio">
+					<img :src="audioIcon" alt="" v-if="audioIcon == '../image/stop.png'" @click="playVoice">
+				</div>
+				<div v-else class="play">
+					<img :src="audioIcon" alt="">
+				</div>
+				<div class="nameId1">
+					<span class="id">约ID:{{myInfo.member_random_id}}</span>
+					<span class="sty" v-if="myInfo.RandomIdStatus == 1"><img src="../image/liang.png" alt=""></span><span class="sty"
+					 v-if="myInfo.RandomIdStatus == 2"><img src="../image/shen.png" alt=""></span>
+					<p>
+						<span class="sex sex1" v-if="myInfo.sex==1">
+							<i class="iconfont icon-nan"></i>{{myInfo.age}}
+						</span>
+						<span class="sex sex2" v-else>
+							<i class="iconfont icon-nv"></i>{{myInfo.age}}
+						</span>
+						<span class="box33" v-if="myInfo.sex==1" style="margin-right:5px">
+							<img :src="level_info.member_wealth_level_icon" alt="" style="margin-bottom:-4px;height:80%" />
+						</span>
+						<span class="box33" style="margin-right:8px;" v-else>
+							<img :src="level_info.member_charm_level_icon" alt="" style="height:150%;margin:0 2px -12px -4px;" />
+						</span>
+						<span class="box33" v-if="myInfo.level == 1" style="margin:0 8px 0 -10px;">
+							<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;">
+						</span>
+						<span class="box33" v-if="myInfo.masterwork_identification == 6" style="margin:0  4px 0 -7px">
+							<img src="../image/ji.png" alt="" style="height:66%;margin-bottom: -2px">
+						</span>
+						<span v-if="myInfo.status == 0" class="status-info"><img src="../image/outline.png" alt=""></span>
+						<span v-if="myInfo.status == 4 && myInfo.fake_status == 2" class="status-info"><img src="../image/outline.png"
+							 alt=""></span>
+						<span v-if="myInfo.status == 1 && myInfo.fake_status == 0" class="status-info"><img src="../image/online.png" alt=""></span>
+						<span v-if="myInfo.status == 1 && myInfo.fake_status == 2" class="status-info"><img src="../image/online.png" alt=""></span>
+						<span v-if="myInfo.status == 1 && myInfo.fake_status == 3" class="status-info"><img src="../image/online.png" alt=""></span>
+						<span v-if="myInfo.status == 4 && myInfo.fake_status == 0" class="status-info"><img src="../image/manglu.png" alt=""></span>
+						<span v-if="myInfo.status == 4 && myInfo.fake_status == 3" class="status-info"><img src="../image/manglu.png" alt=""></span>
+						<span v-if="myInfo.status == 1 && myInfo.fake_status == 1" class="status-info"><img src="../image/wurao.png" alt=""></span>
+						<span v-if="myInfo.status == 4 && myInfo.fake_status == 1" class="status-info"><img src="../image/wurao.png" alt=""></span>
+					</p>
+				</div>
+			</div>
+			<div class="nameInfo">
+				<ul class="flex-wrap">
+					<li>
+						<div v-if="myInfo.wechat_identification == 6">
+							<span class="box">
+								<img src="../image/weixin.png" alt="">
+							</span>
+							<p>成功认证</p>
+						</div>
+						<div v-else @click="openwetchatAuth">
+							<span class="box">
+								<img src="../image/weixin.png" alt="">
+							</span>
+							<p>微信认证</p>
+						</div>
+					</li>
+					<li>
+						<div v-if="myInfo.video_identification == 6">
+							<span class="box">
+								<img src="../image/videos.png" alt="">
+							</span>
+							<p>成功认证</p>
+						</div>
+						<div v-else @click="openvedioAuth">
+							<span class="box">
+									<img src="../image/videos.png" alt="">
+							</span>
+							<p>视频认证</p>
+						</div>
+					</li>
+					<li>
+						<div v-if="myInfo.masterwork_identification == 6">
+							<span class="box">
+								<img src="../image/jipinren.png" alt="">
+							</span>
+							<p>成功认证</p>
+						</div>
+						<div v-else @click="openjipinAuth">
+							<span class="box">
+									<img src="../image/jipinren.png" alt="">
+							</span>
+							<p>极品认证</p>
+						</div>
+					</li>
+					<li v-if="myInfo.sex == 1" @click="openMyGrade">
+						<span class="box">
+							<img :src="level_info.member_wealth_level_icon" alt="" />
+						</span>
+						<p class="labelname">{{level_info.member_wealth_level}}</p>
+					</li>
+					<li v-else @click="openMyGrade">
+						<span class="box">
+							<img :src="level_info.member_charm_level_icon" style="width:70px;height:70px;margin-top:-14px;margin-left:-20px"
+							 alt="" />
+						</span>
+						<p class="labelname1">{{level_info.member_charm_level}}</p>
+					</li>
+				</ul>
+			</div>
+			<div class="photo" v-if="pictures != ''">
+				<div class="photo-con">
+					<ul class="flex-wrap">
+						<li v-if="index1<4" v-for="(item1,index1) in pictures" :key="item1.id" @click="getPhotoBrowser(index1)">
+							<img :src="item1.photo" alt="">
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="aui-tab flex-wrap" id="tab">
+				<div class="aui-tab-item tapmode" @click="afferent(1)" v-bind:class="{active:indexOf==1}">资料</div>
+				<div class="aui-tab-item tapmode" @click="afferent(2)" v-bind:class="{active:indexOf==2}">视频</div>
+				<div class="aui-tab-item tapmode" @click="afferent(3)" v-bind:class="{active:indexOf==3}">动态</div>
+				<div class="aui-tab-item tapmode" @click="afferent(4)" v-bind:class="{active:indexOf==4}">求约</div>
+			</div>
+			<div class="labels" v-show="indexOf==1">
+				<p style="margin-bottom:10px;color: #868282">我的技能</p>
+				<div class="content">
+					<span class="biaoti" v-if="myInfo.sale_column ==null || myInfo.sale_column ==''">暂无技能信息</span>
+					<span class="biaoti" v-else>{{myInfo.sale_column}}</span>
+				</div>
+			</div>
+			<div class="personaldata flex-wrap" v-show="indexOf==1">
+				<ul>
+					<li>
+						<span class="items">魅力标签</span>
+						<div class="content">
+							<span v-for="(tagitem,labelindex) in labelList" :key="tagitem.id" class="zhuanxian">{{tagitem.tag}}</span>
+						</div>
+					</li>
+					<li>
+						<span class="items" v-if="myInfo.sex==2">入驻版块</span>
+						<span class="items" v-if="myInfo.sex==1">展示版块</span>
+						<span class="content" v-if="liveLabel == null || liveLabel == ''">暂无</span>
+						<div class="content" v-else>
+							<span v-for="(liveitem,liveindex) in liveLabel" :key="liveitem.id" class="zhuanxian">{{liveitem.parent_category}}</span>
+						</div>
+
+					</li>
+					<li>
+						<span class="items">喜欢类型</span>
+						<div class="content">
+							<span v-for="(likeitem,liveindex) in like_type_s" :key="likeitem.id" class="zhuanxian">{{likeitem.tag}}</span>
+						</div>
+					</li>
+					<li>
+						<span class="items">职业</span>
+						<div class="content">
+							<span v-for="(occupationitem,occupationindex) in occupation_s" :key="occupationitem.id" class="zhuanxian">{{occupationitem.tag}}</span>
+						</div>
+					</li>
+					<li>
+						<span class="items">身高/体重</span>
+						<span class="content" v-if="myInfo.height == 0 || myInfo.height == null">暂无</span>
+						<span class="content" v-else-if="myInfo.weight == 0 || myInfo.weight == null">暂无</span>
+						<span class="content" v-else>{{myInfo.height}}cm/{{myInfo.weight}}kg</span>
+					</li>
+					<li v-if="myInfo.sex==2">
+						<span class="items">三围</span>
+						<span class="content" v-if="myInfo.bwh == '' || myInfo.bwh == null">暂无</span>
+						<span class="content" v-else>{{myInfo.bwh}}</span>
+					</li>
+					<li>
+						<span class="items">年龄</span>
+						<span class="content">{{myInfo.age}}岁</span>
+					</li>
+					<li>
+						<span class="items">地区</span>
+						<span class="content">{{myInfo.city}}</span>
+					</li>
+					<li>
+						<span class="items">接通率</span>
+						<span class="content">{{myInfo.connection}}%</span>
+					</li>
+					<li>
+						<span class="items">好评率</span>
+						<span class="content xingping">
+							<i class="iconfont icon-jiangzhang"></i> {{myInfo.star}}%</span>
+					</li>
+				</ul>
+			</div>
+			<div class="gifts" v-show="indexOf==1">
+				<div v-if="liwu ==''" class="empty-data">
+					<img class="empty-img" src="../image/empty.png">
+					<div class="empty-text">暂无礼物~</div>
+				</div>
+				<div v-else class="gift-con">
+					<ul>
+						<li v-for="(item2,index2) in liwu" :key="item2.id">
+							<div class="imgbox">
+								<img :src="item2.gifts[0].file" alt="">
+							</div>
+							<span>{{item2.number}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="photo" v-show="indexOf==2">
+			<div v-if="audios == ''" class="empty-data">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无视频~</div>
+			</div>
+			<div v-else class="photo-con1">
+				<ul class="flex-wrap">
+					<li v-for="(item1,index1) in audios" :key="item1.id" @click="openvedio_detail(item1.file)">
+						<img :src="item1.photo" alt="">
+						<div class="box12">
+							<img src="../image/video.png" alt="">
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="labels" v-show="indexOf==3">
+			<div v-if="dongtai ==''" class="empty-data">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无动态~</div>
+			</div>
+			<div class="content" v-for="(item3,index3) in dongtai" :key="item3.id" v-if="item3.description !='我的相册上传照片写入'">
+				<div class="content">
+					<div class="text" v-if="item3.description !='我的视频上传视频写入'">{{item3.description}}</div>
+					<div class="media" v-if="item3.type == 1 && item3.description !='我的相册上传照片写入'">
+						<div class="imgBox"><img v-if="!!item3.images" :src="item3.images" alt="" @click="getPhotoBrowser1(index3)"></div>
+						<div @click="playVoice1(item3.audio,index3)" class="voice-wrap">
+							<img :src="item3.audioIcon1" alt="">
+							<span>{{item3.audio_timer}}"</span>
+						</div>
+					</div>
+					<div class="media1" v-if="item3.type == 2">
+						<div class="imgBox"><img :src="item3.photo" alt="" @click="openvedio_detail(item3.file)">
+							<div class="box12" @click="openvedio_detail(item3.file)">
+								<img src="../image/video.png" alt="">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="info" style="border-bottom:1px solid #c2c8ca;margin-bottom: 10px;">
+					<span class="time">{{item3.created_at | timeFormat}}</span>
+					<span class="pinglun">
+						<span @click="openDynamicDetail(item3.id)">
+							<i class="iconfont icon-comment"></i> {{item3.comment_size}}</span>
+						<span :class="[item3.is_like == 1 ? 'is_like' : '']" @click="like(item3.id, index3)">
+							<i class="iconfont icon-dianzan"></i> {{item3.like_size}}</span>
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="labels" v-show="indexOf==4">
+			<div v-if="qiuyue ==''" class="empty-data">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无求约~</div>
+			</div>
+			<div class="info" v-if="item4.type !=4" v-for="(item4,index4) in qiuyue" :key="item4.id" style="width:100%; margin-top:8px;border-bottom:1px solid #c2c8ca"
+			 @click="opendatedetails(item4.id,item4.member_id,item4.type)">
+				<div class="name">
+					<span>个人信息</span>我在{{myInfo.city}},今年{{myInfo.age}}岁,
+					<p>身高{{myInfo.height}}cm,职业<span v-if="occupation_s == null || occupation_s == ''" style="font-size:14px;color:#000"></span>暂无<span
+						 style="font-size:14px;" v-else>{{occupation_s[0].tag}}</span></p>
+				</div>
+				<div class="label">
+					<span v-if="item4.type ==1">约游类型</span><span v-if="item4.type ==2">约会类型</span><span v-if="item4.type ==3">约拍类型</span>{{item4.style_s}}
+				</div>
+				<div class="label">
+					<span v-if="item4.type ==1">约游时间</span><span v-if="item4.type ==2">约会时间</span><span v-if="item4.type ==3">约拍时间</span>{{item4.time}}</div>
+				<div class="label">
+					<span v-if="item4.type ==1">约游地点</span><span v-if="item4.type ==2">约会地点</span><span v-if="item4.type ==3">约拍地点</span>{{item4.adress}}
+					<span class="right">详情
+						<i class="iconfont icon-xiangyou"></i>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				labelList: [],
+				like_type_s: [],
+				myInfo: {},
+				labels: [],
+				pictures: [],
+				audios: [],
+				liwu: [],
+				level_info: {},
+				dongtai: [{
+					type: '',
+					description: '',
+					images: '',
+					audio: '',
+					audio_timer: '',
+					created_at: '',
+					timeFormat: '',
+					comment_size: '',
+					is_like: '',
+					like_size: '',
+					id: '',
+					photo: '',
+					file: '',
+					audioIcon1: '../image/stop11.png',
+				}],
+				qiuyue: [],
+				liveLabel: [],
+				occupation_s: [],
+				audio: '',
+				file: '',
+				audio_timer: '',
+				voiceGif: false,
+				audioIcon: '../image/stop.png',
+				audioUrl: '',
+				qiniuToken: '',
+				indexOf: '1',
+				indexOf1: '5',
+				uid: '',
+				opacityStyle: {
+					opacity: 0.4
+				},
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refresh111'
+				}, function (ret, err) {
+					_this.getMyInfo();
+				})
+				api.addEventListener({
+					name: 'refresh_dynamic_list'
+				}, function (ret, err) {
+					_this.getMyInfo();
+				})
+			},
+			mounted: function () {
+				this.getMyInfo();
+				this.photos();
+				window.addEventListener('scroll', this.handleScroll);
+			},
+			methods: {
+				handleScroll: function () {
+					const top = document.body.scrollTop
+					console.log(top)
+					if (top > 300) {
+						var opacity = top / 120
+						opacity = opacity > 1 ? 1 : opacity
+						this.opacityStyle.opacity = opacity
+						$api.css($api.byId('header'), 'background-color:#fff');
+					}
+					if (top < 300) {
+						var opacity = 0.4
+						this.opacityStyle.opacity = opacity
+						$api.css($api.byId('header'), 'background: none');
+					}
+					if (top > 320) {
+						$api.css($api.byId('tab'), 'position: fixed;top:60px;z-index:1000');
+					}
+					if (top < 320) {
+						$api.css($api.byId('tab'), 'position: static;');
+					}
+				},
+				getPhotoBrowser: function (index) {
+					var _this = this;
+					var phoneImg = [];
+					for (var i = 0; i < _this.pictures.length; i++) {
+						phoneImg.push(_this.pictures[i].photo);
+					}
+					var photoBrowser = api.require('photoBrowser');
+					photoBrowser.open({
+						images: phoneImg,
+						placeholderImg: 'widget://image/image_pre.png',
+						bgColor: '#000',
+						activeIndex: index,
+						zoomEnabled: false
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.eventType == 'click') {
+								photoBrowser.close();
+							}
+						}
+					});
+				},
+				getPhotoBrowser1: function (index) {
+					var _this = this;
+					var phoneImg = [];
+					for (var i = 0; i < _this.dongtai.length; i++) {
+						phoneImg.push(_this.dongtai[i].images);
+					}
+					var photoBrowser = api.require('photoBrowser');
+					photoBrowser.open({
+						images: phoneImg,
+						placeholderImg: 'widget://image/image_pre.png',
+						bgColor: '#000',
+						activeIndex: index,
+						zoomEnabled: false
+					}, function (ret, err) {
+						if (ret) {
+							if (ret.eventType == 'click') {
+								photoBrowser.close();
+							}
+						}
+					});
+				},
+				uploadFiles: function (fileUrl) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						report: true,
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							api.showProgress({
+								title: ret.progress + '%',
+								text: ''
+							});
+							if (ret.status == 1) {
+								api.hideProgress();
+								_this.file = ret.body.key;
+								_this.phone = qiniuImageUrl + ret.body.key + '?vframe/jpg/offset/1/w/300/h/300';
+								var str = "";
+								str = "<div class='box' @click='openvedio_detail(_this.file)'>" +
+									"<img src='" + _this.phone + "' title=''/>" +
+									"</div>"
+								$api.before($api.dom('#addBtn'), str);
+								_this.submitVedio();
+							}
+						}
+						if (err) {
+							api.hideProgress();
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				getMyInfo: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Profile', {
+						uid: $api.getStorage('uid'),
+						member_id: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.myInfo = ret.data;
+							_this.labelList = ret.data.tag;
+							_this.labels = ret.data.tags;
+							_this.pictures = ret.data.member_photo;
+							_this.audios = ret.data.member_video;
+							_this.liwu = ret.data.member_gifts;
+							_this.dongtai = [];
+							for (var i = 0; i < ret.data.member_dynamic.length; i++) {
+								_this.dongtai.push({
+									description: ret.data.member_dynamic[i].description,
+									photo: ret.data.member_dynamic[i].photo,
+									audio: ret.data.member_dynamic[i].audio,
+									images: ret.data.member_dynamic[i].images,
+									audio_timer: ret.data.member_dynamic[i].audio_timer,
+									created_at: ret.data.member_dynamic[i].created_at,
+									timeFormat: ret.data.member_dynamic[i].timeFormat,
+									comment_size: ret.data.member_dynamic[i].comment_size,
+									is_like: ret.data.member_dynamic[i].is_like,
+									like_size: ret.data.member_dynamic[i].like_size,
+									id: ret.data.member_dynamic[i].id,
+									file: ret.data.member_dynamic[i].file,
+									type: ret.data.member_dynamic[i].type,
+									audioIcon1: '../image/stop11.png',
+								})
+							}
+							_this.qiuyue = ret.data.member_meet;
+							_this.liveLabel = ret.data.live_line_s;
+							_this.like_type_s = ret.data.like_type_s;
+							_this.occupation_s = ret.data.occupation_s;
+							_this.level_info = ret.data.level_info;
+						}
+					})
+				},
+				photos: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (api.pageParam.id == '') {
+						_this.uid = $api.getStorage('uid');
+					} else {
+						_this.uid = api.pageParam.id;
+					}
+					$$.ajaxData('MyPhoto', {
+						uid: _this.uid,
+						type: 'photo',
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.photoslist = [];
+							for (var i = 0; i < ret.data.data.length; i++) {
+								if (ret.data.data[i].photo == null || ret.data.data[i].photo == 'null' || ret.data.data[i].photo == '') {
+									return false;
+								} else {
+									_this.photoslist.push({
+										photo: ret.data.data[i].photo
+									})
+								}
+							}
+						}
+					})
+				},
+				stopaudio: function () {
+					var _this = this;
+					api.stopPlay();
+					_this.audioIcon = '../image/stop.png';
+				},
+				afferent: function (index) {
+					this.indexOf = index
+				},
+				afferent1: function (index1) {
+					this.indexOf1 = index1
+				},
+				openauth: function () {
+					api.openWin({
+						name: 'my_auth',
+						url: 'my_auth.html',
+						bounces: false,
+						pageParam: {
+							wechat_identification: _this.myInfo.wechat_identification,
+							wechat: _this.myInfo.wechat
+						}
+					});
+				},
+				opendatedetails: function (id, member_id, type) {
+					api.openWin({
+						name: 'dating_details1',
+						url: 'dating_details1.html',
+						bounces: false,
+						pageParam: {
+							id: id,
+							member_id: member_id,
+							type: type,
+						}
+					});
+				},
+				openDynamicDetail: function (id) {
+					api.openWin({
+						name: 'dynamic_detail',
+						url: 'dynamic_detail.html',
+						bounces: false,
+						pageParam: {
+							id: id
+						}
+					});
+				},
+				openphoto_frame: function (id) {
+					var _this = this;
+					api.openWin({
+						name: 'photo_list_frame',
+						url: 'photo_list_frame.html',
+						bounces: false,
+						pageParam: {
+							id: id,
+							member_id: _this.uid
+						}
+					});
+				},
+				openvedio_detail: function (file) {
+					api.openWin({
+						name: 'video_detail',
+						url: 'video_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							file: file
+						}
+					});
+				},
+				openwetchatAuth: function () {
+					var _this = this;
+					if (_this.wechat_identification == 1 || _this.wechat_identification == 3) {
+						api.toast({
+							msg: '认证中，请耐心等待审核',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (_this.wechat_identification == 6) {
+						api.toast({
+							msg: '已认证',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else {
+						api.openWin({
+							name: 'wechat_auth',
+							url: 'wechat_auth.html',
+							slidBackEnabled: false
+						});
+					}
+				},
+				// 点赞
+				like: function (id, i) {
+					var _this = this;
+					$$.ajaxData('DynamicLike', {
+						uid: $api.getStorage('uid'),
+						trendes_id: id
+					}, function (ret, err) {
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							_this.getMyInfo();
+						}
+					})
+				},
+				openvedioAuth: function () {
+					var _this = this;
+					if (_this.video_identification == 1 || _this.video_identification == 3) {
+						api.toast({
+							msg: '认证中，请耐心等待审核',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (_this.video_identification == 6) {
+						api.toast({
+							msg: '已认证',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else {
+						api.openWin({
+							name: 'video_auth',
+							url: 'video_auth.html',
+							slidBackEnabled: false
+						});
+					}
+				},
+				openjipinAuth: function () {
+					var _this = this;
+					if (_this.masterwork_identification == 1 || _this.masterwork_identification == 3) {
+						api.toast({
+							msg: '认证中，请耐心等待审核',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else if (_this.masterwork_identification == 6) {
+						api.toast({
+							msg: '已认证',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					} else {
+						api.openWin({
+							name: 'master_auth',
+							url: 'master_auth.html',
+							slidBackEnabled: false
+						});
+					}
+				},
+				openMyGrade: function () {
+					api.openWin({
+						name: 'my_grade',
+						url: 'my_grade.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+				openMyInfoEdit: function () {
+					var _this = this;
+					api.openWin({
+						name: 'my_info_edit',
+						url: 'my_info_edit.html',
+						bounces: false,
+						pageParam: {
+							avatar: _this.myInfo.avatar,
+							name: _this.myInfo.name,
+							sex: _this.myInfo.sex,
+							signature: _this.myInfo.signature,
+							occupation_s: _this.myInfo.occupation_s,
+							age: _this.myInfo.age,
+							height: _this.myInfo.height,
+							weight: _this.myInfo.weight,
+							bwh: _this.myInfo.bwh,
+							sale_column: _this.myInfo.sale_column,
+							like_type_s: _this.myInfo.like_type_s,
+							live_line_s: _this.myInfo.live_line_s,
+							character_tags_s: _this.myInfo.character_tags_s,
+							audio: _this.myInfo.audio,
+							audio_timer: _this.myInfo.audio_timer,
+							audioUrl: _this.myInfo.audioUrl,
+						}
+					});
+				},
+				// 播放语音
+				playVoice: function () {
+					var _this = this;
+					_this.audioIcon = '../image/playing.gif';
+					api.download({
+						url: _this.myInfo.audio,
+						savePath: 'fs://ziyue2_' + (+new Date()) + '.amr',
+						report: false,
+						cache: true,
+						allowResume: true
+					}, function (ret, err) {
+						if (ret.state == 1) {
+							_this.audioIcon = '../image/playing.gif';
+							api.startPlay({
+								path: ret.savePath
+							}, function (ret, err) {
+								_this.audioIcon = '../image/stop.png';
+							});
+						}
+					});
+				},
+				playVoice1: function (audioUrl, k) {
+					var _this = this;
+					_this.dongtai[k].audioIcon1 = '../image/playing2.gif';
+					api.download({
+						url: audioUrl,
+					}, function (ret, err) {
+						if (ret.state == 1) {
+							api.startPlay({
+								path: ret.savePath
+							}, function (ret, err) {
+								_this.dongtai[k].audioIcon1 = '../image/stop11.png';
+							});
+						}
+					});
+				},
+				uploadAudio: function () {
+					var _this = this;
+					$$.ajaxData('MyAudio', {
+						uid: $api.getStorage('uid'),
+						audio: _this.audio,
+						audio_timer: _this.audio_timer
+					}, function (ret, err) {
+						if (ret.status) {
+							_this.getMyInfo();
+						}
+					})
+				}
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>

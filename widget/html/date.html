@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>约会</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/date.css" />
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="hujiao">
+            <img src="../image/bg_home_head.jpg" alt="">
+            <p class="circle phone"></p>
+            <p class="circle phone"></p>
+            <span class="phone" @click="openrandom()"><i class="iconfont icon-call"></i></span>
+            <p class="match">随机约聊在线{{random.count_people}}人</p>
+        </div>
+        <div class="tag-nav"></div>
+        <nav id="wrapper">
+            <div id="scroller">
+                <ul id="navlist">
+                    <li v-for="(item, index) in tag_info" :key="item.id" @click="tabclick(index)" :class="['tag-item', tagIndex == index ? 'selected' : '']">{{item.tag}}</li>
+                </ul>
+            </div>
+        </nav>
+        <div id="main-list" class="main-list-wrap flex-wrap">
+            <div v-for="(item, index) in memberList" :key="item.id" class="item-wrap" @click="openMemberDetail(item.member_id)">
+                <div class="img-wrap">
+                    <img :src="item.avatar" alt="">
+                </div>
+                <div v-if="item.status == 1 && item.fake_status == 0" class="status-info"><img src="../image/qiuyue.png" alt=""></div>
+                <div v-if="item.status == 1 && item.fake_status == 2" class="status-info"><img src="../image/qiuyue.png" alt=""></div>
+                <div v-if="item.status == 1 && item.fake_status == 3" class="status-info"><img src="../image/qiuyue.png" alt=""></div>
+                <div class="item-info">
+                    <div class="name">{{item.name}}</div>
+                    <p>
+                        <span :class="['sex', 'sex' + item.sex]">
+							<i :class="['iconfont', item.sex == '1' ? 'icon-nan' : 'icon-nv']"></i>{{item.age}}
+						</span>
+                        <span class="box33" v-if="item.level == '1'">
+							<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;margin-left: -4px">
+						</span>
+                        <span class="box33" v-if="item.masterwork_identification == '6'" style="margin:0  4px 0 -7px">
+							<img src="../image/ji.png" alt="" style="height:66%;margin-bottom: -2px">
+						</span>
+                        <span class="label" v-if="item.sex == '2' && !!item.character_tags_s && item.character_tags_s.length > 0">
+							{{item.character_tags_s[0].tag}}
+						</span>
+                    </p>
+                    <div class="call">
+                        <i class="iconfont icon-call"></i>
+                        <div class="calltitle flex-wrap">
+                            <!-- <span>{{item.price}}</span> -->
+                            <span>11</span>
+                            <div class="zuanshibox">
+                                <img src="../image/zuanshi.png" alt="" style="margin-bottom:2px;">
+                            </div>
+                            <span>/分钟</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/iscroll.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+    var app;
+    apiready = function() {
+        var cirs = $api.domAll('.circle');
+        for (var i = 0; i < cirs.length; i++) {
+            cirs[i].classList.add('go');
+            cirs[i].style.animationDelay = i * 0.8 + 's';
+        }
+        app = new Vue({
+            el: '#app',
+            data: {
+                random: {
+                    count_people: '52'
+                },
+                meetType: 'meet_pat',
+                sex: '',
+                tag_info: [],
+                tagIndex: -1,
+                memberList: [{
+                    avatar: "../image/img1.png",
+                    sex: 1,
+                    name: "木蓝茶陌",
+                }, {
+                    avatar: "../image/img2.png",
+                    sex: 2,
+                    name: "小沐沐",
+                }, {
+                    avatar: "../image/img3.png",
+                    sex: 1,
+                    name: "木蓝茶陌",
+                }, {
+                    avatar: "../image/img4.png",
+                    sex: 2,
+                    name: "小沐沐",
+                }],
+                page: 1,
+                redEnvelopeShow: false,
+                redEnvelopeFlag: false,
+                playFlag: false,
+                giveGiftNotice: [],
+                list4: [{
+                    gift: {
+                        id: '',
+                        gold: '',
+                        name: ''
+                    },
+                    time: '',
+                }],
+            },
+            created: function() {
+                var _this = this;
+                api.addEventListener({
+                    name: 'give_newred_notice'
+                }, function(ret, err) {
+                    _this.list4 = [];
+                    setTimeout(function() {
+                        $$.ajaxData('AskAboutList', {
+                            uid: $api.getStorage('uid'),
+                            type: 4,
+                            sex: '',
+                            page: 1,
+                        }, function(ret, err) {
+                            if (ret.status) {
+                                _this.list4 = ret.data.data;
+                            }
+                        })
+                        $api.addCls($api.byId('redEnvelope'), 'show');
+                        _this.redEnvelopeFlag = true;
+                    }, 2000);
+                });
+                api.addEventListener({
+                    name: 'tabsDateType'
+                }, function(ret, err) {
+                    _this.meetType = ret.value.meetType;
+                    _this.page = 1;
+                    _this.tagIndex = -1;
+                    _this.getHomeData();
+                });
+                api.addEventListener({
+                    name: 'sexDateType'
+                }, function(ret, err) {
+                    _this.sex = ret.value.sex;
+                    _this.page = 1;
+                    _this.tagIndex = -1;
+                    _this.getHomeData();
+                });
+                api.setRefreshHeaderInfo({
+                    bgColor: '#232121',
+                    textColor: '#fff',
+                    textDown: '下拉刷新...',
+                    textUp: '松开刷新...'
+                }, function(ret, err) {
+                    _this.page = 1;
+                    _this.getHomeData();
+                });
+                api.addEventListener({
+                    name: 'scrolltobottom',
+                    extra: {
+                        threshold: 0
+                    }
+                }, function(ret, err) {
+                    _this.getHomeData();
+                });
+                api.addEventListener({
+                    name: 'give_gift_notice_private'
+                }, function(ret, err) {
+                    var message_content = JSON.parse(ret.value.result.message.content.data)
+                    if (parseInt(message_content.GiftGold) * parseInt(message_content.GiftNumber) < 1000) {
+                        _this.giveGiftNotice.push({
+                            fromName: message_content.fromName,
+                            GiftName: message_content.GiftName,
+                            GiftImg: message_content.GiftImg,
+                            GiftNumber: message_content.GiftNumber,
+                        })
+                        setTimeout(function() {
+                            _this.giveGiftNotice.pop();
+                        }, 5000);
+                    } else {
+                        api.openFrame({
+                            name: 'give_gift_notice_frame',
+                            url: 'give_gift_notice_frame.html',
+                            bounces: false,
+                            rect: {
+                                x: 0,
+                                y: 200,
+                                w: api.winWidth,
+                                h: 200
+                            },
+                            pageParam: {
+                                type: 'private',
+                                con: message_content
+                            }
+                        });
+                        setTimeout(function() {
+                            api.closeFrame({
+                                name: 'give_gift_notice_frame'
+                            });
+                        }, 5000);
+                    }
+                });
+                api.addEventListener({
+                    name: 'give_gift_notice'
+                }, function(ret, err) {
+                    var extraContent = JSON.parse(ret.value.result.message.content.data)
+                    if ($api.getStorage('uid') == extraContent.extra.fromId || $api.getStorage('uid') == extraContent.extra.toId) {
+                        // 自己送的礼物或者别人送给自己的礼物
+                    } else {
+                        api.openFrame({
+                            name: 'give_gift_notice_frame',
+                            url: 'give_gift_notice_frame.html',
+                            bounces: false,
+                            rect: {
+                                x: 0,
+                                y: 200,
+                                w: api.winWidth,
+                                h: 200
+                            },
+                            pageParam: {
+                                type: 'all',
+                                con: extraContent.extra
+                            }
+                        });
+                        setTimeout(function() {
+                            api.closeFrame({
+                                name: 'give_gift_notice_frame'
+                            });
+                        }, 5000);
+                    }
+                });
+            },
+            mounted: function() {
+                var _this = this;
+                setTimeout(function() {
+                    var tagNavOffset = $api.offset($api.dom('.tag-nav'));
+                    $api.css($api.dom('#wrapper'), 'top: ' + tagNavOffset.t + 'px');
+                }, 200);
+                _this.getHomeData();
+                _this.getredpackList();
+                window.addEventListener('scroll', _this.handleScroll);
+            },
+            methods: {
+                getredpackList: function() {
+                    var _this = this;
+                    $$.ajaxData('AskAboutList', {
+                        uid: $api.getStorage('uid'),
+                        type: 4,
+                        sex: _this.sex,
+                        page: 1,
+                    }, function(ret, err) {
+                        if (ret.status) {
+                            if (ret.data.data.length > 0) {
+                                _this.list4 = ret.data.data;
+                            }
+                        }
+                    })
+                },
+                getredpack: function() {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    $$.ajaxData('AskAbouSelectRed', {
+                        uid: $api.getStorage('uid'),
+                        meet_id: _this.list4[0].id,
+                        gift_id: _this.list4[0].gift.id,
+                    }, function(ret, err) {
+                        api.hideProgress();
+                        if (ret.code == '202') {
+                            api.alert({
+                                title: '提醒',
+                                msg: ret.msg,
+                                buttons: ['知道了']
+                            });
+                            _this.getredpackList();
+                            setTimeout(function() {
+                                _this.redEnvelopeShow = false;
+                            }, 1000);
+                        }
+                        if (ret.code == '201') {
+                            api.alert({
+                                title: '提醒',
+                                msg: ret.msg,
+                                buttons: ['购买Vip']
+                            }, function(ret, err) {
+                                if (ret.buttonIndex == 1) {
+                                    setTimeout(function() {
+                                        api.openWin({
+                                            name: 'my_vip',
+                                            url: 'my_vip.html',
+                                            slidBackEnabled: false
+                                        });
+                                    }, 1000);
+                                }
+                            });
+                        }
+                        if (ret.code == '208') {
+                            api.alert({
+                                title: '提醒',
+                                msg: '对方设定必须异性才能抢红包',
+                                buttons: ['知道了']
+                            });
+                        }
+                        if (ret.code == '200') {
+                            _this.gift_gold = _this.list4[0].gift.gold;
+                            _this.gift_time = _this.list4[0].time;
+                            _this.getredpackList();
+                            api.confirm({
+                                title: ret.msg,
+                                msg: '恭喜你领取成功，马上去完成任务吧',
+                                buttons: ['现在就去', '稍后再去']
+                            }, function(ret, err) {
+                                if (ret.buttonIndex == 1) {
+                                    _this.pophide();
+                                    var tempExtra = {
+                                        fromId: $api.getStorage('uid'),
+                                        fromName: $api.getStorage('uname'),
+                                        fromAvatar: $api.getStorage('uavatar'),
+                                        toId: _this.list4[0].member.member_id,
+                                        toName: _this.list4[0].member.name,
+                                        toAvatar: _this.list4[0].member.avatar,
+                                    }
+                                    setTimeout(function() {
+                                        api.openWin({
+                                            name: 'im',
+                                            url: 'im.html',
+                                            pageParam: tempExtra
+                                        });
+                                    }, 1000);
+                                }
+                                if (ret.buttonIndex == 2) {
+                                    _this.pophide();
+                                    return false;
+                                }
+                            });
+                        }
+                    })
+                },
+                handleScroll: function() {
+                    var top = document.body.scrollTop;
+                    var tagNavOffset = $api.offset($api.dom('.tag-nav'));
+                    if (top > 200) {
+                        $api.css($api.byId('wrapper'), 'position: fixed;top: 0px;');
+                    }
+                    if (top < 200) {
+                        $api.css($api.byId('wrapper'), 'position: absolute;top: ' + tagNavOffset.t + 'px;');
+                    }
+                },
+                tabclick: function(index) {
+                    var _this = this;
+                    _this.tagIndex = index;
+                    _this.page = 1;
+                    _this.getHomeData();
+                },
+
+                pophide: function() {
+                    var _this = this;
+                    _this.redEnvelopeShow = false;
+                },
+
+                getRedEnvelope: function() {
+                    var _this = this;
+                    if (!_this.redEnvelopeFlag) {
+                        if (_this.list4.length == 0 || _this.list4[0].gift.id == '') {
+                            api.toast({
+                                msg: '还没有人发红包'
+                            });
+                        } else {
+                            $api.addCls($api.byId('redEnvelope'), 'show');
+                            _this.redEnvelopeFlag = true;
+                        }
+                    } else {
+                        _this.redEnvelopeFlag = false;
+                        $api.removeCls($api.byId('redEnvelope'), 'show');
+                        _this.redEnvelopeShow = true;
+                    }
+                },
+
+                // 获取约会数据
+                getHomeData: function() {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    $$.ajaxData('Home', {
+                        uid: $api.getStorage('uid'),
+                        pid: _this.meetType,
+                        sex: _this.sex,
+                        tid: _this.tagIndex == -1 ? '' : _this.tag_info[_this.tagIndex].id,
+                        page: _this.page,
+                    }, function(ret, err) {
+                        api.refreshHeaderLoadDone();
+                        api.hideProgress();
+                        if (ret.status) {
+                            _this.random.count_people = ret.data.count_people;
+                            if (_this.tagIndex == -1) {
+                                _this.tag_info = ret.data.tag_info;
+                                _this.tagIndex = 0;
+                                $api.css($api.byId('scroller'), 'width: auto');
+                                setTimeout(function() {
+                                    var tagWidth = $api.offset($api.byId('scroller')).w;
+                                    $api.css($api.byId('scroller'), 'width: ' + tagWidth + 'px');
+                                    var myScroll = new IScroll('#wrapper', {
+                                        eventPassthrough: true,
+                                        scrollX: true,
+                                        scrollY: false,
+                                        preventDefault: false
+                                    });
+                                }, 500);
+                            }
+                            if (_this.page == 1) {
+                                _this.memberList = ret.data.member_info.data;
+                                _this.page++;
+                            } else if (_this.page <= ret.data.member_info.last_page) {
+                                _this.page++;
+                                for (var i = 0; i < ret.data.member_info.data.length; i++) {
+                                    _this.memberList.push(ret.data.member_info.data[i]);
+                                }
+                            } else {
+                                api.toast({
+                                    msg: '没有更多了',
+                                    duration: 2000,
+                                    location: 'bottom'
+                                });
+                            }
+                        } else {
+                            api.toast({
+                                msg: ret.msg,
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+                        }
+                    })
+                },
+
+                openrandom: function() {
+                    api.openWin({
+                        name: 'random',
+                        url: 'random.html',
+                        bounces: false
+                    });
+                },
+
+                openMemberDetail: function(id) {
+                    api.openWin({
+                        name: 'member_detail',
+                        url: 'member_detail.html',
+                        slidBackEnabled: false,
+                        pageParam: {
+                            member_id: id
+                        }
+                    });
+                },
+
+                getPlay: function() {
+                    var _this = this;
+                    if (!_this.playFlag) {
+                        _this.playFlag = true;
+                        $api.addCls($api.byId('play'), 'show');
+                    } else {
+                        _this.playFlag = false;
+                        $api.removeCls($api.byId('play'), 'show');
+                        api.openWin({
+                            name: 'play_strategy',
+                            url: 'play_strategy.html',
+                            bounces: false
+                        });
+                    }
+                },
+
+                sayHello: function() {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    $$.ajaxData('Greet', {
+                        uid: $api.getStorage('uid'),
+                    }, function(ret, err) {
+                        api.hideProgress();
+                        if (ret.status) {
+                            api.toast({
+                                msg: '打招呼成功',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+                        } else {
+                            api.toast({
+                                msg: '网络错误，请稍后再试',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+                        }
+                    })
+                },
+            },
+        })
+    }
+</script>

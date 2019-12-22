@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的VIP</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical my-vip">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的VIP</h1>
+					<div class="header-right">
+						<span @click="openviphelp()">帮助</span>
+					</div>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="vip">
+					<div class="top">
+						<div class="box">
+							<img id="avatar" :src="personal.avatar" alt="">
+							<img v-if="personal.level == 1" class="vip1" src="../image/VIP.png" alt="">
+						</div>
+						<span class="name">{{personal.name}}
+						</span>
+						<p v-if="personal.level == 1">VIP会员期限还剩{{personal.time}}天</p>
+						<p v-else>开通VIP，获得专项特权</p>
+					</div>
+				</div>
+				<div class="menu">
+					<nav class="navlist flex-wrap">
+						<p><span :class="['menu',zIndex == 1 ?'selected': '']" tapmode @click="meili(1)" style="color: #b385e6">VIP特权</span></p>
+						<p><span :class="['menu',zIndex == 2 ?'selected': '']" tapmode @click="meili(2)">购买VIP</span></p>
+					</nav>
+				</div>
+				<div class="viplist" v-if="zIndex == 1" id="infolist1">
+					<div class="viplabel flex-wrap" v-for="(item ,index) in vipIntroduce" :id="item.id">
+						<div class="hezi">
+							<img :src="item.mark" alt="">
+						</div>
+						<div class="info">
+							<p class="name">{{item.title}}</p>
+							<p class="label">{{item.description}}</p>
+						</div>
+					</div>
+					<div class="btn">
+						<button @click="meili(2)">购买VIP</button>
+					</div>
+				</div>
+				<div id="infolist" v-if="zIndex == 2">
+					<div class="infolist" style="font-weight:bold;">
+						<div class="list" style="color:#868282">
+							<div class="label1">
+							</div>
+							<div class="label1">
+								<span>VIP天数</span>
+							</div>
+							<div class="label3">
+								<span style="margin:0 auto">赠送</span>
+							</div>
+							<div class="label">
+								价格
+							</div>
+						</div>
+					</div>
+					<div class="infolist" v-for="(item ,index) in viplist" :id="item.id">
+						<div class="list">
+							<div class="label1">
+								<div class="vipbox">
+									<img src="../image/vip1.png" alt="">
+								</div>
+							</div>
+							<div class="label1">
+								{{item.vip}}
+							</div>
+							<div class="label3">
+								<div class="song1">
+									<span>{{item.give}}</span>
+									<div class="vipbox">
+										<img src="../image/zuanshi.png" alt="">
+									</div>
+									<span>x{{item.send_gold_days}}天</span>
+								</div>
+								<div class="song1">
+									<span>VIPx</span>
+									<span>{{item.give_vip}}天</span>
+									<span>+求约</span>
+									<span>x{{item.meet}}条</span>
+								</div>
+							</div>
+							<div class="label">
+								<button @click="openPayFrame(item)">￥{{item.price}}</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				activeIndex: '',
+				activePrice: '',
+				option: 'wechat',
+				personal: {
+					avatar: '../image/img2.png',
+					name: '小迷妹',
+					level: 0,
+					time: 1,
+				},
+				viplist: [],
+				vipIntroduce: [],
+				zIndex: 1,
+			},
+			mounted: function () {
+				this.getVipList();
+				this.getVipIntroduce();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				meili: function (i) {
+					var _this = this;
+					_this.zIndex = i;
+				},
+				openviphelp: function () {
+					api.alert({
+						title: '帮助',
+						msg: '成为Vip，在规定时间内每日登录赠送钻石，更赠送免费发布求约的机会。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				getVipList: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('vip', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.viplist = ret.data.list;
+							_this.personal.avatar = ret.data.avatar;
+							_this.personal.name = ret.data.name;
+							_this.personal.level = ret.data.level;
+							_this.personal.time = ret.data.leveltime
+						}
+					})
+				},
+				getVipIntroduce: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('VipIntroduce', {}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.vipIntroduce = ret.data;
+						}
+					})
+				},
+				openPayFrame: function (item) {
+					api.openFrame({
+						name: 'pay_frame',
+						url: 'pay_frame.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						pageParam: {
+							title: 'VIP充值',
+							type: 'vip',
+							con: item
+						}
+					});
+				},
+			},
+		})
+	}
+</script>

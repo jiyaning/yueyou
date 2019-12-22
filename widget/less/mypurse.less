@@ -1,0 +1,119 @@
+// out: ../css/mypurse.css
+@import 'common';
+html,
+body {
+  background-color: #F7F7F7;
+}
+
+.balance {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px;
+  background-color: #fff;
+  .diamonds {
+    border-right: 1px solid @main2-color;
+    box-sizing: border-box;
+  }
+  .profit {
+    width: 50%;
+    text-align: center;
+    .box1 {
+      display: inline;
+      margin-left: 6px;
+      img {
+        width: 30px;
+        height: 22px;
+      }
+    }
+    .num {
+      height: 60px;
+      height: 60px;
+      font-size: 28px;
+      margin-top: 30px;
+      color: #2d2d2d;
+    }
+    button {
+      padding: 8px 14px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      outline: none;
+      font-size: 16px;
+      background-color: @main2-color;
+      color: #fff;
+    }
+    .nocan {
+      background-color: #bfbfb9;
+    }
+  }
+}
+
+.remark {
+  padding: 20px;
+  padding-left: 10px;
+  p {
+    line-height: 26px;
+    color: #888484;
+  }
+}
+
+.purselist {
+  display: flex;
+  justify-content: flex-end;
+  background-color: #fff;
+  .label {
+    width: 33.3%;
+    height: 60px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 30px 0;
+    .iconfont {
+      font-size: 26px;
+    }
+    .icon-xiaofei {
+      color: #f5ce11;
+    }
+    .icon-shouru {
+      color: #f57c27;
+    }
+    .icon-gift {
+      color: #fb266b;
+    }
+  }
+}
+
+footer {
+  margin: 20px 0;
+  padding: 0 20px;
+  button {
+    display: block;
+    height: 40px;
+    width: 80%;
+    margin: 0 auto 20px;
+    display: block;
+    line-height: 40px;
+    border-radius: 30px;
+  }
+  button.can1 {
+    background-color: @main2-color;
+    color: #fff;
+  }
+  button.can {
+    border: 1px solid @main2-color;
+    color: @main2-color;
+  }
+  button.nocan {
+    border: 1px solid #bfbfb9;
+    color: #bfbfb9;
+  }
+}
+
+.beizhu {
+  padding: 0 20px;
+  color: #888484;
+  p {
+    line-height: 22px;
+    text-align: center;
+  }
+}

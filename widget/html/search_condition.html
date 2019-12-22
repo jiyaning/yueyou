@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>搜索</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/search.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">条件搜索</h1>
+				</div>
+			</header>
+			<div class="flex-con" style="margin-top:30px;">
+				<div class="searchlist">
+					<div class="box1">
+						<span>性别</span>
+					</div>
+					<div class="box2" @click="actionSelector(sex,1,'请选择性别',1)">
+						<span>{{sexName}}</span>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="searchlist">
+					<div class="box1">
+						<span>标签</span>
+					</div>
+					<div class="box2" @click="openshowlabel">
+						<span>{{labelTag}}</span>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="label_box" v-if="showlabel">
+					<span :class="zIndex== index? 'selectLa':''" @click="selectLabel(item,index)" v-for="(item,index) in labelList"
+					 :key="item.id"><i>{{item.tag}}</i></span>
+				</div>
+				<div class="searchlist">
+					<div class="box1">
+						<span>地区</span>
+					</div>
+					<div class="box2" @click="actionSelector(citySelector,2,'请选择城市',2)">
+						<span>{{form.adr}}</span>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="btn">
+					<button @click="search">查找</button>
+				</div>
+				<div class="search_list">
+					<div v-for="(item ,index) in searchlist" :key="item.id" class="friend" @click="openMemberDetail(item.member_id)">
+						<div class="personname">
+							<div class="hezi">
+								<img id="avatar" :src="item.avatar" alt="">
+							</div>
+						</div>
+						<div class="info">
+							<span class="name">{{item.name}}</span>
+							<span class="sex">
+								<i class="iconfont icon-nan" v-if="item.sex==1"></i>
+								<i class="iconfont icon-nv" v-else="item.sex==2"></i>{{item.age}}
+							</span>
+							<p class="qianming">{{item.city}}</p>
+						</div>
+						<span class="follow-icon"><i class="iconfont icon-xiangyou"></i></span>
+					</div>
+				</div>
+				<p v-if="showempty" style="margin-top:50px;text-align:center;color:#fff;font-size:16px;">暂无相关搜索</p>
+			</div>
+		</div>
+	</div>
+	</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/city.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				showlabel: false,
+				showempty: false,
+				form: {
+					adr: '不限',
+					charm_tag: '',
+					sex: '',
+				},
+				labelList: [],
+				labelTag: '不限',
+				sexName: '不限',
+				zIndex: null,
+				sex: [{
+					name: '男',
+					id: '1'
+				}, {
+					name: '女',
+					id: '2'
+				}],
+				searchlist: [],
+			},
+			mounted: function () {
+				//this.getlabel();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				openshowlabel: function () {
+					var _this = this;
+					_this.getlabel();
+					_this.showlabel = true;
+				},
+				selectLabel: function (item, index) {
+					var _this = this;
+					_this.zIndex = index;
+					_this.form.charm_tag = item.id;
+					_this.labelTag = item.tag;
+				},
+				getlabel: function () {
+					var _this = this;
+					$$.ajaxData('MySearch', {}, function (ret, err) {
+						if (ret.status) {
+							_this.labelList = ret.data;
+						}
+					})
+				},
+				search: function () {
+					var _this = this;
+					_this.searchlist = [];
+					$$.ajaxData('MySearch', _this.form, function (ret, err) {
+						if (ret.status) {
+							if (ret.data == '') {
+								_this.showempty = true;
+							} else {
+								_this.searchlist = ret.data;
+							}
+						}
+					})
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+				actionSelector: function (button, num, txt, index) {
+					var _this = this;
+					var UIActionSelector = api.require('UIActionSelector');
+					UIActionSelector.open({
+						datas: button,
+						layout: {
+							row: 5,
+							col: num,
+							height: 30,
+							size: 14,
+							sizeActive: 16,
+							rowSpacing: 5,
+							colSpacing: 10,
+							maskBg: 'rgba(0,0,0,0.2)',
+							bg: '#fff',
+							color: '#888',
+							colorActive: '#f00',
+							colorSelected: '#f00'
+						},
+						animation: true,
+						cancel: {
+							text: '取消',
+							size: 14,
+							w: 60,
+							h: 32,
+							bg: '#6cd9b6',
+							bgActive: '#ccc',
+							color: '#fff',
+							colorActive: '#fff'
+						},
+						ok: {
+							text: '确定',
+							size: 14,
+							w: 60,
+							h: 32,
+							bg: '#6cd9b6',
+							bgActive: '#ccc',
+							color: '#fff',
+							colorActive: '#fff'
+						},
+						title: {
+							text: txt,
+							size: 14,
+							h: 44,
+							bg: '#fff',
+							color: '#888'
+						},
+						fixedOn: api.frameName
+					}, function (ret, err) {
+						if (ret.eventType == 'ok') {
+							if (index == 1) {
+								_this.form.sex = ret.selectedInfo[0].id;
+								_this.sexName = ret.selectedInfo[0].name;
+							}
+							if (index == 2) {
+								_this.form.adr = ret.selectedInfo[0].name + '.' + ret.selectedInfo[1].name;
+							}
+						} else {
+							if (index == 1) {
+								_this.sexName = '不限';
+							}
+							if (index == 2) {
+								_this.form.adr = '不限';
+							}
+						}
+					});
+				},
+			},
+		})
+	}
+</script>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>投诉</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dynamic_edit.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">投诉</h1>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="edit-wrap">
+					<textarea v-model="form.description" placeholder="写下您的投诉理由（10-150个字）"></textarea>
+					<div class="moneynum" v-if="form.type == 8">
+						<div class="hbbox">
+							<img src="../image/hb.png" alt="">
+						</div>
+						<span>红包金额：</span><input v-model="form.gold" type="text" placeholder="请输入红包金额">
+					</div>
+					<div class="moneynum" v-if="form.type == 6 || form.type == 9">
+						<div class="giftbox">
+							<i class="iconfont icon-gift"></i>
+						</div>
+						<span>礼物金额：</span><input v-model="form.gold" type="text" placeholder="请输入礼物金额">
+					</div>
+					<p class="tupian" @click="uploadImgActionSheet"><span>上传图片</span><i class="iconfont icon-ElecfansAPPiCON-"></i></p>
+					<div class="edit-media">
+						<div v-if="imgUrl.length != 0" class="img-wrap" v-for="(item, index) in imgUrl" :key="item.id">
+							<i @click="deleteImg(index)" class="iconfont icon-guanbi"></i>
+							<img :src="imgUrl[index]" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+			<footer>
+				<div class="btn-wrap">
+					<button @click="post" id="submit-btn" type="button">确定提交</button>
+				</div>
+			</footer>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				form: {
+					uid: $api.getStorage('uid'),
+					type: api.pageParam.status,
+					description: '',
+					images: [],
+					gold: '',
+					member_id: api.pageParam.member_id,
+				},
+				qiniuToken: '',
+				imgUrl: [],
+				audioIcon: '../image/stop11.png',
+				audioUrl: '',
+				voiceGif: false,
+				imgnum: 0,
+			},
+			created: function () {
+				this.getQiniuToken();
+			},
+			mounted: function () {},
+			methods: {
+				post: function () {
+					var _this = this;
+					if (_this.form.description == '') {
+						api.toast({
+							msg: '请填写您的投诉理由',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (_this.form.type == 8) {
+						if (_this.form.gold == '') {
+							api.toast({
+								msg: '请填写红包金额',
+								duration: 2000,
+								location: 'bottom'
+							});
+							return false;
+						}
+					}
+					if (_this.form.type == 6) {
+						if (_this.form.gold == '') {
+							api.toast({
+								msg: '请填写礼物金额',
+								duration: 2000,
+								location: 'bottom'
+							});
+							return false;
+						}
+					}
+					if (_this.form.images.length == 0) {
+						api.toast({
+							msg: '请上传证据图片',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyComplaints', {
+						uid: $api.getStorage('uid'),
+						to_member_id: _this.form.member_id,
+						gold: _this.form.gold,
+						file: _this.form.images,
+						description: _this.form.description,
+						type: _this.form.type,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							api.alert({
+								title: '提醒',
+								msg: '您的投诉提交成功，我们会尽快处理回复。',
+								buttons: ['知道了']
+							});
+							setTimeout(function () {
+								api.closeWin({
+									name: 'report',
+								});
+								api.closeWin();
+							}, 1500);
+						}
+					})
+				},
+				// 获取七牛token
+				getQiniuToken: function () {
+					var _this = this;
+					$$.ajaxData('qniu', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.qiniuToken = ret.data;
+						}
+					})
+				},
+				uploadImgActionSheet: function () {
+					var _this = this;
+					if (_this.imgnum < 3) {
+						api.actionSheet({
+							title: '',
+							cancelTitle: '取消',
+							destructiveTitle: '',
+							buttons: ['拍照', '相册']
+						}, function (ret, err) {
+							if (ret) {
+								if (ret.buttonIndex == 1) {
+									_this.getImageFile('camera');
+								}
+								if (ret.buttonIndex == 2) {
+									_this.getImageFile('library');
+								}
+							}
+						});
+					} else {
+						api.alert({
+							title: '提醒',
+							msg: '举报投诉最多只能上传三张照片',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+				},
+				getImageFile: function (type) {
+					var _this = this;
+					api.getPicture({
+						sourceType: type,
+						encodingType: 'png',
+						mediaValue: 'pic',
+						destinationType: 'url',
+						allowEdit: false,
+						// quality: 100,
+						// targetWidth: 500,
+						// targetHeight: 500,
+						saveToPhotoAlbum: false
+					}, function (ret, err) {
+						if (ret) {
+							_this.uploadFiles(ret.data, 'img')
+						}
+					});
+				},
+				voiceTouchstart: function () {
+					this.voiceGif = true;
+					api.startRecord({
+						path: 'fs://ziyue_' + (+new Date()) + '.amr'
+					});
+				},
+				voiceTouchend: function () {
+					var _this = this;
+					_this.voiceGif = false;
+					api.stopRecord(function (ret, err) {
+						if (ret) {
+							//_this.audioDuration = ret.duration;
+							_this.form.audio_timer = ret.duration;
+							_this.audioUrl = ret.path;
+							_this.uploadFiles(ret.path, 'voice');
+						}
+					});
+				},
+				uploadFiles: function (fileUrl, type) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							if (type == 'img') {
+								_this.form.images.push(ret.key);
+								_this.imgUrl.push(qiniuImageUrl + ret.key + '?imageView2/1/w/300');
+								_this.imgnum++;
+							}
+							if (type == 'voice') {
+								_this.form.audio = ret.key;
+							}
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				deleteImg: function (i) {
+					this.imgUrl.splice(i, 1);
+					this.form.images.splice(i, 1);
+					this.imgnum--;
+				}
+			}
+		})
+	}
+
+	function addphotos() {
+		api.getPicture({
+			sourceType: 'library',
+			encodingType: 'jpg',
+			mediaValue: 'pic',
+			destinationType: 'url',
+			allowEdit: true,
+			quality: 50,
+			targetWidth: 100,
+			targetHeight: 100,
+			saveToPhotoAlbum: false
+		}, function (ret, err) {
+			if (ret) {
+				alert(JSON.stringify(ret));
+			} else {
+				alert(JSON.stringify(err));
+			}
+		});
+	}
+
+	function addRecord() {
+		api.startRecord({
+			path: 'fs://a.amr'
+		});
+	}
+</script>
+
+</html>

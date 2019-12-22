@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>动态详情</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dynamic.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin()" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">动态详情</h1>
+					<div class="header-right">
+						<i class="iconfont icon-shanchu" @click="opendatedel(dynamicInfo.id)"></i>
+					</div>
+				</div>
+			</header>
+			<div id="main" class="flex-con">
+				<div class="con">
+					<div class="dongtai">
+						<div class="title flex-wrap" v-if="dynamicInfo.member != ''" @click="openMemberDetail(dynamicInfo.member.member_id)">
+							<div class="avatar">
+								<img :src="dynamicInfo.member.avatar" alt="">
+							</div>
+							<div class="info">
+								<div class="name">{{dynamicInfo.member.name}}</div>
+								<div class="address">{{dynamicInfo.member.city}}</div>
+							</div>
+						</div>
+						<div class="dycontent">
+							<div class="text" v-if="dynamicInfo.description !='我的视频上传视频写入'">{{dynamicInfo.description}}</div>
+							<div class="media flex-wrap" v-if="dynamicInfo.type == 1 && dynamicInfo.description !='我的相册上传照片写入'">
+								<div class="imgBox"><img v-if="!!dynamicInfo.images" :src="dynamicInfo.images" alt=""></div>
+								<div v-if="!!dynamicInfo.audio"  class="voice-wrap">
+									<img :src="audioIcon" alt="" v-if="audioIcon == '../image/playing2.gif'" @click="stopaudio()">
+									<img :src="audioIcon" alt="" v-if="audioIcon == '../image/stop11.png'" @click="playVoice(dynamicInfo.audio)">
+									<span>{{dynamicInfo.audio_timer}}"</span>
+								</div>
+								<div v-else class="voice-wrap">
+									<img :src="audioIcon" alt="">
+									<span>0</span>
+								</div>
+							</div>
+							<div class="media flex-wrap" v-if="dynamicInfo.type == 1 && dynamicInfo.description =='我的相册上传照片写入'" style="background:#fff">
+								<div class="imgBox"><img v-if="!!dynamicInfo.images" :src="dynamicInfo.images" alt=""></div>
+							</div>
+							<div class="media1" v-if="dynamicInfo.type == 2">
+								<div class="imgBox"><img :src="dynamicInfo.photo" alt="" @click="openvedio_detail(dynamicInfo.file)"></div>
+							</div>
+						</div>
+					</div>
+					<div class="nums">
+						<div @click="getpinglunlist(1)" :class="['pinglunnum',activeIndex == 1 ? 'numSelected' : '']">
+							<i class="iconfont icon-comment"></i>评论
+						</div>
+						<div @click="getpinglunlist(2)" :class="['pinglunnum',activeIndex == 2 ? 'numSelected' : '']">
+							<i class="iconfont icon-gift"></i>打赏
+						</div>
+					</div>
+				</div>
+				<div id="pl" v-if="activeIndex == 1" style="margin:344px 0 50px;">
+					<div v-if="comentList == null || comentList == ''" class="empty-data">
+						<img class="empty-img" src="../image/empty.png">
+						<div class="empty-text">暂无评论~</div>
+					</div>
+					<div v-else class="pingluns" v-for="(item,index) in comentList" :key="item.id">
+						<div class="left" @click="openMemberDetail(item.member.member_id)">
+							<div class="hezi" v-if="item.member != ''">
+								<img :src="item.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="right">
+							<div class="name">
+								<span v-if="item.member != ''" class="yonghu">{{item.member.name}}</span>
+								<span class="shijian">{{item.created_at | timeFormat}}</span>
+							</div>
+							<div class="dianping">
+								<p>{{item.description}}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="gift" class="giftlist-con" v-if="activeIndex == 2" style="margin:350px 0 70px;">
+					<div v-if="giftList == null || giftList == ''" class="empty-data">
+						<img class="empty-img" src="../image/empty.png">
+						<div class="empty-text">暂无礼物~</div>
+					</div>
+					<ul style="margin-bottom:50px;">
+						<li v-for="(item1,index1) in giftList" :key="item1.id">
+							<div class="gift_top">
+								<div class="gift_top-info" v-if="item1.member != ''" @click="openMemberDetail(item1.member.member_id)">
+									<img :src="item1.member.avatar" alt="">
+									<p>{{item1.member.name}}</p>
+								</div>
+								<span>赠送</span>
+								<div class="gift_top-info1" v-if="item1.gift != ''">
+									<img :src="item1.gift.file" alt="">
+									<div style="display:flex;margin-top: -5px"><span style="text-align:right">{{item1.gift.gold}}</span><img style="width:20px;height:20px;margin: auto 0"
+										 src="../image/zuanshi.png" alt=""></div>
+								</div>
+							</div>
+							<p v-if="item1.description !='' && item1.description !=null ">并想对她说：{{item1.description}}</p>
+						</li>
+					</ul>
+				</div>
+				<div class="pinglun_ipt">
+					<span v-if="$api.getStorage('uid') == dynamicInfo.member.member_id" @click="noopenGift_frame" class="left">
+						<i class="iconfont icon-gift"></i>
+					</span>
+					<span v-else @click="openGift_frame" class="left">
+						<i class="iconfont icon-gift"></i>
+					</span>
+					<input v-model="pinglun" type="text">
+					<span class="right" @click="sendBtn">发送</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				activeIndex: 1,
+				pinglun: '',
+				dynamicInfo: {
+					images: '',
+					audio: '',
+					audio_timer: '',
+					description: '',
+					photo: '',
+					file: '',
+					type: '',
+					myinfo: {
+						gold: '',
+					},
+					member: {
+						avatar: '',
+						name: '',
+						gold: '',
+						city: ''
+					}
+				},
+				comentList: [{
+					description: '',
+					created_at: '',
+					member: {
+						name: '',
+						avatar: ''
+					}
+				}],
+				giftList: [{
+					description: '',
+					gift: {
+						name: '',
+						file: '',
+						gold: '',
+					},
+					member: {
+						name: '',
+						avatar: ''
+					}
+				}],
+				audioIcon: '../image/stop11.png',
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'giftlist'
+				}, function (ret, err) {
+					_this.getdynamicList('gift_list');
+				});
+			},
+			mounted: function () {
+				this.getdynamicList('comment_list');
+			},
+			methods: {
+				// 播放语音
+				playVoice: function (audioUrl) {
+					var _this = this;
+					_this.audioIcon = '../image/playing2.gif';
+					api.download({
+						url: audioUrl,
+					}, function (ret, err) {
+						if (ret.state == 1) {
+							api.startPlay({
+								path: ret.savePath
+							}, function (ret, err) {
+								_this.audioIcon = '../image/stop11.png';
+							});
+						}
+					});
+				},
+				//暂停语音
+				stopaudio: function () {
+					var _this = this;
+					api.stopPlay();
+					_this.audioIcon = '../image/stop11.png';
+				},
+				getdynamicList: function (statusValue, value) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('DynamicComment', {
+						uid: $api.getStorage('uid'),
+						trends_id: api.pageParam.id,
+						status: statusValue,
+						description: value,
+						type: 9,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							if (statusValue == "comment_list") {
+								_this.dynamicInfo = ret.extra;
+								_this.comentList = ret.data.data;
+							} else if (statusValue == "gift_list") {
+								_this.giftList = ret.data.data;
+							}
+						}
+					})
+				},
+				opendatedel: function (dynamicid) {
+					var _this = this;
+					api.confirm({
+						title: '提醒',
+						msg: '是否删除该条动态',
+						buttons: ['删除', '取消']
+					}, function (ret, err) {
+						if (ret.buttonIndex == 1) {
+							api.showProgress({
+								title: '',
+								text: ''
+							});
+							$$.ajaxData('MyNewsDynamicDelete', {
+								type: 'dynamic',
+								news_id: '',
+								dynamic_id: dynamicid,
+							}, function (ret, err) {
+								api.hideProgress();
+								if (ret.status) {
+									api.toast({
+										msg: ret.msg,
+									});
+									api.sendEvent({
+										name: 'mydynamicdel',
+									});
+								}
+								setTimeout(function () {
+									api.closeWin();
+								}, 1000);
+							})
+						}
+						if (ret.buttonIndex == 2) {
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+					});
+				},
+				openvedio_detail: function (file) {
+					api.openWin({
+						name: 'video_detail',
+						url: 'video_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							file: file
+						}
+					});
+				},
+				uploadFiles: function (fileUrl) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						report: true,
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							api.showProgress({
+								title: ret.progress + '%',
+								text: ''
+							});
+							if (ret.status == 1) {
+								api.hideProgress();
+								_this.file = ret.body.key;
+								_this.phone = qiniuImageUrl + ret.body.key + '?vframe/jpg/offset/1/w/300/h/300';
+								var str = "";
+								str = "<div class='box' @click='openvedio_detail(_this.file)'>" +
+									"<img src='" + _this.phone + "' title=''/>" +
+									"</div>"
+								$api.before($api.dom('#addBtn'), str);
+								_this.submitVedio();
+							}
+						}
+						if (err) {
+							api.hideProgress();
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				getpinglunlist: function (i) {
+					var _this = this;
+					_this.activeIndex = i;
+					if (_this.activeIndex == 1) {
+						_this.getdynamicList('comment_list');
+					} else if (_this.activeIndex == 2) {
+						_this.getdynamicList('gift_list');
+					}
+				},
+				sendBtn: function () {
+					var _this = this;
+					if (this.pinglun == '') {
+						api.toast({
+							msg: '请输入评论内容',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					_this.getdynamicList('add', this.pinglun);
+					api.toast({
+						msg: '评论成功',
+						duration: 2000,
+						location: 'bottom'
+					});
+					_this.comentList.push({
+						description: this.pinglun,
+						created_at: new Date().getTime(),
+						member: {
+							avatar: $api.getStorage('uavatar'),
+							name: $api.getStorage('uname')
+						}
+					});
+					_this.pinglun = '';
+					api.sendEvent({
+						name: 'refresh_dynamic_list',
+					});
+				},
+				openGift_frame: function () {
+					var _this = this;
+					api.openFrame({
+						name: 'gifts_frame_dynamic',
+						url: 'gifts_frame_dynamic.html',
+						rect: {
+							x: 0,
+							y: 0,
+							w: api.winWidth,
+							h: api.winHeight
+						},
+						pageParam: {
+							gold: _this.dynamicInfo.myinfo.gold,
+							loves_id: api.pageParam.id,
+							costtype: 4,
+						}
+					});
+				},
+				noopenGift_frame: function () {
+					api.alert({
+						title: '提醒',
+						msg: '自己不能给自己送礼物',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>
+
+</html>

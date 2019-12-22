@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>充值</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/recharge.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" onclick="api.closeWin()">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的充值</h1>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="balance-wrap">
+					<div class="label">您的钻石</div>
+					<div class="balance-info">
+						<img src="../image/zuanshi.png" alt="">
+						<span>{{myGold}}</span>
+					</div>
+				</div>
+				<div class="product-list" v-for="(item, index) in productList" :key="item.id">
+					<div class="product-item" @click="pay(item)">
+						<img src="../image/zuanshi.png" alt="">
+						<div class="title">
+							<div class="gold">+{{item.gold}}钻石</div>
+							<div v-if="item.give != '' || item.give_vip != ''" class="gift">
+								<span v-if="item.give != ''">赠送{{item.give}}钻石</span>
+								<span v-if="item.give_vip != ''">赠送{{item.give_vip}}天VIP</span>
+							</div>
+						</div>
+						<div class="value">￥{{item.price}}</div>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app, iap;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		iap = api.require('iap');
+		app = new Vue({
+			el: '#app',
+			data: {
+				myGold: api.pageParam.myGold,
+				productList: [],
+				activeIndex: '',
+				activePrice: '',
+				option: 'wechat',
+			},
+			created: function () {
+				var _this = this;
+				iap.setTransactionListener(function(ret, err) {
+					if (ret) {
+						if (ret.state == 1) {
+							var oApplicationUsername = JSON.parse(ret.applicationUsername);
+							$$.ajaxData('PayCallBack', {
+								trade_no: ret.transactionId,
+								productId: ret.productId,
+								receipt: ret.receipt,
+								uid: $api.getStorage('uid'),
+								cid: '0',
+								tuid: '0',
+								price: oApplicationUsername.price,
+							}, function (ret, err) {
+								api.hideProgress();
+								api.toast({
+									msg: ret.msg,
+									duration: 2000,
+									location: 'bottom'
+								});
+								if (ret.status) {
+									api.sendEvent({
+										name: 'refreshMyWallet',
+										extra: {
+											key: 'value'
+										}
+									});
+									setTimeout(function () {
+										api.closeWin();
+									}, 2000);
+								}
+							})
+						} 
+						if (ret.state == 2) {
+							api.hideProgress();
+							api.toast({
+								msg: '取消支付',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					}
+					if (err) {
+						api.alert({
+							title: 'setTransactionListener',
+							msg: JSON.stringify(err)
+						});
+					}
+				});
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getProductList();
+			},
+			methods: {
+				getProductList: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (api.systemType == 'ios') {
+						iap.getProducts({
+							productIds: ['7', '8', '9']
+						}, function(ret, err) {
+							api.hideProgress();
+							if (ret) {
+								for (var i = 0; i < ret.products.length; i++) {
+									_this.productList.push({
+										id: ret.products[i].productId,
+										gold: ret.products[i].title,
+										price: ret.products[i].price,
+										give: '',
+										give_vip: '',
+									})
+								}
+							}
+							if (err) {
+								api.alert({
+									title: 'err',
+									msg: JSON.stringify(err)
+								});
+							}
+						});
+					} else {
+						$$.ajaxData('GoodsList', {}, function (ret, err) {
+							if (ret.status) {
+								api.hideProgress();
+								for (var i = 0; i < ret.data.length; i++) {
+									_this.productList.push({
+										id: ret.data[i].id,
+										gold: ret.data[i].gold,
+										price: ret.data[i].price,
+										give: ret.data[i].give,
+										give_vip: ret.data[i].give_vip,
+									})
+								}
+							}
+						})
+					}
+				},
+				pay: function (item) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (api.systemType == 'ios') {
+						// 苹果支付
+						iap.purchase({
+							productId: item.id,
+							applicationUsername: JSON.stringify(item)
+						}, function(ret, err) {});
+					}
+				}
+			}
+		})
+	}
+
+</script>
+
+</html>

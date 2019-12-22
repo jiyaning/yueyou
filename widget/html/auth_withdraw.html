@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>提现认证</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/auth.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" onclick="api.closeWin();">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">提现认证</h1>
+				</div>
+			</header>
+			<div class="label">
+				<span class="title">姓名：</span>
+				<input v-model="user_name" type="text" placeholder="请输入银行开户姓名">
+			</div>
+			<div class="label">
+				<span class="title">开户行：</span>
+				<input v-model="bank_name" type="text" placeholder="请输入开户行与具体支行">
+			</div>
+			<div class="label">
+				<span class="title">银行卡号：</span>
+				<input v-model="bank_ID" type="text" placeholder="请输入银行卡帐号">
+			</div>
+			<div class="label">
+				<span class="title">身份证号：</span>
+				<input v-model="ID_number" type="text" placeholder="请输入开户身份证号">
+			</div>
+			<div class="label">
+				<span class="title">可提现金额为：</span>
+				<input disabled type="text" :value="price">
+			</div>
+			<div class="label">
+				<span class="title">输入提现金额：</span>
+				<input v-model="present_money" type="text" placeholder="提现金额须为100的倍数">
+			</div>
+			<footer>
+				<button class="can1" @click="tixian">确认提现</button>
+			</footer>
+			<div class="beizhu">
+				<p>本周的提现会在下周第1个工作日为您安排转账，具体到账时间以银行转账时间为准。</p>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				price:api.pageParam.price,
+				user_name:'',
+				bank_name:'',
+				bank_ID:'',
+				ID_number:'',
+				present_money:''
+			},
+			mounted: function () {},
+			methods: {
+				tixian:function(){
+					pattern = /^([1-9]{1})(\d{14}|\d{18})$/;
+					var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+					if (this.user_name == '') {
+						api.toast({
+							msg: '姓名不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (this.bank_name == '') {
+						api.toast({
+							msg: '开户行不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (!pattern.test(this.bank_ID)) {
+						api.toast({
+							msg: '请输入正确的银行卡号',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (reg.test(this.ID_number) === false) {
+						api.toast({
+							msg: '请输入正确的身份证号',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (parseInt(this.present_money)%100!=0) {
+						api.toast({
+							msg: '体现金额必须是100的倍数',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (parseInt(this.present_money) > parseInt(this.price)) {
+						api.toast({
+							msg: '体现金额不能超过最大金额',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('PresentCertification', {
+						uid: $api.getStorage('uid'),
+						user_name:this.user_name,
+						bank_name:this.bank_name,
+						bank_ID:this.bank_ID,
+						ID_number:this.ID_number,
+						present_money:this.present_money
+					}, function (ret, err) {
+						api.hideProgress();						
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							setTimeout(function () {
+								api.openWin({
+									name: 'my_wallet',
+									url: 'my_wallet.html',
+									bounces: false
+								});
+							}, 2000);
+						}
+					})
+				},
+				goback: function () {
+					api.closeWin();
+				},
+				
+			},
+		})
+	}
+</script>
+
+</html>

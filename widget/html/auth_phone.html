@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>身份确认</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/auth.css" />
+</head>
+
+<body>
+	<div id="wrap" class="flex-wrap flex-vertical" v-cloak>
+		<header id="header">
+			<div class="header-wrap">
+				<div class="header-left">
+					<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+				</div>
+				<h1 class="title">身份确认</h1>
+			</div>
+		</header>
+		<div id="main" class="flex-con">
+			<div class="form-wrap">
+				<div class="form-item flex-wrap">
+					<i class="iconfont icon-shouji"></i>
+					<input id="mobile" class="flex-con" type="tel" placeholder="请输入手机号码">
+				</div>
+				<div class="form-item flex-wrap">
+					<i class="iconfont icon-yanzhengma"></i>
+					<input id="code" class="flex-con" type="text" placeholder="请输入验证码">
+					<button onclick="sendSMS();" class="sendMessage-btn" id="sendMessage-btn" type="button">获取验证码</button>
+				</div>
+				<div class="btn-wrap" onclick="openauthentication()">
+					<button id="submit-btn" class="btn1" type="button">下一步</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		if (!!localStorage.getItem('uid')) {
+			api.openWin({
+				name: 'root',
+				url: '../index.html',
+				slidBackEnabled: false
+			});
+		}
+	}
+
+	// 倒计时
+	function ctimer(time) {
+		var t = time;
+		var sendMessageBtn = $api.dom('#sendMessage-btn');
+		sendMessageBtn.classList.add('disabled')
+		if (t > 0) {
+			sendMessageBtn.classList.add('disabled');
+			sendMessageBtn.disabled = true;
+			sendMessageBtn.innerHTML = t + '秒';
+			t--;
+			setTimeout(function () {
+				ctimer(t);
+			}, 1000);
+		} else {
+			sendMessageBtn.classList.remove('disabled')
+			sendMessageBtn.disabled = false;
+			sendMessageBtn.innerHTML = '获取验证码';
+		}
+	}
+
+	// 发送验证码短信
+	function sendSMS() {
+		var regex = /^(?=\d{11}$)^1(?:3\d|4[57]|5[^4\D]|66|7[^249\D]|8\d|9[89])\d{8}$/g;
+		var input_mobile = $api.dom('#mobile').value;
+		if (!regex.test(input_mobile)) {
+			api.toast({
+				msg: '请输入正确的手机号码',
+				duration: 2000,
+				location: 'bottom'
+			});
+			return false;
+		}
+		$$.ajaxData('Message', {
+			mobile: input_mobile
+		}, function (ret, err) {
+			api.toast({
+				msg: ret.msg,
+				duration: 2000,
+				location: 'bottom'
+			});
+			if (ret.status) {
+				ctimer(60);
+			}
+		})
+	}
+
+	// 下一步
+	function openauthentication() {
+		var regex = /^(?=\d{11}$)^1(?:3\d|4[57]|5[^4\D]|66|7[^249\D]|8\d|9[89])\d{8}$/g;
+		var input_mobile = $api.dom('#mobile').value;
+		var input_code = $api.dom('#code').value;
+		if (!regex.test(input_mobile)) {
+			api.toast({
+				msg: '请输入正确的手机号码',
+				duration: 2000,
+				location: 'bottom'
+			});
+			return false;
+		}
+		if (input_code == '') {
+			api.toast({
+				msg: '验证码不能为空',
+				duration: 2000,
+				location: 'bottom'
+			});
+			return false;
+		}
+		$$.ajaxData('PhoneCertification', {
+			phone: input_mobile,
+			code: input_code
+		}, function (ret, err) {
+			if (ret.status) {
+				api.openWin({
+					name: 'auth',
+					url: 'auth_withdraw.html',
+					bounces: false,
+					pageParam: {
+						price: api.pageParam.price
+					}
+				});
+			} else {
+				api.toast({
+					msg: ret.msg,
+					duration: 2000,
+					location: 'bottom'
+				});
+			}
+		})
+	}
+</script>

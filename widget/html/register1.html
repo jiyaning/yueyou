@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>注册流程1</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/register.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="wrap" class="flex-wrap flex-vertical">
+      <header id="header">
+        <div class="header-wrap">
+          <div @click="goback" class="header-left">
+            <i class="iconfont icon-fanhui"></i>
+          </div>
+          <h1 class="title">基本信息</h1>
+        </div>
+      </header>
+      <div class="num">
+        <div class="content step1">
+          <div class="schedule2"></div>
+          <div class="schedule1">
+            <span class="first">1</span>
+            <span class="second">2</span>
+            <span class="third">3</span>
+          </div>
+        </div>
+      </div>
+      <div class="label">
+        <span class="title">性别</span>
+        <label v-for="(item, i) in sex" :key="i" @click="selectSex(i)" :class="['sex', 'sex' + i, form.sex == item.value ? 'active' : '']">
+          <i></i> {{item.label}}
+        </label>
+      </div>
+      <div class="label">
+        <span class="title">昵称</span>
+        <input v-model="form.username" type="text" placeholder="请输入昵称">
+      </div>
+      <div class="label">
+        <span class="title">年龄</span>
+        <input v-model="form.age" type="text" placeholder="请输入年龄">
+      </div>
+      <div class="label">
+        <span class="title">职业</span>
+        <div class="info" @click="openLabel(13,form.sex)">
+          <i class="iconfont icon-xiangyou"></i>
+          <span v-if="form.occupationLabel.length == 0">请选择</span>
+          <div class="labelBox" v-else>
+            <span class="labelStyle" v-if="index<3" v-for="(item,index) in form.occupationLabel">{{item.tag}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="label">
+        <span class="title">所在地</span>
+        <div>
+          <span @click="actionSelector">{{form.city}}</span>
+          <i class="iconfont icon-xiangyou"></i>
+        </div>
+      </div>
+      <div id="main" class="flex-con">
+        <div class="form-wrap">
+          <div class="btn-wrap">
+            <button @click="next" id="submit-btn" type="button">下一步</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/city.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    api.setStatusBarStyle({
+      style: 'light',
+    });
+    var app = new Vue({
+      el: '#app',
+      data: {
+        form: {
+          sex: '',
+          username: '',
+          age: '',
+          occupationLabel: [],
+          city: '请选择'
+        },
+        sex: [{
+          label: '男',
+          value: '1'
+        }, {
+          label: '女',
+          value: '2'
+        }],
+        sexTips: true
+      },
+      created: function () {
+        var _this = this;
+        api.addEventListener({
+          name: 'myEvent13'
+        }, function (ret, err) {
+          _this.form.occupationLabel = ret.value.key1;
+        })
+      },
+      mounted: function () {},
+      methods: {
+        goback: function () {
+          api.closeWin();
+        },
+        openLabel: function (i, sex) {
+          if (sex == '') {
+            api.toast({
+              msg: '请先选择性别'
+            });
+            return false;
+          }
+          api.openWin({
+            name: 'label',
+            url: 'label.html',
+            pageParam: {
+              index: i,
+              sex: sex,
+            }
+          });
+        },
+        selectSex: function (index) {
+          var _this = this;
+          if (_this.sexTips) {
+            api.alert({
+              title: '提醒',
+              msg: '性别选定注册之后不能更改'
+            }, function (ret, err) {
+              _this.form.sex = _this.sex[index].value;
+            });
+            _this.sexTips = false;
+          } else {
+            _this.form.sex = _this.sex[index].value;
+          }
+        },
+        actionSelector: function () {
+          var _this = this;
+          var UIActionSelector = api.require('UIActionSelector');
+          UIActionSelector.open({
+            datas: citySelector,
+            layout: {
+              row: 5,
+              col: 2,
+              height: 30,
+              size: 14,
+              sizeActive: 16,
+              rowSpacing: 5,
+              colSpacing: 10,
+              maskBg: 'rgba(0,0,0,0.2)',
+              bg: '#fff',
+              color: '#888',
+              colorActive: '#f00',
+              colorSelected: '#573e84'
+            },
+            animation: true,
+            cancel: {
+              text: '取消',
+              size: 14,
+              w: 60,
+              h: 32,
+              bg: '#aaa',
+              bgActive: '#ccc',
+              color: '#fff',
+              colorActive: '#fff'
+            },
+            ok: {
+              text: '确定',
+              size: 14,
+              w: 60,
+              h: 32,
+              bg: '#573e84',
+              bgActive: '#ccc',
+              color: '#fff',
+              colorActive: '#fff'
+            },
+            title: {
+              text: '请选择城市',
+              size: 14,
+              h: 44,
+              bg: '#fff',
+              color: '#888'
+            }
+          }, function (ret, err) {
+            if (ret.eventType == 'ok') {
+              _this.form.city = ret.selectedInfo[0].name + '.' + ret.selectedInfo[1].name;
+            }
+          });
+        },
+        next: function () {
+          var _this = this;
+          if (_this.form.sex == '') {
+            api.toast({
+              msg: '请选择性别',
+            });
+            return false;
+          }
+          if (_this.form.username == '') {
+            api.toast({
+              msg: '请输入昵称',
+            });
+            return false;
+          }
+          if (_this.form.age == '') {
+            api.toast({
+              msg: '请输入年龄',
+            });
+            return false;
+          } else if (isNaN(_this.form.age)) {
+            api.toast({
+              msg: '请输入正确的年龄',
+            });
+            return false;
+          } else if (Math.floor(_this.form.age) != _this.form.age) {
+            api.toast({
+              msg: '请输入正确的年龄',
+            });
+            return false;
+          } else if (_this.form.age < 0 || _this.form.age > 99) {
+            api.toast({
+              msg: '请输入正确的年龄',
+            });
+            return false;
+          }
+          if (_this.form.occupationLabel.length == 0) {
+            api.toast({
+              msg: '请选择职业',
+            });
+            return false;
+          }
+          if (_this.form.city == '请选择') {
+            api.toast({
+              msg: '请选择所在地',
+            });
+            return false;
+          }
+          api.openWin({
+            name: 'register2',
+            url: 'register2.html',
+            pageParam: {
+              username: _this.form.username,
+              sex: _this.form.sex,
+              city: _this.form.city,
+              mobile: api.pageParam.mobile,
+              password: api.pageParam.password,
+              code: api.pageParam.code,
+              age: _this.form.age,
+              occupation: _this.form.occupationLabel,
+            }
+          });
+        },
+      }
+    })
+  }
+</script>

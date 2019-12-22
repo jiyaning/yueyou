@@ -1,0 +1,36 @@
+// out: ../css/video_control.css
+@import 'common';
+html, body {
+  background: rgba(0, 0, 0, 0);
+}
+.control-wrap {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	.playing {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		.iconfont {
+			font-size: 40px;
+			color: #fff;
+		}
+	}
+	.goback {
+		width: 30px;
+		height: 30px;
+		position: absolute;
+		left: 20px;
+		top: 20px;
+		text-align: center;
+		line-height: 30px;
+		background-color: rgba(0, 0, 0, 0.6);
+		border-radius: 30px;
+		.iconfont {
+			font-size: 18px;
+			color: #fff;
+		}
+	}
+}

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>爱意墙</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/loving_list.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="main" class="flex-con">
+			<div class="lovebox">
+				<img src="../image/love.jpg" alt="">
+			</div>
+			<div class="contentlistall">
+				<div class="content flex-wrap flex-vertical" v-for="(item ,index) in extraList" :key="item.id">
+					<div style="background-image: url(../image/lovingbgc.jpg);background-size:100% 100%;color: #fff;">
+						<div class="toptime flex-wrap">
+							<span class="time" style="color: #fff;">{{item.created_at | timeFormat}}</span>
+						</div>
+						<div class="gifts flex-wrap" @click="fngiftsListWin(item.loves_id)">
+							<ul class="flex-wrap">
+								<li class="infolist">
+									<div class="box" v-if="item.member != ''">
+										<div class="imgbox">
+											<img :src="item.member.avatar" alt="">
+										</div>
+										<span class="name" style="color: #fff;">{{item.member.name}}</span>
+									</div>
+								</li>
+								<li class="song" style="color: #fff;">送</li>
+								<li class="gifts">
+									<div class="giftbox flex-wrap" v-if="item.gifts != ''" style="margin:0 1%;text-align:left;">
+										<div class="boxsize">
+											<img :src="item.gifts.file" alt="">
+										</div>
+										<span>x{{item.gift_size}}</span>
+									</div>
+									<div class="giftmoney flex-wrap">
+										<span>{{item.gifts.gold*item.gift_size}}</span>
+										<div class="zuanbox">
+											<img src="../image/zuanshi.png" alt="">
+										</div>
+									</div>
+								</li>
+								<li class="song" style="color: #fff;">给</li>
+								<li class="infolist">
+									<div class="box" v-if="item.to_member != ''">
+										<div class="imgbox">
+											<img :src="item.to_member.avatar" alt="">
+										</div>
+										<span class="name" style="color: #fff;">{{item.to_member.name}}</span>
+									</div>
+								</li>
+							</ul>
+						</div>
+						<div class="pinglun">
+							<p v-if="item.description != null && item.description !=''" style="color: #fff;">并想对她说：{{item.description}}</p>
+						</div>
+					</div>
+					<div v-if="item.comment.length != 0 " class="huifu">
+						<p v-for="(com_item,com_index) in item.comment" :key="com_item.id"><span v-if="com_item.member != 0 ">{{com_item.member.name}}:</span>{{com_item.description}}</p>
+					</div>
+					<div class="dianzan flex-wrap">
+						<span>
+							<i class="iconfont icon-comment" @click="fngiftsListWin(item.loves_id)"></i> {{item.commont_size}}
+						</span>
+						<span :class="[item.is_like == 1 ? 'xin1' : '']" @click="zan1(item.loves_id,index)" class="zanBtn">
+							<i class="iconfont icon-xin"></i> {{item.like_size}}
+						</span>
+						<div class="namelist  flex-wrap">
+							<p v-if="item.like_size !=0">等{{item.like_size}}人祝福</p>
+							<ul class="flex-wrap">
+								<li v-if="po_index<4" v-for="(po_item,po_index) in item.point_people" :key="po_item.id">
+									<div class="avatarbox">
+										<img v-if="po_item.member != ''" :src="po_item.member.avatar" alt="">
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="contentlistall" style="padding:0">
+				<div class="content flex-wrap flex-vertical" v-for="(item ,index) in lovingList" :key="item.id">
+					<div class="toptime flex-wrap">
+						<span class="time">{{item.created_at | timeFormat}}</span>
+						<div class="num">
+							<div class="img1box" v-if="index==0">
+								<img src="../image/loving1.png" alt="">
+							</div>
+							<div class="img1box" v-if="index==1">
+								<img src="../image/loving2.png" alt="">
+							</div>
+							<div class="img1box" v-if="index==2">
+								<img src="../image/loving3.png" alt="">
+							</div>
+							<p v-if="index>2">NO.{{index+1}}</p>
+						</div>
+					</div>
+					<div class="gifts flex-wrap" @click="fngiftsListWin(item.id)">
+						<ul class="flex-wrap">
+							<li class="infolist">
+								<div class="box" v-if="item.member != ''">
+									<div class="imgbox">
+										<img :src="item.member.avatar" alt="">
+									</div>
+									<span class="name">{{item.member.name}}</span>
+								</div>
+							</li>
+							<li class="song">送</li>
+							<li class="gifts">
+								<div class="giftbox flex-wrap" v-if="item.gifts != ''" style="margin:0 1%;text-align:left;">
+									<div class="boxsize">
+										<img :src="item.gifts.file" alt="">
+									</div>
+									<span>x{{item.gift_size}}</span>
+								</div>
+								<div class="giftmoney flex-wrap">
+									<span>{{item.gifts.gold*item.gift_size}}</span>
+									<div class="zuanbox">
+										<img src="../image/zuanshi.png" alt="">
+									</div>
+								</div>
+							</li>
+							<li class="song">给</li>
+							<li class="infolist">
+								<div class="box" v-if="item.to_member != ''">
+									<div class="imgbox">
+										<img :src="item.to_member.avatar" alt="">
+									</div>
+									<span class="name">{{item.to_member.name}}</span>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div class="pinglun">
+						<p v-if="item.description != null && item.description !=''">并想对她说：{{item.description}}</p>
+					</div>
+					<div v-if="item.comment.length != 0 " class="huifu">
+						<p v-for="(com_item,com_index) in item.comment" :key="com_item.id"><span v-if="com_item.member != 0 ">{{com_item.member.name}}:</span>{{com_item.description}}</p>
+					</div>
+					<div class="dianzan flex-wrap">
+						<span>
+							<i class="iconfont icon-comment" @click="fngiftsListWin(item.id)"></i> {{item.commont_size}}
+						</span>
+						<span :class="[item.is_like == 1 ? 'xin1' : '']" @click="zan(item.id,index)" class="zanBtn">
+							<i class="iconfont icon-xin"></i> {{item.like_size}}
+						</span>
+						<div class="namelist  flex-wrap">
+							<p v-if="item.like_size !=0">等{{item.like_size}}人祝福</p>
+							<ul class="flex-wrap">
+								<li v-if="po_index<4" v-for="(po_item,po_index) in item.point_people" :key="po_item.id">
+									<div class="avatarbox">
+										<img v-if="po_item.member != ''" :src="po_item.member.avatar" alt="">
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		app = new Vue({
+			el: '#app',
+			data: {
+				lovingList: [],
+				extraList: [],
+				page: 1,
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refresh_loving_list'
+				}, function (ret, err) {
+					_this.page = 1;
+					_this.lovingList = [];
+					_this.getlovingList();
+				})
+				api.setRefreshHeaderInfo({
+					bgColor: '#141414',
+					textColor: '#fff',
+					textDown: '下拉刷新...',
+					textUp: '松开刷新...'
+				}, function (ret, err) {
+					if (!!$api.getStorage('token')) {
+						setTimeout(function () {
+							_this.page = 1;
+							_this.avatarShow = false;
+							_this.lovingList = [];
+							_this.getlovingList();
+						}, 1000);
+					}
+				});
+				api.addEventListener({
+					name: 'scrolltobottom',
+					extra: {
+						threshold: 0
+					}
+				}, function (ret, err) {
+					_this.getlovingList();
+				});
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getlovingList();
+			},
+			methods: {
+				getlovingList: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Love', {
+						uid: $api.getStorage('uid'),
+						page: _this.page,
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							if (ret.data.data.length != 0) {
+								_this.page++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.lovingList.push(ret.data.data[i]);
+								}
+							} else {
+								api.toast({
+									msg: '没有更多了',
+								});
+								return false;
+							}
+							if (ret.extra.length != 0) {
+								_this.extraList = ret.extra;
+							}
+						}
+					})
+				},
+				zan: function (id, i) {
+					var _this = this;
+					$$.ajaxData('LoveLikes', {
+						uid: $api.getStorage('uid'),
+						loves_id: id
+					}, function (ret, err) {
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							if (_this.lovingList[i].is_like == 0) {
+								_this.lovingList[i].is_like = 1;
+								_this.lovingList[i].like_size++;
+							} else {
+								_this.lovingList[i].is_like = 0;
+								_this.lovingList[i].like_size--;
+								_this.lovingList[i].point_people.splice(_this.lovingList[i].like_size, 1);
+							}
+						}
+					})
+				},
+				zan1: function (id, i) {
+					var _this = this;
+					$$.ajaxData('LoveLikes', {
+						uid: $api.getStorage('uid'),
+						loves_id: id
+					}, function (ret, err) {
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							if (_this.extraList[i].is_like == 0) {
+								_this.extraList[i].is_like = 1;
+								_this.extraList[i].like_size++;
+							} else {
+								_this.extraList[i].is_like = 0;
+								_this.extraList[i].like_size--;
+								_this.extraList[i].point_people.splice(_this.extraList[i].like_size, 1);
+							}
+						}
+					})
+				},
+				fngiftsListWin: function (id) {
+					api.openWin({
+						name: 'loving_detail',
+						url: 'loving_detail.html',
+						bounces: false,
+						pageParam: {
+							id: id
+						}
+					});
+				},
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime,
+						result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>
+
+</html>

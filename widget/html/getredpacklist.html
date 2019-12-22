@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>红包领取列表</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myprofit.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" style="width:80px">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+						<span>红包详情</span>
+					</div>
+					<div class="header-right" style="width:70px;" @click="opengetredpackrecord">
+						<span style="font-size: 14px;">红包记录</span>
+					</div>
+				</div>
+			</header>
+			<div id="main" class="content flex-con">
+				<div class="fromman">
+					<div class="manavatar">
+						<div class="avatarbox">
+							<img :src="redpacklist[0].from_member.avatar" alt="">
+						</div>
+					</div>
+					<p><span>{{redpacklist[0].from_member.name}}</span></p>
+					<p><span>100{{redpacklist[0].from_member.member_id}}</span></p>
+					<p><span>发了{{rednum}}个红包</span></p>
+				</div>
+				<p class="getinfo" v-if="red_pack != 0">剩余{{red_pack}}个红包未被抢</p>
+				<p class="getinfo" v-if="red_pack == 0">所有红包已被抢完</p>
+				<div class="bangdanlist" id="bangdanlist">
+					<div v-for="(item,index) in redpacklist" :key="item.id" class="bangdan" v-if="item.member !=null">
+						<div class="paiming">{{index+1}}
+						</div>
+						<div class="personname" @click="openMemberDetail(item.member_id)">
+							<div class="hezi">
+								<img :src="item.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="info">
+							<span class="name1">{{item.member.name}}</span>
+							<span>100{{item.member.member_id}}</span>
+							<p class="address">{{item.created_at}}</p>
+						</div>
+						<div class="myid">
+							<div class="zuanshibox">
+								<img src="../image/zuanshi.png" alt="">
+							</div>
+							<span>{{gift_gold}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				redpacklist: [
+					{
+						from_member: {},
+						member: {},
+					}
+				],
+				red_pack: api.pageParam.red_pack,
+				gift_gold: api.pageParam.gift_gold,
+				rednum: 0,
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getredpacklist();
+			},
+			methods: {
+				getredpacklist: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutSelectRedLog', {
+						meet_id: api.pageParam.meet_id
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.redpacklist = ret.data;
+							_this.rednum += ret.data.length;
+						} else {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					})
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+				opengetredpackrecord: function (){
+					api.openWin({
+						name: 'getredpackrecord',
+						url: 'getredpackrecord.html',
+						slidBackEnabled: false,
+						// pageParam: {
+						// 	member_id: id
+						// }
+					});
+				},
+			},
+		})
+	}
+</script>
+
+</html>

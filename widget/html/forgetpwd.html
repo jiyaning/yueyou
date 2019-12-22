@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>找回密码</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/register.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div @click="goback" class="header-left">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">找回密码</h1>
+				</div>
+			</header>
+			<div id="main" class="flex-con">
+				<div class="form-wrap">
+					<div class="form-item flex-wrap">
+						<i class="iconfont icon-shouji"></i>
+						<input v-model="mobile" class="flex-con" type="tel" placeholder="请输入手机号码">
+					</div>
+					<div class="form-item flex-wrap">
+						<i class="iconfont icon-mima"></i>
+						<input v-model="password" class="flex-con" type="password" placeholder="请设置新的密码">
+					</div>
+					<div class="form-item flex-wrap">
+						<i class="iconfont icon-yanzhengma"></i>
+						<input v-model="code" class="flex-con" type="text" placeholder="请输入验证码">
+						<button :disabled="disabled" @click="sendSMS" :class="['sendMessage-btn', disabled ? 'disabled' : '']" type="button">{{verifyCodeBtnText}}</button>
+					</div>
+					<div class="btn-wrap">
+						<button @click="submit" id="submit-btn" type="button">重置密码</button>
+					</div>
+				</div>
+				<div class="forget-wrap">
+					<a @click="goLogin" class="register-link" href="javascript:;">已有账号，去登录</a>
+				</div>
+				<div class="agreement-wrap">
+					<a href="javascript:;">《用户协议》</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light',
+		});
+		app = new Vue({
+			el: '#app',
+			data: {
+				mobile: '',
+				password: '',
+				code: '',
+				disabled: false,
+				verifyCodeBtnText: '获取验证码',
+			},
+			created: function () {},
+			mounted: function () {},
+			methods: {
+				goback: function () {
+					api.closeWin();
+				},
+
+				goLogin: function () {
+					api.closeToWin({
+						name: 'root'
+					});
+				},
+
+				ctimer: function (time) {
+					var t = time;
+					var _this = this;
+					if (t > 0) {
+						_this.disabled = true;
+						_this.verifyCodeBtnText = t + '秒';
+						t--;
+						setTimeout(function () {
+							_this.ctimer(t);
+						}, 1000);
+					} else {
+						_this.disabled = false;
+						_this.verifyCodeBtnText = '获取验证码';
+					}
+				},
+
+				sendSMS: function () {
+					var _this = this;
+					var regex = /^(?=\d{11}$)^1(?:3\d|4[57]|5[^4\D]|66|7[^249\D]|8\d|9[89])\d{8}$/g;
+					if (_this.mobile == '') {
+						api.toast({
+							msg: '手机号码不能为空'
+						});
+						return false;
+					}
+					if (!regex.test(_this.mobile)) {
+						api.toast({
+							msg: '请输入正确的手机号码'
+						});
+						return false;
+					}
+					$$.ajaxData('Message', {
+						mobile: _this.mobile
+					}, function (ret, err) {
+						api.toast({
+							msg: ret.msg
+						});
+						if (ret.status) {
+							_this.ctimer(60);
+						}
+					})
+				},
+
+				submit: function () {
+					var _this = this;
+					var regex = /^(?=\d{11}$)^1(?:3\d|4[57]|5[^4\D]|66|7[^249\D]|8\d|9[89])\d{8}$/g;
+					if (_this.mobile == '') {
+						api.toast({
+							msg: '手机号码不能为空'
+						});
+						return false;
+					}
+					if (!regex.test(_this.mobile)) {
+						api.toast({
+							msg: '请输入正确的手机号码'
+						});
+						return false;
+					}
+					if (_this.password == '') {
+						api.toast({
+							msg: '密码不能为空',
+						});
+						return false;
+					}
+					if (_this.code == '') {
+						api.toast({
+							msg: '验证码不能为空',
+						});
+						return false;
+					}
+					$$.ajaxData('RetrievePassword', {
+						phone: _this.mobile,
+						password: _this.password,
+						code: _this.code,
+					}, function (ret, err) {
+						if (ret.status == true) {
+							api.toast({
+								msg: ret.msg,
+								duration: 2000,
+								location: 'bottom'
+							});
+							setTimeout(function () {
+								api.closeToWin({
+									name: 'root'
+								});
+							}, 1000);
+						} else {
+							api.toast({
+								msg: ret.msg,
+							});
+						}
+					})
+				},
+			}
+		})
+	}
+</script>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+	/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>设置</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div onclick="api.closeWin()" class="header-left">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<div class="title">设置</div>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="menu-list">
+					<div class="menu-item">
+						<div class="menu-info">
+							<div class="title">当前账号</div>
+						</div>
+						<div class="value">{{mobile}}</div>
+						<i class="iconfont"></i>
+					</div>
+					<div class="menu-item" @click="clearCache">
+						<div class="menu-info">
+							<div class="title">清除缓存</div>
+						</div>
+						<div class="value">{{cacheSize}}MB</div>
+						<i class="iconfont"></i>
+					</div>
+					<div class="menu-item" @click="checkUpdate">
+						<div class="menu-info">
+							<div class="title">APP版本</div>
+						</div>
+						<div class="value">{{appVersion}}</div>
+						<i class="iconfont"></i>
+					</div>
+					<div class="menu-item">
+						<div class="menu-info">
+							<div class="title">关于子约</div>
+						</div>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+				<div class="logout-wrap">
+					<button @click="logout" class="logout-btn">退出当前账号</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app, rong;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+      style: 'light'
+    });
+		rong = api.require('rongCloud2');
+		app = new Vue({
+			el: '#app',
+			data: {
+				mobile: '',
+				appVersion: api.appVersion,
+				cacheSize: 0
+			},
+			created: function () {
+				var _this = this;
+        api.getCacheSize(function (ret) {
+          _this.cacheSize = (parseInt(ret.size)/1024/1024).toFixed(2);
+        });
+        if (!!$api.getStorage('umobile')) {
+          _this.mobile = $api.getStorage('umobile').length > 11 ? '' : $api.getStorage('umobile')
+        }
+			},
+			mounted: function () {},
+			methods: {
+				// 清除缓存
+        clearCache: function () {
+          var _this = this;
+          api.confirm({
+            title: '提醒',
+            msg: '确定清除缓存?',
+            buttons: ['确定', '取消']
+          }, function (ret, err) {
+            if (ret.buttonIndex == 1) {
+              api.showProgress({
+                title: '',
+                text: ''
+              });
+              api.clearCache(function () {
+                api.hideProgress();
+                _this.cacheSize = 0;
+                api.toast({
+                  msg: '清除完成'
+                });
+              });
+            }
+          });
+        },
+
+				logout: function () {
+					var _this = this;
+					$$.ajaxData('LoginOut', {
+						uid: $api.getStorage('uid')
+					}, function (ret, err) {
+						if (ret.status) {
+							$api.rmStorage('uid');
+              $api.rmStorage('uname');
+              $api.rmStorage('uavatar');
+              $api.rmStorage('umobile');
+              $api.rmStorage('token');
+              $api.rmStorage('index');
+							rong.disconnect({
+								isReceivePush: true
+							}, function (ret, err) {
+								if (ret.status) {
+									api.toast({
+										msg: '退出登录'
+									});
+								}
+								setTimeout(function () {
+									api.closeToWin({
+										name: 'root'
+									});
+								}, 1000);
+							});
+						}
+					})
+				},
+				// 检查app版本更新
+				checkUpdate: function () {
+					var mam = api.require('mam');
+					mam.checkUpdate(function (ret, err) {
+						if (ret) {
+							var result = ret.result;
+							if (result.update) {
+								var str = '新版本号:' + result.version + ';\n更新内容:\n' + result.updateTip + ';\n发布时间:' + result.time;
+								if (result.closed) {
+									api.alert({
+										title: '有新版本更新',
+										msg: str,
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											if (api.systemType == "android") {
+												api.download({
+													url: result.source,
+													report: true
+												}, function (ret, err) {
+													if (ret && 0 == ret.state) {
+														api.showProgress({
+															title: ret.percent + "%",
+															text: ''
+														});
+													}
+													if (ret && 1 == ret.state) {
+														api.hideProgress();
+														api.installApp({
+															appUri: ret.savePath
+														});
+													}
+												});
+											}
+											if (api.systemType == "ios") {
+												api.installApp({
+													appUri: result.source
+												});
+											}
+										}
+									});
+								} else {
+									api.confirm({
+										title: '有新版本推送，是否下载安装',
+										msg: str,
+										buttons: ['确定', '下次再说']
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											if (api.systemType == "android") {
+												api.download({
+													url: result.source,
+													report: true
+												}, function (ret, err) {
+													if (ret && 0 == ret.state) {
+														api.showProgress({
+															title: ret.percent + "%",
+															text: ''
+														});
+													}
+													if (ret && 1 == ret.state) {
+														api.hideProgress();
+														api.installApp({
+															appUri: ret.savePath
+														});
+													}
+												});
+											}
+											if (api.systemType == "ios") {
+												api.installApp({
+													appUri: result.source
+												});
+											}
+										}
+									});
+								}
+							} else {
+								if (result.closed) {
+									// 无更新，强制关闭
+									api.alert({
+										title: '无新的版本',
+										msg: '应用已强制关闭',
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											api.closeWidget({
+												id: api.appId,
+												silent: true
+											});
+										}
+									});
+								} else {
+									api.toast({
+										msg: '应用已是最新版本',
+									});
+								}
+							}
+						}
+					});
+				},
+			},
+		})
+	}
+
+</script>
+
+</html>

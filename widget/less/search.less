@@ -1,0 +1,210 @@
+// out: ../css/search.css
+@import 'common';
+html,
+body {
+	background-color: @main1-color;
+}
+.content{
+  padding: 20px;
+  background-color: #2d2c2c;
+  display: flex;
+  margin-bottom: 10px;
+  .label{
+    width: 88%;
+    height: 40px;
+    display: flex;
+    background-color: @main1-color;
+    border-radius: 6px;
+    .title{
+      height: 40px;
+      width: 40px;
+      line-height: 40px;
+      text-align: center;
+      .iconfont{
+        font-size: 20px;
+        color: #a09d9d;
+      }
+    }
+    input{
+      flex: 1;
+      color: #a09d9d;
+    }
+  }
+  .search{
+    width: 12%;
+    margin-left: 10px;
+    line-height: 40px;
+    font-size: 18px;
+    color: #eaeaea;
+  }
+}
+.list{
+  background-color: #2d2c2c;
+  height: 50px;
+  display: flex;
+  padding: 0 20px;
+  .box{
+    height: 40px;
+    width: 40px;
+    line-height: 50px;
+    text-align: center;
+    .iconfont{
+      font-size: 20px;
+      color: #eaeaea;
+    }
+  }
+  span{
+    color: #eaeaea;
+    line-height: 50px;
+  }
+}
+.searchlist{
+  line-height: 40px;
+  display: flex;
+  border-bottom: 1px solid #2d2c2c;
+  .box{
+    width: 33.33%;
+    color: #fff;
+    text-align: center;
+  }
+  .box1{
+    width: 45%;
+    color: #fff;
+    margin-left: 5%;
+  }
+  .box2{
+    width: 45%;
+    color: #fff;
+    margin-right: 5%;
+    text-align: right;
+  }
+}
+.btn{
+  button{
+    width: 80%;
+    height: 40px;
+    line-height: 40px;   
+    margin:50px auto 0;
+    display: block;
+    background-color: #573e84;
+    color: #fff;
+    border-radius: 30px;
+  }
+}
+
+.search_list{
+  margin:30px 0;
+  width: 100%;
+  color:#fff;
+  .friend{
+      width: 100%;
+      height: 70px;
+      border-bottom: 1px solid rgba(52, 42, 83, .7);
+      position: relative;
+      .personname{
+          float: left;
+          width: 13%;
+          height: 50px;
+          line-height: 50px;
+          text-align: center;
+          margin: 10px;
+          .hezi{
+              width: 50px;
+              height: 50px;
+             img{
+                 height: 100%;
+                 border-radius: 25px;
+             }
+          }
+      }
+      .info{
+          line-height: 20px;
+          padding-top: -10px;
+          .vip{
+              color: @main-color;
+              .icon-vip1{
+                  font-size: 16px;
+                  color: gold;
+              }
+          }
+          span{
+              height: 20px;
+              line-height: 20px;
+          }
+          .name{
+              font-size:16px;
+          }
+          .sex{
+              padding:0 5px;
+              height: 16px;
+              line-height: 16px;
+              text-align: center;
+              margin: 6px 8px;
+              margin-top: 20px;
+              border:1px solid #d044ff;
+              color: #d044ff;
+              border-radius: 4px;
+              font-size:12px;
+              .iconfont{
+                  font-size:14px;
+              }
+          }
+          .guanzhusex{
+              width: 14%;
+          }
+          .qianming{
+              color: #958da5;
+          }
+      }
+      .guanzhuinfo{
+          width: 80%;
+      }
+      .money{
+          float: right;
+          width: 18%;
+          height: 50px;
+          line-height: 50px;
+          text-align: center;
+          margin: 10px 4px;
+      }
+
+  }
+}
+.follow-icon{
+  position: absolute;
+  right:10px;
+  top:10px;
+  line-height:50px;
+  .iconfont{
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+  }
+}
+.label_box{
+    padding:10px 5px;
+    box-sizing: border-box;
+    display: flex;
+    span{
+        width:25%;
+        padding:5px;
+        box-sizing: border-box;
+        i{
+            border: 1px solid #573e84;
+            color:#573e84;
+            width:100%;
+            height:30px;
+            border-radius:6px;
+            display: block;
+            font-style: normal;
+            line-height:30px;
+            text-align: center;
+        }
+    }
+    .selectLa{
+        i{
+           background:#573e84;
+           color:#fff; 
+        }
+    }
+}

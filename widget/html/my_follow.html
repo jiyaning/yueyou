@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的关注</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myfriends.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的关注</h1>
+					<div class="header-right">
+						<span @click="openfollowhelp()">帮助</span>
+					</div>
+				</div>
+			</header>
+			<nav id="nav">
+				<span class="menu selected" tapmode @click="follow">我关注的</span>
+				<span class="menu" tapmode @click="myFollow">关注我的</span>
+			</nav>
+			<div class="empty-data" v-if="followlist.length == 0">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无关注~</div>
+			</div>
+			<div class="friendslist">
+				<div v-for="(item ,index) in followlist" :key="item.id" class="friend flex-wrap" @click="openMemberDetail(item.member_id)">
+					<div class="personname">
+						<div class="hezi">
+							<img id="avatar" :src="item.avatar" alt="">
+						</div>
+					</div>
+					<div class="info">
+						<span class="name">{{item.name}}</span>
+						<span class="sex sex1" v-if="item.sex==1">
+							<i class="iconfont icon-nan"></i>{{item.age}}
+						</span>
+						<span class="sex sex2" v-else>
+							<i class="iconfont icon-nv"></i>{{item.age}}
+						</span>
+						<span class="vip" v-if="item.level==1">
+							<img class="vip1" src="../image/VIP.png" alt="" style="height:65%;margin-bottom: -2px;margin-left: -4px">
+						</span>
+						<p class="qianming" v-if="item.sale_column==null">暂无技能信息</p>
+						<p class="qianming" v-else>{{item.sale_column}}</p>
+					</div>
+					<span class="follow-icon"><i class="iconfont icon-xiangyou"></i></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				followlist: [{
+					id: 2,
+					avatar: '../image/img2.png',
+					name: '小迷妹',
+					level: 'vip13',
+					sex: 1,
+					age: 25,
+					signature: '最后那抹微笑，被埋没在寂寞的夜空',
+				}]
+			},
+			mounted: function () {
+				this.followList('MyAttention');
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				follow: function (e) {
+					$api.removeCls($api.dom('.selected'), 'selected');
+					$api.addCls(e.currentTarget, 'selected');
+					this.followList('MyAttention');
+				},
+				myFollow: function (e) {
+					var _this = this;
+					$api.removeCls($api.dom('.selected'), 'selected');
+					$api.addCls(e.currentTarget, 'selected');
+					_this.followlist = [];
+					_this.followList('Attention_me');
+				},
+				openfollowhelp: function () {
+					api.alert({
+						title: '帮助',
+						msg: '关注越多，机会越多哦，非VIP不能查看关注你的人。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				followList: function (attention) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('attention', {
+						uid: $api.getStorage('uid'),
+						Attention: attention,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.followlist = ret.data;
+						} else {
+							api.hideProgress();
+							api.confirm({
+								title: '提醒',
+								msg: '此为VIP功能，请先开通VIP',
+								buttons: ['立即开通', '取消']
+							}, function (ret, err) {
+								if (ret.buttonIndex == 1) {
+									setTimeout(function () {
+										api.openWin({
+											name: 'my_vip',
+											url: 'my_vip.html',
+											slidBackEnabled: false
+										});
+									}, 200);
+								}
+								if (ret.buttonIndex == 2) {
+									return false;
+								}
+							});
+						}
+					});
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+		})
+	}
+</script>

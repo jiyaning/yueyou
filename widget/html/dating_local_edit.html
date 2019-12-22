@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>求约发布</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/date_edit.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="content">
+			<div class="label">
+				<span class="title">我的语音:</span>
+				<div v-if="!audioUrl" class="btn-item" @touchstart="voiceTouchstart" @touchend="voiceTouchend">
+					<span>发表语音</span>
+					<i class="iconfont icon-fabu-yuyin"></i>
+				</div>
+				<div v-if="!!audioUrl" @click="playVoice" class="btn-item">
+					<img :src="audioIcon" alt="">
+					<span>{{audioDuration}}</span>
+					<i @click="deleteAudio" class="iconfont icon-guanbi"></i>
+				</div>
+			</div>
+			<div class="label">
+				<span class="title">邀约对象:</span>
+				<p class="text" @click="openLabel(9,myInfo.sex)">
+					<span v-if="meetLabel.length == 0" class="tishi">请选择邀约对象</span>
+					<span class="labelStyle" else v-for="(item,index) in meetLabel">{{item.tag}}</span>
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="label">
+				<span class="title">约会类型:</span>
+				<p class="text" @click="openLabel(11,myInfo.sex)">
+					<span v-if="invitedLabel.length == 0" class="tishi">请选择约会类型</span>
+					<span class="labelStyle" else v-for="(item,index) in invitedLabel">{{item.tag}}</span>
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="label">
+				<span class="title">约会地点:</span>
+				<input v-model="form.adress" type="text" placeholder="请输入约会地点">
+			</div>
+			<div class="label">
+				<span class="title">约会时间</span>
+				<div class="datetime-input">
+					<label for="time2" v-if="form.time == ''" class="placeholder">请选择约会时间</label>
+					<input id="time2" class="ipt1" v-model="form.time" type="date">
+				</div>
+			</div>
+			<div class="label">
+				<span class="title">费用预算:</span>
+				<p class="text" @click="typeActionSheet(button,0)">{{yusuanTxt}}
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="label">
+				<span class="title">费用支付:</span>
+				<p class="text" @click="typeActionSheet(button1,1)">{{feiyongTxt}}
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="label">
+				<span class="title">门槛设定:</span>
+				<p class="text" @click="typeActionSheet(button2,2)">{{menkuanTxt}}
+					<i class="iconfont icon-xiangyou"></i>
+				</p>
+			</div>
+			<div class="info-item">
+				<span class="title">约会描述</span>
+				<textarea v-model="form.rule_require" maxlength="30" placeholder="说点什么..."></textarea>
+			</div>
+			<p class="help"><span @click="helpshow">{{title1}}</span></p>
+			<div class="helplist" v-if="helplist == true">
+				<p>1、请绿色约会，严禁涉黄、涉暴力与政治。达成求约后请及时私聊约会事宜，并商量确定收取或赠送赴约担保礼物金额，最后确定约会行程安排。若为AA制，则赴约担保礼物退回。</p>
+				<p>2、子约交友约友众多，切勿相信任何私下转账要求，避免上当受骗，避免财产损失。</p>
+				<p>3、如遇到未赴约或者骗子，请及时举报投诉，我们将为您追回损失，并给予违约者处罚。</p>
+				<p>4、送礼物者违约，礼物归收礼物者所有。收礼物者违约，我们将为送礼物者追回礼物，并给予违约者所收礼物等价值的处罚，并将50%的处罚补偿给送礼物者。</p>
+				<p @click="play">5、更多详情请参考子约玩转攻略-特权。</p>
+				<p></p>
+				<p style="line-height:30px;color:#000;text-align: center"><span @click="helphide">收回</span></p>
+			</div>
+		</div>
+		<footer>
+			<div class="btn-wrap">
+				<button @click="fabu" id="submit-btn" type="button">确定发布</button>
+			</div>
+		</footer>
+		<div v-if="voiceGif" class="voice-gif">
+			<img src="../image/voice.gif" alt="">
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		app = new Vue({
+			el: '#app',
+			data: {
+				form: {
+					uid: $api.getStorage('uid'),
+					type: 2,
+					audio: '',
+					audio_timer: '',
+					invite_obj: '',
+					style: '',
+					adress: '',
+					time: '',
+					occupation: '',
+					Cost_requirements: '',
+					threshold_requirement: '',
+					hand_require: '',
+					rule_require: '',
+					flag: '',
+				},
+				myInfo: {},
+				vipnum: [],
+				voiceGif: false,
+				audioIcon: '../image/stop.png',
+				audioUrl: '',
+				qiniuToken: '',
+				audioDuration: '',
+				button: ['100元及以下', '100-300元', '300-500元', '500-800元', '800-1500元', '1500元以上', '视情况定', ],
+				button1: ['我付', '对方付', '私聊协商'],
+				button2: ['密友', '7天VIP', '30天VIP', '账户余额不低于500钻石', '无门槛'],
+				yusuanTxt: '请选择费用预算',
+				feiyongTxt: '请选择支付方式',
+				menkuanTxt: '请选择门槛',
+				meetLabel: [],
+				invitedLabel: [],
+				title1: '同城约规则 >>>',
+				helplist: false,
+			},
+			created: function () {
+				var _this = this;
+				_this.meetLabel = [];
+				_this.invitedLabel = [];
+				api.addEventListener({
+					name: 'myEvent9'
+				}, function (ret, err) {
+					_this.meetLabel = ret.value.key1;
+					for (var i = 0; i < _this.meetLabel.length; i++) {
+						_this.form.invite_obj += _this.meetLabel[i].id + ',';
+					}
+				});
+				api.addEventListener({
+					name: 'myEvent11'
+				}, function (ret, err) {
+					_this.invitedLabel = ret.value.key1;
+					for (var i = 0; i < _this.invitedLabel.length; i++) {
+						_this.form.style += _this.invitedLabel[i].id + ',';
+					}
+				})
+			},
+			mounted: function () {
+				this.getQiniuToken();
+				this.getMyInfo();
+			},
+			methods: {
+				getMyInfo: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Profile', {
+						uid: $api.getStorage('uid'),
+						member_id: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.myInfo = ret.data;
+							_this.vipnum = ret.data.ask_about;
+						}
+					})
+				},
+				// 获取七牛token
+				getQiniuToken: function () {
+					var _this = this;
+					$$.ajaxData('qniu', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.qiniuToken = ret.data;
+						}
+					})
+				},
+				helpshow: function () {
+					this.helplist = true;
+					this.title1 = "同城约规则";
+				},
+				helphide: function () {
+					this.helplist = false;
+					this.title1 = "同城约规则 >>>";
+				},
+				play: function () {
+					api.openWin({
+						name: 'play_strategy',
+						url: 'play_strategy.html',
+						bounces: false
+					});
+				},
+				uploadFiles: function (fileUrl) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							_this.form.audio = ret.key;
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				voiceTouchstart: function () {
+					this.voiceGif = true;
+					api.startRecord({
+						path: 'fs://ziyue_' + (+new Date()) + '.amr'
+					});
+				},
+
+				voiceTouchend: function () {
+					var _this = this;
+					_this.voiceGif = false;
+					api.stopRecord(function (ret, err) {
+						if (ret) {
+							_this.audioDuration = ret.duration;
+							_this.form.audio_timer = ret.duration;
+							_this.audioUrl = ret.path;
+							_this.uploadFiles(ret.path);
+						}
+					});
+				},
+				// 播放语音
+				playVoice: function () {
+					var _this = this;
+					_this.audioIcon = '../image/playing.gif';
+					api.startPlay({
+						path: _this.audioUrl
+					}, function (ret, err) {
+						_this.audioIcon = '../image/stop.png';
+					});
+				},
+				deleteAudio: function () {
+					this.audioUrl = '';
+					this.form.audio = '';
+					this.form.audio_timer = '';
+				},
+				typeActionSheet: function (button, i) {
+					var _this = this;
+					api.actionSheet({
+						title: '',
+						cancelTitle: '取消',
+						destructiveTitle: '',
+						buttons: button
+					}, function (ret, err) {
+						if (ret) {
+							if (i == 0) {
+								_this.form.hand_require = ret.buttonIndex;
+								_this.yusuanTxt = button[ret.buttonIndex - 1];
+							}
+							if (i == 1) {
+								_this.form.Cost_requirements = ret.buttonIndex;
+								_this.feiyongTxt = button[ret.buttonIndex - 1];
+							}
+							if (i == 2) {
+								_this.form.threshold_requirement = ret.buttonIndex;
+								_this.menkuanTxt = button[ret.buttonIndex - 1];
+							}
+						}
+					});
+				},
+				openLabel: function (i, k) {
+					api.openWin({
+						name: 'label',
+						url: 'label.html',
+						slidBackEnabled: false,
+						pageParam: {
+							index: i,
+							sex: k
+						}
+					});
+				},
+				fabu: function () {
+					var _this = this;
+					var re = /^[0-9]+$/;
+					if (_this.form.audio == '') {
+						api.alert({
+							title: '提醒',
+							msg: '语音不能为空',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.audio_timer < 5) {
+						api.alert({
+							title: '提醒',
+							msg: '语音不能少于5秒',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.invite_obj == []) {
+						api.alert({
+							title: '提醒',
+							msg: '邀约对象未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.style == []) {
+						api.alert({
+							title: '提醒',
+							msg: '约会类型未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.adress == '') {
+						api.alert({
+							title: '提醒',
+							msg: '约会地点未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.time == '') {
+						api.alert({
+							title: '提醒',
+							msg: '约会时间未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.hand_require == '' || _this.form.hand_require == 8) {
+						api.alert({
+							title: '提醒',
+							msg: '费用预算未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.Cost_requirements == '' || _this.form.Cost_requirements == 4) {
+						api.alert({
+							title: '提醒',
+							msg: '支付方式未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.threshold_requirement == '' || _this.form.threshold_requirement == 6) {
+						api.alert({
+							title: '提醒',
+							msg: '门槛设定未选择',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.form.rule_require == '') {
+						api.alert({
+							title: '提醒',
+							msg: '约会描述不能为空',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					if (_this.myInfo.level == 0) {
+						api.confirm({
+							title: '提醒',
+							msg: ret.msg,
+							buttons: ['支付钻石发布', '成为VIP', ]
+						}, function (ret, err) {
+							if (ret.buttonIndex == 2) {
+								setTimeout(function () {
+									api.openWin({
+										name: 'my_vip',
+										url: 'my_vip.html',
+										slidBackEnabled: false
+									});
+								}, 1000);
+							} else if (ret.buttonIndex == 1) {
+								if (_this.myInfo.gold < 100) {
+									api.confirm({
+										title: '提醒',
+										msg: ret.msg,
+										buttons: ['立即充值', '免费获得钻石']
+									}, function (ret, err) {
+										if (ret.buttonIndex == 1) {
+											setTimeout(function () {
+												api.openWin({
+													name: 'recharge',
+													url: 'recharge.html',
+													slidBackEnabled: false
+												});
+											}, 1000);
+										}
+										if (ret.buttonIndex == 2) {
+											setTimeout(function () {
+												api.openWin({
+													name: 'share',
+													url: 'share.html',
+													slidBackEnabled: false
+												});
+											}, 1000);
+										}
+									});
+								} else {
+									api.showProgress({
+										title: '',
+										text: ''
+									});
+									$$.ajaxData('AskAboutAdd', _this.form, function (ret, err) {
+										api.hideProgress();
+										api.toast({
+											msg: ret.msg,
+											duration: 2000,
+											location: 'bottom'
+										});
+										if (ret.status) {
+											api.sendEvent({
+												name: 'refreshMYDate',
+											});
+											setTimeout(function () {
+												api.closeWin();
+											}, 2000);
+										}
+									})
+								}
+							}
+						});
+					}
+					if (_this.myInfo.level == 1) {
+						api.showProgress({
+							title: '',
+							text: ''
+						});
+						$$.ajaxData('AskAboutAdd', _this.form, function (ret, err) {
+							api.hideProgress();
+							if (ret.code == 201) {
+								api.confirm({
+									title: '提醒',
+									msg: ret.msg,
+									buttons: ['支付钻石发布', '取消']
+								}, function (ret, err) {
+									if (ret.buttonIndex == 1) {
+										_this.form.flag = 'pay';
+										_this.fabu();
+									}
+									if (ret.buttonIndex == 2) {
+										setTimeout(function () {
+											api.closeWin();
+										}, 1000);
+									}
+								});
+							}
+							if (ret.code == 200) {
+								api.toast({
+									msg: ret.msg,
+								});
+								api.sendEvent({
+									name: 'refreshMYDatelocal',
+								});
+								setTimeout(function () {
+									api.closeWin();
+								}, 2000);
+							}
+						})
+					}
+				}
+			}
+		})
+	}
+</script>
+
+</html>

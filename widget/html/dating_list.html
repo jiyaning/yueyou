@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>求约墙</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dating_list.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<nav id="nav" class="flex-wrap">
+			<span @click="tab(2)" :class="['menu',zIndex == 2 ? 'selected' : '']">同城</span>
+			<span @click="tab(1)" :class="['menu',zIndex == 1 ? 'selected' : '']">约游</span>
+			<span @click="tab(3)" :class="['menu',zIndex == 3 ? 'selected' : '']">约拍</span>
+			<span @click="tab(4)" :class="['menu',zIndex == 4 ? 'selected' : '']">红包约</span>
+		</nav>
+		<div id="main" class="flex-con">
+			<div id="yueyou" v-if="zIndex == 3" class="contentlistall">
+				<div v-for="(item, index) in list1" :key="item.id" class="content" @click="opendatedetails(item.id,1)">
+					<div class="top flex-wrap">
+						<div class="top-left">
+							<div class="box1" v-if="item.member != null">
+								<img :src="item.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="top-center" v-if="item.member != null">
+							<span class="name">{{item.member.name}}</span>
+							<p class="time1">{{item.created_at | timeFormat}}</p>
+						</div>
+						<div class="top-right">
+							<p>
+								<span class="sex sex1" v-if="item.sex==1">
+									<i class="iconfont icon-nan"></i>{{item.member.age}}
+								</span>
+								<span class="sex sex2" v-else>
+									<i class="iconfont icon-nv"></i>{{item.member.age}}
+								</span>
+								<span class="box33" v-if="item.sex==1">
+									<img :src="item.level_info.member_wealth_level_icon" alt="" style="height:80%;margin-bottom:-3px;" />
+								</span>
+								<span class="box33" v-else>
+									<img :src="item.level_info.member_charm_level_icon" alt="" style="height:150%;margin-bottom: -12px;margin-left: -6px;" />
+								</span>
+								<span class="box33" v-if="item.member.level == 1" style="margin-right: 4px">
+									<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;margin-left: -2px;">
+								</span>
+								<span class="box33" v-if="item.member.masterwork_identification == 6" style="margin:0  4px 0 -7px">
+									<img src="../image/ji.png" alt="" style="height:66%;margin-bottom: -2px">
+								</span>
+							</p>
+						</div>
+					</div>
+					<div class="info">
+						<div class="label">
+							<span>个人信息:</span>我在{{item.member.city}},今年{{item.member.age}}岁,
+						</div>
+						<div class="info2">
+							<span>身高{{item.member.height}}cm,</span><span style="padding-left: 0" v-if="item.member.occupation_s !=null && item.member.occupation_s !=''">职业是{{item.member.occupation_s[0].tag}}</span></div>
+						<div class="label">
+							<span>约拍地点:</span>{{item.adress}}</div>
+						<div class="label">
+							<span>邀约对象:</span>{{item.invite_obj_s}}</div>
+						<div class="label">
+							<span>约拍时间:</span>{{item.time}}</div>
+						<div class="label">
+							<span>费用预算:</span>{{button01[item.hand_require-1]}}</div>
+						<div class="label flex-wrap" style="justify-content:space-between;">
+							<span style="width:auto">费用支付:&nbsp;&nbsp;&nbsp;{{button1[item.Cost_requirements-1]}}</span>
+							<div class="right flex-wrap">
+								<span class="labeltitle">详情</span>
+								<i class="iconfont icon-xiangyou"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="yueyou" v-if="zIndex == 1" class="contentlistall">
+				<div v-for="(item2, index2) in list2" :key="item2.id" class="content" @click="opendatedetails(item2.id,2)">
+					<div class="top flex-wrap">
+						<div class="top-left">
+							<div class="box1" v-if="item2.member != null">
+								<img :src="item2.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="top-center" v-if="item2.member != null">
+							<span class="name">{{item2.member.name}}</span>
+							<p class="time1">{{item2.created_at | timeFormat}}</p>
+						</div>
+						<div class="top-right">
+							<p>
+								<span class="sex sex1" v-if="item2.sex==1">
+									<i class="iconfont icon-nan"></i>{{item2.member.age}}
+								</span>
+								<span class="sex sex2" v-else>
+									<i class="iconfont icon-nv"></i>{{item2.member.age}}
+								</span>
+								<span class="box33" v-if="item2.sex==1">
+									<img :src="item2.level_info.member_wealth_level_icon" alt="" style="height:80%;margin-bottom:-3px;" />
+								</span>
+								<span class="box33" v-else>
+									<img :src="item2.level_info.member_charm_level_icon" alt="" style="height:150%;margin-bottom: -12px;margin-left: -6px;" />
+								</span>
+								<span class="box33" v-if="item2.member.level == 1" style="margin-right: 4px">
+									<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;margin-left: -2px;">
+								</span>
+								<span class="box33" v-if="item2.member.masterwork_identification == 6" style="margin:0  4px 0 -7px">
+									<img src="../image/ji.png" alt="" style="height:66%;margin-bottom: -2px">
+								</span>
+							</p>
+						</div>
+					</div>
+					<div class="info">
+						<div class="label">
+							<span>个人信息:</span>我在{{item2.member.city}},今年{{item2.member.age}}岁,
+						</div>
+						<div class="info2">
+							<span>
+								身高{{item2.member.height}}cm,</span><span style="padding-left: 0" v-if="item2.member.occupation_s !=null && item2.member.occupation_s !=''">职业是{{item2.member.occupation_s[0].tag}}
+							</span></div>
+						<div class="label">
+							<span>约游地点:</span>{{item2.adress}}</div>
+						<div class="label">
+							<span>邀约对象:</span>{{item2.invite_obj_s}}</div>
+						<div class="label">
+							<span>出发时间:</span>{{item2.time}}&nbsp;&nbsp;&nbsp;&nbsp;总计{{item2.occupation}}天</div>
+						<div class="label">
+							<span>费用预算:</span>{{button02[item2.hand_require-1]}}</div>
+						<div class="label flex-wrap" style="justify-content:space-between;">
+							<span style="width:auto">费用支付:&nbsp;&nbsp;&nbsp;{{button2[item2.Cost_requirements-1]}}</span>
+							<div class="right flex-wrap">
+								<span class="labeltitle">详情</span>
+								<i class="iconfont icon-xiangyou"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="yueyou" v-if="zIndex == 2" class="contentlistall">
+				<div v-for="(item3, index3) in list3" :key="item3.id" class="content" @click="opendatedetails(item3.id,3)">
+					<div class="top flex-wrap">
+						<div class="top-left">
+							<div class="box1" v-if="item3.member != null">
+								<img :src="item3.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="top-center" v-if="item3.member != null">
+							<span class="name">{{item3.member.name}}</span>
+							<p class="time1">{{item3.created_at | timeFormat}}</p>
+						</div>
+						<div class="top-right">
+							<p>
+								<span class="sex sex1" v-if="item3.sex==1">
+									<i class="iconfont icon-nan"></i>{{item3.member.age}}
+								</span>
+								<span class="sex sex2" v-else>
+									<i class="iconfont icon-nv"></i>{{item3.member.age}}
+								</span>
+								<span class="box33" v-if="item3.sex==1">
+									<img :src="item3.level_info.member_wealth_level_icon" alt="" style="height:80%;margin-bottom:-3px;" />
+								</span>
+								<span class="box33" v-else>
+									<img :src="item3.level_info.member_charm_level_icon" alt="" style="height:150%;margin-bottom: -12px;margin-left: -6px;" />
+								</span>
+								<span class="box33" v-if="item3.member.level == 1" style="margin-right: 4px">
+									<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;margin-left: -2px;">
+								</span>
+								<span class="box33" v-if="item3.member.masterwork_identification == 6" style="margin:0  4px 0 -7px">
+									<img src="../image/ji.png" alt="" style="height:66%;margin-bottom: -2px">
+								</span>
+							</p>
+						</div>
+					</div>
+					<div class="info">
+						<div class="label">
+							<span>个人信息:</span>我在{{item3.member.city}},今年{{item3.member.age}}岁,
+						</div>
+						<div class="info2">
+							<span>身高{{item3.member.height}}cm,</span><span style="padding-left: 0" v-if="item3.member.occupation_s !=null && item3.member.occupation_s !=''">职业是{{item3.member.occupation_s[0].tag}}</span></div>
+						<div class="label">
+							<span>约会地点:</span>{{item3.adress}}</div>
+						<div class="label">
+							<span>邀约对象:</span>{{item3.invite_obj_s}}</div>
+						<div class="label">
+							<span>出发时间:</span>{{item3.time}}</div>
+						<div class="label">
+							<span>费用预算:</span>{{button03[item3.hand_require-1]}}</div>
+						<div class="label flex-wrap" style="justify-content:space-between;">
+							<span style="width:auto">费用支付:&nbsp;&nbsp;&nbsp;{{button2[item3.Cost_requirements-1]}}</span>
+							<div class="right flex-wrap">
+								<span class="labeltitle">详情</span>
+								<i class="iconfont icon-xiangyou"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="contentlistall">
+				<div id="renwu" v-if="zIndex == 4" v-for="(item4, index4) in list4" :key="item4.id" class="content" style="padding-bottom:0">
+					<div class="top flex-wrap">
+						<div class="top-left">
+							<div class="box1" v-if="item4.member != null">
+								<img :src="item4.member.avatar" alt="">
+							</div>
+						</div>
+						<div class="top-center" v-if="item4.member != null">
+							<span class="name">{{item4.member.name}}</span>
+							<p class="time1">{{item4.created_at | timeFormat}}</p>
+						</div>
+						<div class="top-right">
+							<p>
+								<span class="sex sex1" v-if="item4.sex==1">
+									<i class="iconfont icon-nan"></i>{{item4.member.age}}
+								</span>
+								<span class="sex sex2" v-else>
+									<i class="iconfont icon-nv"></i>{{item4.member.age}}
+								</span>
+								<span class="box33" v-if="item4.sex==1">
+									<img :src="item4.level_info.member_wealth_level_icon" alt="" style="height:80%;margin-bottom:-3px;" />
+								</span>
+								<span class="box33" v-else>
+									<img :src="item4.level_info.member_charm_level_icon" alt="" style="height:150%;margin-bottom: -12px;margin-left: -6px;" />
+								</span>
+								<span class="box33" v-if="item4.member.level == 1" style="margin-right: 4px">
+									<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;margin-left: -2px;">
+								</span>
+								<span class="box33" v-if="item4.member.masterwork_identification == 6" style="margin:0  4px 0 -7px">
+									<img src="../image/ji.png" alt="" style="height:66%;margin-bottom: -2px">
+								</span>
+							</p>
+						</div>
+					</div>
+					<div class="envelopeList">
+						<div class="money">
+							<span>{{item4.gift.gold}}</span><img src="../image/zuanshi.png" alt="">
+						</div>
+						<div class="label">
+							<span>{{item4.gift.name}}</span>
+						</div>
+						<div class="btn" v-if="item4.red_pack !=0 && item4.red_status !=1" @click="getredpack(index4)">
+							<img src="../image/get1.png" alt="">
+						</div>
+						<div class="btn" v-if="item4.red_pack != 0 && item4.red_status ==1">
+							<img src="../image/geted.png" alt="">
+						</div>
+						<div class="btn" v-if="item4.red_pack == 0">
+							<img src="../image/redpackend.png" alt="">
+						</div>
+						<div class="title">
+							<span>子约红包</span>
+						</div>
+					</div>
+					<div class="help">
+						<span @click="helpshow(index4)">{{title1}}</span>
+						<div class="getlist" @click="opengetlist(item4.id,item4.red_pack,item4.gift.gold)">
+							<span>查看领取详情</span>
+						</div>
+					</div>
+					<div class="helplist" v-if="item4.helplist == true">
+						<p>1、发布红包约之后，抢红包者需按你的任务与时间要求完成任务。</p>
+						<p>2、如遇到未完成者，请及时举报投诉，我们将为您追回损失，并给予违约者处罚，给予你等同于红包价值的50%补偿。</p>
+						<p @click="play">3、更多详情请参考玩转攻略-特权。</p>
+						<p style="line-height:30px;color:#000;text-align: center"><span @click="helphide(index4)">收回</span></p>
+					</div>
+				</div>
+			</div>
+			<div class="envelope" v-show="envelopeShow">
+				<span class="cha" @click="redpackhide()">
+					<i class="iconfont icon-fork"></i>
+				</span>
+				<div class="list">
+					<p style="height: 200px;"></p>
+					<p><span>{{gift_gold}}</span><img src="../image/zuanshi.png" alt=""></p>
+					<p>恭喜你，抢到任务红包</p>
+					<p>完成时间：{{gift_time}}</p>
+					<p @click="redpackhide()">快去完成任务吧</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		app = new Vue({
+			el: '#app',
+			data: {
+				zIndex: 1,
+				list1: [],
+				list2: [],
+				list3: [],
+				list4: [],
+				button01: ['100元及以下', '200元', '500元', '500元以上', '私聊协商', ],
+				button02: ['1000元及以下', '1000-3000元', '3000-5000元', '5000-10000元', '10000元以上', '视情况定'],
+				button03: ['100元及以下', '100-300元', '300-500元', '500-800元', '800-1500元', '1500元以上', '视情况定', ],
+				button1: ['收模特费', '收摄影师费', '互免', '私聊协商'],
+				button2: ['我付', '对方付', '私聊协商'],
+				envelopeShow: false,
+				title1: '红包约规则>>>',
+				sex: '',
+				gift_gold: '',
+				gift_time: '',
+				page1: 1,
+				page2: 1,
+				page3: 1,
+				page4: 1,
+			},
+			created: function () {
+				var _this = this;
+				api.setRefreshHeaderInfo({
+					bgColor: '#141414',
+					textColor: '#fff',
+					textDown: '下拉刷新...',
+					textUp: '松开刷新...'
+				}, function (ret, err) {
+					if (!!$api.getStorage('token')) {
+						setTimeout(function () {
+							_this.page1 = 1;
+							_this.page2 = 1;
+							_this.page3 = 1;
+							_this.page4 = 1;
+							_this.list1 = [];
+							_this.list2 = [];
+							_this.list3 = [];
+							_this.list4 = [];
+							_this.getList1();
+							_this.getList2();
+							_this.getList3();
+							_this.getList4();
+						}, 1000);
+					}
+				});
+				api.addEventListener({
+					name: 'scrolltobottom',
+					extra: {
+						threshold: 0
+					}
+				}, function (ret, err) {
+					_this.getList1();
+					_this.getList2();
+					_this.getList3();
+					_this.getList4();
+				});
+				api.addEventListener({
+					name: 'sexlovingDateType'
+				}, function (ret, err) {
+					_this.sex = ret.value.sex;
+					_this.list1 = [];
+					_this.getList1();
+				});
+				api.addEventListener({
+					name: 'refreshMYDateredpack'
+				}, function (ret, err) {
+					_this.page4 = 1;
+					_this.list4 = [];
+					_this.getList4();
+				});
+				api.addEventListener({
+					name: 'refreshMYDatelocal'
+				}, function (ret, err) {
+					_this.page2 = 1;
+					_this.list2 = [];
+					_this.getList2();
+				});
+				api.addEventListener({
+					name: 'refreshMYDatephone'
+				}, function (ret, err) {
+					_this.page3 = 1;
+					_this.list3 = [];
+					_this.getList3();
+				});
+				api.addEventListener({
+					name: 'refreshMYDateplay'
+				}, function (ret, err) {
+					_this.page1 = 1;
+					_this.list1 = [];
+					_this.getList1();
+				});
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getList1();
+			},
+			methods: {
+				getList4: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutList', {
+						uid: $api.getStorage('uid'),
+						type: 4,
+						sex: _this.sex,
+						page: _this.page4,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.refreshHeaderLoadDone();
+							api.hideProgress();
+							if (ret.data.data.length != 0) {
+								_this.page4++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.list4.push({
+										id: ret.data.data[i].id,
+										sex: ret.data.data[i].sex,
+										member: ret.data.data[i].member,
+										red_pack: ret.data.data[i].red_pack,
+										red_status: ret.data.data[i].red_status,
+										created_at: ret.data.data[i].created_at,
+										timeFormat: ret.data.data[i].timeFormat,
+										level_info: ret.data.data[i].level_info,
+										gift: ret.data.data[i].gift,
+										helplist: false,
+									})
+								}
+							}
+						}
+					})
+				},
+				getList1: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutList', {
+						uid: $api.getStorage('uid'),
+						type: 1,
+						sex: _this.sex,
+						page: _this.page1,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.refreshHeaderLoadDone();
+							api.hideProgress();
+							if (ret.data.data.length != 0) {
+								_this.page1++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.list2.push(ret.data.data[i]);
+								}
+							}
+						}
+					})
+				},
+				getList2: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutList', {
+						uid: $api.getStorage('uid'),
+						type: 2,
+						sex: _this.sex,
+						page: _this.page2,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.refreshHeaderLoadDone();
+							api.hideProgress();
+							if (ret.data.data.length != 0) {
+								_this.page2++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.list3.push(ret.data.data[i]);
+								}
+							}
+						}
+					})
+				},
+				getList3: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutList', {
+						uid: $api.getStorage('uid'),
+						type: 3,
+						sex: _this.sex,
+						page: _this.page3,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.refreshHeaderLoadDone();
+							api.hideProgress();
+							if (ret.data.data.length != 0) {
+								_this.page3++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.list1.push(ret.data.data[i]);
+								}
+							}
+						}
+					})
+				},
+				getredpack: function (i) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAbouSelectRed', {
+						uid: $api.getStorage('uid'),
+						meet_id: _this.list4[i].id,
+						gift_id: _this.list4[i].gift.id,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.code == '202') {
+							api.alert({
+								title: '提醒',
+								msg: ret.msg,
+								buttons: ['知道了']
+							});
+							_this.getList4;
+						}
+						if (ret.code == '201') {
+							api.alert({
+								title: '提醒',
+								msg: ret.msg,
+								buttons: ['购买Vip']
+							}, function (ret, err) {
+								if (ret.buttonIndex == 1) {
+									setTimeout(function () {
+										api.openWin({
+											name: 'my_vip',
+											url: 'my_vip.html',
+											slidBackEnabled: false
+										});
+									}, 1000);
+								}
+							});
+						}
+						if (ret.code == '208') {
+							api.alert({
+								title: '提醒',
+								msg: '对方设定必须异性才能抢红包',
+								buttons: ['知道了']
+							});
+						}
+						if (ret.code == '200') {
+							_this.gift_gold = _this.list4[i].gift.gold;
+							_this.gift_time = _this.list4[i].time;
+							_this.envelopeShow = true;
+							_this.getList4;
+						}
+					})
+				},
+				opengetlist: function (id, pack, gold) {
+					api.openWin({
+						name: 'getredpacklist',
+						url: 'getredpacklist.html',
+						bounces: false,
+						pageParam: {
+							meet_id: id,
+							red_pack: pack,
+							gift_gold: gold,
+						}
+					});
+				},
+				redpackhide: function (i) {
+					var _this = this;
+					_this.envelopeShow = false;
+				},
+				tab: function (i) {
+					var _this = this;
+					if (i == 1) {
+						_this.zIndex = 1;
+						_this.getList1();
+					} else if (i == 2) {
+						_this.zIndex = 2;
+						_this.getList2();
+					} else if (i == 3) {
+						_this.zIndex = 3;
+						_this.getList3();
+					} else if (i == 4) {
+						_this.zIndex = 4;
+						_this.getList4();
+					}
+				},
+				helpshow: function (i) {
+					var _this = this;
+					_this.list4[i].helplist = true;
+				},
+				helphide: function (i) {
+					var _this = this;
+					_this.list4[i].helplist = false;
+				},
+				play: function () {
+					api.openWin({
+						name: 'play_strategy',
+						url: 'play_strategy.html',
+						bounces: false
+					});
+				},
+				opendatedetails: function (id, type) {
+					api.openWin({
+						name: 'dating_details',
+						url: 'dating_details.html',
+						bounces: false,
+						pageParam: {
+							id: id,
+							type: type
+						}
+					});
+				},
+				qiang: function (item) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('AskAboutList', {
+						uid: $api.getStorage('uid'),
+						type: 4
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.code == '200') {
+							api.toast({
+								msg: '抢到了',
+								duration: 2000,
+								location: 'bottom'
+							});
+						} else if (ret.code == '205') {
+							api.toast({
+								msg: '你们还不是密友，赶快去给Ta送礼物成为密友噢',
+								duration: 2000,
+								location: 'bottom'
+							});
+							var _this = this;
+							var tempExtra = {
+								fromId: $api.getStorage('uid'),
+								fromName: $api.getStorage('uname'),
+								fromAvatar: $api.getStorage('uavatar'),
+								toId: item.member_id,
+								toName: item.member.name,
+								toAvatar: item.member.avatar,
+							}
+							setTimeout(function () {
+								api.openWin({
+									name: 'im',
+									url: 'im.html',
+									pageParam: tempExtra
+								});
+							}, 2000);
+							return false;
+						} else if (ret.code == '206') {
+							api.alert({
+								title: '提醒',
+								msg: '您还没有开通VIP，无法约Ta',
+								buttons: ['开通VIP']
+							}, function (ret, err) {
+								if (ret.buttonIndex == 1) {
+									setTimeout(function () {
+										api.openWin({
+											name: 'my_vip',
+											url: 'my_vip.html',
+											slidBackEnabled: false
+										});
+									}, 1000);
+								}
+							});
+							return false;
+						} else {
+							api.toast({
+								msg: ret.msg,
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					})
+				},
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime,
+						result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>

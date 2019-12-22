@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>价格设置</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/moneyset.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">价格设置</h1>
+				</div>
+			</header>
+			<div id="main" class="flex-con">
+				<div class="label">
+					<span class="box"><i class="iconfont icon-call"></i></span>
+					<span>语音报价:</span><input v-model="audio_price" type="text" placeholder="请输入语音报价"><span>钻石/分钟</span>
+				</div>
+				<div class="beizhu">
+					<p>1、{{moneyinfolist1[0].introduction}}</p>
+					<p>2、{{moneyinfolist1[1].introduction}}</p>
+					<div class="list1" v-show="list1Show">
+						<p>3、{{moneyinfolist1[2].k}}</p>
+						<p>4、{{moneyinfolist1[3].k}}</p>
+						<p>5、{{moneyinfolist1[4].k}}</p>
+						<p>6、{{moneyinfolist1[5].k}}</p>
+						<p>7、请设置合理价格，让更多人给你打电话送礼物</p>
+						<p @click="list1hide" class="list" style="text-align:center">收回</p>
+					</div>
+					<p @click="list1" class="list">{{title1}}</p>
+					<div class="btn">
+						<button @click="moneySet()" id="submit-btn" type="button">确定</button>
+					</div>
+				</div>
+				<div class="label">
+					<span class="box2">
+						<i class="iconfont icon-weixin"></i>
+					</span>
+					<span>微信报价:</span><input v-model="wechat_price" type="text" placeholder="请输入微信报价"><span>钻石</span>
+				</div>
+				<div class="beizhu">
+					<p>1、{{moneyinfolist2[0].introduction}}</p>
+					<p>2、{{moneyinfolist2[1].introduction}}</p>
+					<div class="list2" v-show="list2Show">
+						<p>3、{{moneyinfolist2[2].k}}</p>
+						<p>4、{{moneyinfolist2[3].k}}</p>
+						<p>5、{{moneyinfolist2[4].k}}</p>
+						<p>6、{{moneyinfolist2[5].k}}</p>
+						<p @click="list2hide" class="list" style="text-align:center">收回</p>
+					</div>
+					<p @click="list2" class="list">{{title2}}</p>
+					<div class="btn">
+						<button @click="moneySet1()" id="submit-btn" type="button">确定</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				audio_price: api.pageParam.price,
+				wechat_price: api.pageParam.wechat_price,
+				list1Show: false,
+				list2Show: false,
+				title1: '查看更多规则 >>>',
+				title2: '查看更多规则 >>>',
+				moneyinfolist1: [{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+				],
+				moneyinfolist2: [{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+					{
+						k: '',
+						introduction: '',
+					},
+				],
+			},
+			mounted: function () {
+				var _this = this;
+				_this.moneyinfo1();
+				_this.moneyinfo2();
+			},
+			methods: {
+				moneyinfo1: function () {
+					var _this = this;
+					$$.ajaxData('MyPrice', {
+						uid: $api.getStorage('uid'),
+						introduction: 'audio_introduction',
+						audio_price: '',
+						wechat_price: '',
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							_this.moneyinfolist1 = ret.data;
+						}
+					})
+				},
+				moneyinfo2: function () {
+					var _this = this;
+					$$.ajaxData('MyPrice', {
+						uid: $api.getStorage('uid'),
+						introduction: 'wechat_introduction',
+						audio_price: '',
+						wechat_price: '',
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							_this.moneyinfolist2 = ret.data;
+						}
+					})
+				},
+				moneySet: function () {
+					var _this = this;
+					if (this.audio_price == '') {
+						api.toast({
+							msg: '语音报价不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (!(/(^[1-9]\d*$)/.test(this.audio_price))) {
+						api.toast({
+							msg: '请输入整数语音报价',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyPrice', {
+						uid: $api.getStorage('uid'),
+						audio_price: _this.audio_price,
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							api.sendEvent({
+								name: 'refreshMy',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+					})
+				},
+				moneySet1: function () {
+					var _this = this;
+					if (this.wechat_price == '') {
+						api.toast({
+							msg: '微信报价不能为空',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					if (!(/(^[1-9]\d*$)/.test(this.wechat_price))) {
+						api.toast({
+							msg: '请输入整数微信报价',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyPrice', {
+						uid: $api.getStorage('uid'),
+						wechat_price: _this.wechat_price,
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+							duration: 2000,
+							location: 'bottom'
+						});
+						if (ret.status) {
+							api.sendEvent({
+								name: 'refreshMy',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 1000);
+						}
+					})
+				},
+				list1: function () {
+					this.list1Show = true;
+					this.title1 = ""
+				},
+				list2: function () {
+					this.list2Show = true;
+					this.title2 = ""
+				},
+				list1hide: function () {
+					this.list1Show = false;
+					this.title1 = "查看更多 >>>"
+				},
+				list2hide: function () {
+					this.list2Show = false;
+					this.title2 = "查看更多 >>>"
+				}
+			}
+		})
+	}
+</script>
+
+</html>

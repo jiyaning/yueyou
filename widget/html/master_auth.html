@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>极品认证</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/label.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="wrap" class="flex-wrap flex-vertical">
+      <header id="header">
+        <div class="header-wrap">
+          <div class="header-left">
+            <i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+          </div>
+          <div class="title">极品认证</div>
+        </div>
+      </header>
+      <div class="label flex-con" style="margin-top:30px;">
+        <span @click="selectLabel(index,item)" :class="[zIndex == index ? 'selectLabel' : '']" v-for="(item,index) in button"
+          :key="item.id">{{item.name}}</span>
+      </div>
+      <p>请选择1个标签进行认证</p>
+      <p class="helptitle" style="margin:0">认证流程:<span style="color:#ff4744">(必看)</span></p>
+      <p style="margin:2px 0">1、选择一项你认为最贴近你的极品认证标签</p>
+      <p style="margin:2px 0">2、添加官方微信：ziyuerz，验证信息请输入：申请极品认证+你的约ID，若已添加请勿重复添加</p>
+      <p style="margin:2px 0">3、提交认证，等待审核</p>
+      <div class="btn-wrap">
+        <button @click="authBtn" class="btn1" id="submit-btn" type="button">提交认证</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    app = new Vue({
+      el: '#app',
+      data: {
+        zIndex: 0,
+        masterwork: 1,
+        button: [{
+          id: 1,
+          name: '颜艺双馨'
+        }, {
+          id: 2,
+          name: '飙车司机'
+        }, {
+          id: 3,
+          name: '知性红颜'
+        }, {
+          id: 4,
+          name: '轻柔易推'
+        }, {
+          id: 5,
+          name: '全能头牌'
+        }],
+      },
+      created: function () {},
+      mounted: function () {},
+      methods: {
+        authBtn: function () {
+          var _this = this;
+          $$.ajaxData('MyAuthentication', {
+            uid: $api.getStorage('uid'),
+            masterwork: _this.masterwork
+          }, function (ret, err) {
+            if (ret.status) {
+              api.toast({
+                msg: ret.msg,
+                duration: 2000,
+                location: 'bottom'
+              });
+              api.sendEvent({
+                name: 'refreshMyAuth',
+              });
+              setTimeout(function () {
+                api.closeWin();
+              }, 1000);
+            }
+          })
+        },
+        selectLabel: function (index, item) {
+          var _this = this;
+          _this.zIndex = index;
+          _this.masterwork = item.id;
+        },
+      },
+    })
+  }
+</script>

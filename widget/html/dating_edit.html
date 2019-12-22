@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>求约发布</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/date_edit.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<div class="title">求约发布</div>
+					<div class="header-right">
+						<span @click="opendatinghelp()">帮助</span>
+					</div>
+				</div>
+			</header>
+			<nav id="nav">
+				<span v-for="(item, i) in date_frames" :key="i" :class="['menu', index2 == i ? 'selected' : '']" tapmode @click="randomSwitchBtn(i);">{{item.title}}</span>
+			</nav>
+			<div class="main-content flex-con"></div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light'
+		});
+		app = new Vue({
+			el: '#app',
+			data: {
+				date_frames: [
+				{
+					name: 'dating_local_edit',
+					title: '同城',
+					url: 'dating_local_edit.html',
+					bounces: true
+				},
+				{
+					name: 'dating_play_edit',
+					title: '约游',
+					url: 'dating_play_edit.html',
+					bounces: true
+				},
+					{
+					name: 'dating_phone_edit',
+					title: '约拍',
+					url: 'dating_phone_edit.html',
+					bounces: true
+				},
+				{
+					name: 'dating_envelope_edit',
+					title: '红包约',
+					url: 'dating_envelope_edit.html',
+					bounces: true
+				}],
+				index2: !!$api.getStorage('index2') ? $api.getStorage('index2') : 0,
+			},
+			created: function () {
+			},
+			mounted: function () {
+				this.funIniGroup();
+			},
+			methods: {
+				funIniGroup: function () {
+					var ect = $api.offset($api.dom('.main-content'));
+					api.openFrameGroup({
+						name: 'group2',
+						scrollEnabled: false,
+						rect: {
+							x: 0,
+							y: ect.t,
+							w: api.winWidth,
+							h: ect.h
+						},
+						index: this.index2,
+						frames: this.date_frames
+					}, function (ret, err) {
+
+					});
+				},
+				opendatinghelp: function () {
+					api.alert({
+						title: '帮助',
+						msg: 'VIP赠送免费求约发布机会，非VIP发布求约需收钻石，严禁涉黄、涉暴力与政治，打造绿色约会。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				randomSwitchBtn: function (index2) {
+					if (index2 == this.index2) {
+						return false;
+					} else {
+						this.index2 = index2;
+						$api.setStorage('index2', index2);
+						api.setFrameGroupIndex({
+							name: 'group2',
+							index: index2
+						});
+					}
+				},
+			},
+		})
+	}
+</script>
+
+</html>

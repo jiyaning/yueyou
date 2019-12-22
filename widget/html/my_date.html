@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的求约</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/dating_list.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的求约</h1>
+					<div class="header-right">
+						<i class="iconfont icon-fabu4" @click="opendateedit()"></i>
+					</div>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="contentlistall" style="padding-top:64px">
+					<div id="yueyou" v-for="(item, index) in list" v-if="item.type != 4" :key="item.id" class="content">
+						<div class="top flex-wrap">
+							<div class="top-left">
+								<div class="box1" v-if="item.member != null">
+									<img :src="item.member.avatar" alt="">
+								</div>
+							</div>
+							<div class="top-center" v-if="item.member != null">
+								<span class="name">{{item.member.name}}</span>
+								<p class="time1">{{item.created_at | timeFormat}}</p>
+							</div>
+							<div class="top-right">
+								<p>
+									<span class="sex sex1" v-if="item.sex==1">
+										<i class="iconfont icon-nan"></i>{{item.member.age}}
+									</span>
+									<span class="sex sex2" v-else>
+										<i class="iconfont icon-nv"></i>{{item.member.age}}
+									</span>
+									<span class="box33" v-if="item.member.level == 1" style="margin-right: 4px">
+										<img class="vip1" src="../image/VIP.png" alt="" style="height:70%;margin-bottom: -2px;margin-left: -2px;">
+									</span>
+								</p>
+							</div>
+						</div>
+						<div class="info">
+							<div class="label">
+								<span>个人信息:</span>我在{{item.member.city}},今年{{item.member.age}}岁,
+							</div>
+							<div class="info2">
+								<span>身高{{item.member.height}}cm,</span><span style="padding-left: 0" v-if="item.member.occupation_s !=null && item.member.occupation_s !=''">职业是{{item.member.occupation_s[0].tag}}</span>
+							</div>
+							<div class="label">
+								<span v-if="item.type == 1">约游类型:</span><span v-if="item.type == 2">约会类型:</span><span v-if="item.type == 3">约拍风格:</span>{{item.styles}}
+							</div>
+							<div class="label">
+								<span v-if="item.type == 1">约游时间:</span><span v-if="item.type == 2">约会时间:</span><span v-if="item.type == 3">约拍时间:</span>{{item.time}}
+							</div>
+							<div class="label flex-wrap" style="justify-content:space-between;">
+								<span style="width:auto" v-if="item.type == 1">约游地点:&nbsp;&nbsp;&nbsp;{{item.adress}}</span>
+								<span style="width:auto" v-if="item.type == 2">约会地点:&nbsp;&nbsp;&nbsp;{{item.adress}}</span>
+								<span style="width:auto" v-if="item.type == 3">约拍地点:&nbsp;&nbsp;&nbsp;{{item.adress}}</span>
+								<span class="right" @click="opendatedetails(item.id,item.member_id,item.type)">详情<i class="iconfont icon-xiangyou"></i></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light'
+		});
+		app = new Vue({
+			el: '#app',
+			data: {
+				uid: '',
+				list: [],
+				page: 1,
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'refreshMYDate'
+				}, function (ret, err) {
+					_this.page = 1;
+					_this.list = [];
+					_this.getList();
+				});
+				api.addEventListener({
+					name: 'mydatedel'
+				}, function (ret, err) {
+					_this.page = 1;
+					_this.list = [];
+					_this.getList();
+				});
+				api.setRefreshHeaderInfo({
+					bgColor: '#141414',
+					textColor: '#fff',
+					textDown: '下拉刷新...',
+					textUp: '松开刷新...',
+				}, function (ret, err) {
+					if (!!$api.getStorage('token')) {
+						setTimeout(function () {
+							_this.page = 1;
+							_this.list = [];
+							_this.getList();
+						}, 1000);
+					}
+				});
+				api.addEventListener({
+					name: 'scrolltobottom',
+					extra: {
+						threshold: 0
+					}
+				}, function (ret, err) {
+					_this.getList();
+				});
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getList();
+			},
+			methods: {
+				getList: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (api.pageParam.id == '') {
+						_this.uid = $api.getStorage('uid');
+					} else {
+						_this.uid = api.pageParam.id;
+					}
+					$$.ajaxData('MyMeet', {
+						uid: _this.uid,
+						page: _this.page,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.refreshHeaderLoadDone();
+							api.hideProgress();
+							if (ret.data.data.length != 0) {
+								_this.page++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.list.push(ret.data.data[i]);
+								}
+							} else {
+								api.toast({
+									msg: '没有更多了',
+								});
+								return false;
+							}
+						}
+					})
+				},
+				// 编辑（发布）
+				opendateedit: function () {
+					api.openWin({
+						name: 'dating_edit',
+						url: 'dating_edit.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+				opendatedetails: function (id, member_id, type) {
+					api.openWin({
+						name: 'dating_details1',
+						url: 'dating_details1.html',
+						bounces: false,
+						pageParam: {
+							id: id,
+							member_id: member_id,
+							type: type,
+						}
+					});
+				}
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>
+
+</html>

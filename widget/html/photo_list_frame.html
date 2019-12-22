@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>相册</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/images_list.css" />
+</head>
+
+<body>
+
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    var app;
+    apiready = function() {
+        app = new Vue({
+            el: '#app',
+            data: {
+                photoslist: [{
+                    photo: "../image/img1.png",
+                }, {
+                    photo: "../image/img2.png",
+                }, {
+                    photo: "../image/img3.png",
+                }],
+                allphotos: [{
+                    photo: "../image/img1.png",
+                }, {
+                    photo: "../image/img2.png",
+                }, {
+                    photo: "../image/img3.png",
+                }],
+            },
+            mounted: function() {
+                this.photos();
+            },
+            methods: {
+                // 后退
+                goback: function() {
+                    api.closeWin();
+                },
+                photos: function() {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+
+                    $$.ajaxData('MyPhoto', {
+                        uid: api.pageParam.member_id,
+                        type: 'photo',
+                    }, function(ret, err) {
+                        if (ret.status) {
+                            api.hideProgress();
+                            _this.photoslist = ret.data.data;
+                            for (i = 0; i < _this.photoslist.length; i++) {
+                                _this.allphotos.push(_this.photoslist[i].photo);
+                            }
+                            var photoBrowser = api.require('photoBrowser');
+                            photoBrowser.open({
+                                images: _this.allphotos,
+                                activeIndex: api.pageParam.id,
+                                placeholderImg: 'widget://res/img/apicloud.png', //当加载网络图片时显示的占位图路径
+                                bgColor: '#000'
+                            }, function(ret, err) {
+                                if (ret) {} else {
+                                    alert(JSON.stringify());
+                                }
+                            });
+                        }
+                    })
+                },
+            },
+
+        })
+
+
+    }
+</script>
+
+</html>

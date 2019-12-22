@@ -1,0 +1,351 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>登录</title>
+	<link rel="stylesheet" type="text/css" href="css/api.css" />
+	<link rel="stylesheet" type="text/css" href="css/register.css" />
+</head>
+
+<body>
+	<div id="app">
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<h1 class="title">登录</h1>
+				</div>
+			</header>
+			<div id="main" class="flex-con">
+				<div class="form-wrap">
+					<div class="form-item flex-wrap">
+						<i class="iconfont icon-shouji"></i>
+						<input v-model="mobile" class="flex-con" type="tel" placeholder="请输入手机号码">
+					</div>
+					<div class="form-item flex-wrap">
+						<i class="iconfont icon-mima"></i>
+						<input v-model="password" class="flex-con" type="password" placeholder="请输入密码">
+					</div>
+					<div class="btn-wrap">
+						<button @click="login" id="submit-btn" type="button">立即登录</button>
+					</div>
+				</div>
+				<p style="color:#868282;text-align:center;"><span style="width:65px;height:10px;border-bottom:1px solid #3c2c6d;margin-right: 20px;margin-bottom: 5px;"></span><span>还可以选择以下账号登录</span><span style="width:65px;height:10px;border-bottom:1px solid #3c2c6d;margin-left: 20px;margin-bottom: 5px;"></span></p>
+				<div class="login-wrap flex-wrap">
+					<div @click="openWeixin" class="imgbox" href="javascript:;">
+						<img src="image/login_wexin.png" alt="">
+					</div>
+					<div @click="openQQ" class="imgbox" href="javascript:;">
+						<img src="image/login_qq.png" alt="" style="height:88%;">
+					</div>
+				</div>
+				<div class="agreement-wrap" style="bottom:60px;">
+					<span style="color:#573e84;">登录即表示您同意</span><a href="javascript:;">《用户协议》</a>
+				</div>
+				<div class="agreement-wrap flex-wrap" style="justify-content:space-around;">
+					<a @click="forgetpwd" href="javascript:;">忘记密码?</a>
+					<a @click="openRegister" class="register-link" href="javascript:;">还没有账号？立即注册</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="script/api.js"></script>
+<script type="text/javascript" src="script/vue.js"></script>
+<script type="text/javascript" src="script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light'
+		});
+		if (!!$api.getStorage('uid')) {
+			api.openWin({
+				name: 'main',
+				url: 'html/main.html',
+				slidBackEnabled: false
+			});
+		}
+		app = new Vue({
+			el: '#app',
+			data: {
+				mobile: '',
+				password: '',
+				curHomeBackTriggerTimes: 1,
+				maxHomeBackTriggerTimes: 2,
+			},
+			created: function () {
+				$api.setStorage('channel', '0');
+				$api.setStorage('tuid', '0');
+				var shareinstall = api.require('shareinstall');
+				shareinstall.getInstall({}, function (ret, err) {
+					if (ret && ret.channel) {
+						$api.setStorage('channel', ret.channel);
+					}
+					if (ret && ret.tuid) {
+						$api.setStorage('tuid', ret.tuid);
+					}
+				});
+			},
+			mounted: function () {
+				this.androidFinishApp();
+			},
+			methods: {
+				// 点击返回两次退出应用
+				androidFinishApp: function () {
+					var _this = this;
+					api.addEventListener({
+						name: 'keyback'
+					}, function (ret, err) {
+						if (_this.curHomeBackTriggerTimes === _this.maxHomeBackTriggerTimes) {
+							api.closeWidget({
+								id: api.appId,
+								silent: true
+							});
+						} else {
+							api.toast({
+								msg: api.appName + '：再按一次退出应用'
+							})
+						}
+						_this.curHomeBackTriggerTimes++;
+						setTimeout(function () {
+							_this.curHomeBackTriggerTimes--;
+						}, 2000);
+					});
+				},
+				openRegister: function () {
+					api.openWin({
+						name: 'register',
+						url: 'html/register.html',
+						slidBackEnabled: false
+					});
+				},
+				forgetpwd: function () {
+					api.openWin({
+						name: 'forgetpwd',
+						url: 'html/forgetpwd.html',
+						slidBackEnabled: false
+					});
+				},
+				login: function () {
+					var _this = this;
+					var regex = /^(?=\d{11}$)^1(?:3\d|4[57]|5[^4\D]|66|7[^249\D]|8\d|9[89])\d{8}$/g;
+					if (!regex.test(_this.mobile)) {
+						api.toast({
+							msg: '请输入正确的手机号码',
+						});
+						return false;
+					}
+					if (_this.password == '') {
+						api.toast({
+							msg: '密码不能为空',
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Login', {
+						mobile: _this.mobile,
+						password: _this.password,
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg
+						});
+						if (ret.status) {
+							_this.mobile = '';
+							_this.password = '';
+							var token = JSON.parse(ret.data.token).code == 200 ? JSON.parse(ret.data.token).token : '';
+							$api.setStorage('uid', ret.data.id);
+							$api.setStorage('uname', ret.data.name);
+							$api.setStorage('uavatar', ret.data.avatar);
+							$api.setStorage('umobile', ret.data.email);
+							$api.setStorage('token', token);
+							setTimeout(function () {
+								api.openWin({
+									name: 'main',
+									url: 'html/main.html',
+									slidBackEnabled: false
+								});
+							}, 1000);
+						}
+					})
+				},
+				// 微信登录
+				openWeixin: function () {
+					var wx = api.require('wx');
+					wx.isInstalled(function (ret, err) {
+						if (ret.installed) {
+							api.showProgress({
+								animationType: '',
+								title: '',
+								text: '加载中...'
+							});
+							wx.auth(function (ret, err) {
+								if (ret.status) {
+									wx.getToken({
+										code: ret.code
+									}, function (ret2, err2) {
+										if (ret2.status) {
+											wx.getUserInfo({
+												accessToken: ret2.accessToken,
+												openId: ret2.openId
+											}, function (ret3, err3) {
+												var city;
+												if (ret3.province == '') {
+													city = !!ret3.city ? ret3.city : '';
+												} else {
+													city = ret3.province + (!!ret3.city ? ('-' + ret3.city) : '');
+												}
+												if (ret3.status) {
+													$$.ajaxData('ThirdPartyLogin', {
+														type: '2',
+														openid: ret3.openid,
+														name: ret3.nickname,
+														sex: ret3.sex,
+														city: city,
+														headimgurl: ret3.headimgurl,
+														cid: '0',
+														tid: '0',
+													}, function (ret4, err4) {
+														api.hideProgress();
+														api.toast({
+															msg: ret4.msg
+														});
+														if (ret4.status) {
+															var token = JSON.parse(ret4.data.token).code == 200 ? JSON.parse(ret4.data.token).token :
+																'';
+															$api.setStorage('uid', ret4.data.id);
+															$api.setStorage('uname', ret4.data.name);
+															$api.setStorage('uavatar', ret4.data.avatar);
+															$api.setStorage('umobile', ret4.data.email);
+															$api.setStorage('token', token);
+															setTimeout(function () {
+																api.openWin({
+																	name: 'main',
+																	url: 'html/main.html',
+																	slidBackEnabled: false
+																});
+															}, 1000);
+														}
+													})
+												}
+											})
+										}
+									});
+								}
+								if (err) {
+									api.hideProgress();
+									switch (err.code) {
+										case -1:
+											api.toast({
+												msg: '网络错误，请稍后再试'
+											});
+											break;
+										case 0:
+											api.toast({
+												msg: '微信已授权'
+											});
+											break;
+										case 1:
+											api.toast({
+												msg: '您已取消授权'
+											});
+											break;
+										case 2:
+											api.toast({
+												msg: '您已拒绝授权'
+											});
+											break;
+										case 3:
+											api.toast({
+												msg: '当前设备未安装微信客户端'
+											});
+											break;
+										default:
+											break;
+									}
+								}
+							});
+						} else {
+							alert('当前设备未安装微信客户端');
+						}
+					});
+				},
+
+				// QQ登录
+				openQQ: function () {
+					var qq = api.require('QQPlus');
+					qq.login(function (ret, err) {
+						api.showProgress({
+							animationType: '',
+							title: '',
+							text: '加载中...'
+						});
+						if (ret.status) {
+							qq.getUserInfo(function (ret2, err2) {
+								if (ret2.status) {
+									var city;
+									if (ret2.info.province == '') {
+										city = !!ret2.info.city ? info.city : '';
+									} else {
+										city = ret2.info.province + (!!ret2.info.city ? ('.' + ret2.info.city) : '');
+									}
+									$$.ajaxData('ThirdPartyLogin', {
+										type: '1',
+										openid: ret.openId,
+										name: ret2.info.nickname,
+										sex: ret2.info.gender == '男' ? 1 : 2,
+										city: city,
+										headimgurl: ret2.info.figureurl_qq_2,
+										cid: '0',
+										tid: '0',
+									}, function (ret3, err3) {
+										api.hideProgress();
+										api.toast({
+											msg: ret3.msg
+										});
+										if (ret3.status) {
+											var token = JSON.parse(ret3.data.token).code == 200 ? JSON.parse(ret3.data.token).token : '';
+											$api.setStorage('uid', ret3.data.id);
+											$api.setStorage('uname', ret3.data.name);
+											$api.setStorage('uavatar', ret3.data.avatar);
+											$api.setStorage('umobile', ret3.data.email);
+											$api.setStorage('token', token);
+											setTimeout(function () {
+												api.openWin({
+													name: 'main',
+													url: 'html/main.html',
+													slidBackEnabled: false
+												});
+											}, 1000);
+										}
+									})
+								}
+								if (ret2) {
+									api.hideProgress();
+									api.toast({
+										msg: ret2.msg
+									});
+								}
+							});
+						}
+						if (err) {
+							api.hideProgress();
+							api.toast({
+								msg: err.msg
+							});
+						}
+					});
+				}
+			},
+		})
+	}
+</script>

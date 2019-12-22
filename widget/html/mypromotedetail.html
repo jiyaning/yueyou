@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>邀请人详情</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myfriends.css" />
+</head>
+
+<body style="background-color: #24232b;color: #fff;">
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">邀请人详情</h1>
+				</div>
+			</header>
+			<div class="friendslist" style="margin-top:68px">
+				<div class="friend flex-wrap" style="margin-bottom:20px;">
+					<div class="personname" @click="openMemberDetail(detailinfo.member_id)">
+						<div class="hezi">
+							<img id="avatar" :src="detailinfo.avatar" alt="">
+						</div>
+					</div>
+					<div class="info">
+						<span class="name">{{detailinfo.name}}</span>
+						<span class="sex sex1" v-if="detailinfo.sex==1">
+							<i class="iconfont icon-nan"></i>{{detailinfo.age}}
+						</span>
+						<span class="sex sex2" v-else>
+							<i class="iconfont icon-nv"></i>{{detailinfo.age}}
+						</span>
+						<span class="vip" v-if="detailinfo.level==1">
+							<img class="vip1" src="../image/VIP.png" alt="" style="height:65%;margin-bottom: -2px;margin-left: -4px">
+						</span>
+						<p class="qianming" v-if="detailinfo.sale_column == 'null'">暂无技能信息</p>
+						<p class="qianming" v-else>{{detailinfo.sale_column}}</p>
+					</div>
+				</div>
+				<div class="promotedetail">
+					<span class="promotetitle">返利类型</span>
+					<div class="promotelabel">
+						<span>金额</span>
+					</div>
+					<span class="promotetime">时间</span>
+				</div>
+				<div class="promotedetail" v-for="(item ,index) in mypromotedetail" :key="item.id">
+					<span class="promotetitle" v-if="item.type ==1">充钻返利</span>
+					<span class="promotetitle" v-else>收益返利</span>
+					<div class="promotelabel">
+						<span>{{item.pink_diamond}}</span>
+						<div class="imgbox">
+							<img src="../image/zuanshi.png" alt="">
+						</div>
+					</div>
+					<span class="promotetime">{{item.created_at}}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				mypromotedetail: [],
+				detailinfo: {},
+				mystatus: 'week',
+			},
+			mounted: function () {
+				this.promotedetail();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				promotedetail: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyPromotePersonal', {
+						from_member_id: $api.getStorage('uid'),
+						status: _this.mystatus,
+						member_id: api.pageParam.member_id,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.mypromotedetail = ret.data;
+							_this.detailinfo = ret.extra;
+						}
+					})
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+		})
+	}
+</script>

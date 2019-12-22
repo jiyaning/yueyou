@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>我的相册</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../css/images_list.css" />
+
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div id="wrap" class="flex-wrap flex-vertical">
+            <header id="header">
+                <div class="header-wrap">
+                    <div class="header-left" onclick="api.closeWin()">
+                        <i class="iconfont icon-fanhui"></i>
+                    </div>
+                    <h1 class="title">我的相册</h1>
+                    <div class="header-right">
+                        <span @click="opendelete()">{{title1}}</span>
+                    </div>
+                </div>
+            </header>
+            <div id="main" class="flex-con">
+                <div class="photolist flex-wrap">
+                    <div v-for="(item, index) in photoslist" :key="item.id" class="box">
+                        <img :src="item.photo" alt="" @click="openphoto_frame(index)">
+                        <div class="delimg" v-show="imgdel" @click="opendeleteimg(item.id)">
+                            <i class="iconfont icon-fork"></i>
+                        </div>
+                    </div>
+                    <div id="addBtn" class="box" @click="uploadImgActionSheet">
+                        <img src="../image/img_edit_add.png" alt="" style="background-color:#afc2c7">
+                    </div>
+                </div>
+                <div v-if="FNImageClipShow" class="FNImageClip-control">
+                    <span @click="FNImageClip_cancel">取消</span>
+                    <span @click="FNImageClip_enter">确定</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+    var app;
+    apiready = function() {
+        $api.fixStatusBar($api.dom('#header'));
+        var FNImageClip = api.require('FNImageClip');
+        app = new Vue({
+            el: '#app',
+            data: {
+                avatar: '',
+                uid: '',
+                photoslist: [{
+                    photo: "../image/img1.png",
+                }, {
+                    photo: "../image/img2.png",
+                }, {
+                    photo: "../image/img3.png",
+                }],
+                qiniuToken: '',
+                FNImageClipShow: false,
+                imgdel: false,
+                title1: '删除',
+            },
+            created: function() {
+                this.getQiniuToken();
+            },
+            mounted: function() {
+                this.photos();
+            },
+            methods: {
+                // 后退
+                goback: function() {
+                    api.closeWin();
+                },
+                opendelete: function() {
+                    var _this = this;
+                    if (_this.imgdel == false) {
+                        _this.imgdel = true;
+                        _this.title1 = '取消'
+                    } else {
+                        _this.imgdel = false;
+                        _this.title1 = '删除'
+                    }
+                },
+                opendeleteimg: function(photoid) {
+                    var _this = this;
+                    api.confirm({
+                        title: '提醒',
+                        msg: '是否删除',
+                        buttons: ['删除', '取消']
+                    }, function(ret, err) {
+                        if (ret.buttonIndex == 1) {
+                            api.showProgress({
+                                title: '',
+                                text: ''
+                            });
+                            $$.ajaxData('MyPhotoDel', {
+                                photo_id: photoid,
+                                type: 'photo',
+                            }, function(ret, err) {
+                                api.hideProgress();
+                                if (ret.status) {
+                                    api.toast({
+                                        msg: ret.msg,
+                                    });
+                                }
+                                _this.photos();
+                            })
+                        }
+                        if (ret.buttonIndex == 2) {
+                            setTimeout(function() {
+                                api.closeWin();
+                            }, 1000);
+                        }
+                    });
+                },
+                photos: function() {
+                    var _this = this;
+                    api.showProgress({
+                        title: '',
+                        text: ''
+                    });
+                    if (api.pageParam.id == '') {
+                        _this.uid = $api.getStorage('uid');
+                    } else {
+                        _this.uid = api.pageParam.id;
+                    }
+                    $$.ajaxData('MyPhoto', {
+                        uid: _this.uid,
+                        type: 'photo',
+                    }, function(ret, err) {
+                        api.hideProgress();
+                        if (ret.status) {
+                            if (ret.data.data.length != 0) {
+                                _this.photoslist = ret.data.data
+                            }
+                        }
+                    })
+                },
+                // 获取七牛token
+                getQiniuToken: function() {
+                    var _this = this;
+                    $$.ajaxData('qniu', {
+                        uid: $api.getStorage('uid'),
+                    }, function(ret, err) {
+                        api.refreshHeaderLoadDone();
+                        api.hideProgress();
+                        if (ret.status) {
+                            _this.qiniuToken = ret.data;
+                        }
+                    })
+                },
+                uploadImgActionSheet: function() {
+                    var _this = this;
+                    api.actionSheet({
+                        title: '',
+                        cancelTitle: '取消',
+                        destructiveTitle: '',
+                        buttons: ['拍照', '相册']
+                    }, function(ret, err) {
+                        if (ret) {
+                            if (ret.buttonIndex == 1) {
+                                _this.getImageFile('camera');
+                            }
+                            if (ret.buttonIndex == 2) {
+                                _this.getImageFile('library');
+                            }
+                        }
+                    });
+                },
+                getImageFile: function(type) {
+                    var _this = this;
+                    api.getPicture({
+                        sourceType: type,
+                        mediaValue: 'pic',
+                        destinationType: 'url',
+                        allowEdit: false,
+                        saveToPhotoAlbum: false
+                    }, function(ret, err) {
+                        if (ret) {
+                            FNImageClip.open({
+                                rect: {
+                                    x: 0,
+                                    y: 0,
+                                    w: api.winWidth,
+                                    h: api.winHeight - 50
+                                },
+                                srcPath: ret.data,
+                                style: {
+                                    mask: 'rgba(0,0,0,0.5)',
+                                    clip: {
+                                        w: api.winWidth - 2,
+                                        h: api.winWidth - 2,
+                                        x: 1,
+                                        y: (api.winHeight - api.winWidth - 50) / 2,
+                                        borderColor: '#0f0',
+                                        borderWidth: 1,
+                                        appearance: 'rectangle'
+                                    }
+                                },
+                                mode: 'image',
+                                fixedOn: api.frameName
+                            }, function(ret, err) {
+                                if (ret) {
+                                    _this.FNImageClipShow = true;
+                                } else {
+                                    api.toast({
+                                        msg: '请开启访问相册权限'
+                                    })
+                                }
+                            });
+                        }
+                    });
+                },
+                FNImageClip_cancel: function() {
+                    var _this = this;
+                    _this.FNImageClipShow = false;
+                    FNImageClip.close();
+                },
+                FNImageClip_enter: function() {
+                    var isclick = true;
+                    var _this = this;
+                    if (isclick) {
+                        isclick = false;
+                        api.showProgress({
+                            title: '',
+                            text: ''
+                        });
+                        FNImageClip.save({
+                            destPath: 'fs://imageClip/liaola_' + (+new Date()) + '.png',
+                            copyToAlbum: false,
+                            quality: 1
+                        }, function(ret, err) {
+                            api.hideProgress();
+                            if (ret) {
+                                isclick = true;
+                                if (ret.destPath == undefined) {
+                                    api.toast({
+                                        msg: '图片保存失败'
+                                    })
+                                    this.FNImageClipShow = false;
+                                    FNImageClip.close();
+                                } else {
+                                    _this.uploadImg(ret.destPath)
+                                }
+                            } else {
+                                api.toast({
+                                    msg: '图片保存失败'
+                                })
+                                _this.FNImageClipShow = false;
+                                FNImageClip.close();
+                            }
+                        });
+                    }
+                },
+                // 上传图片
+                uploadImg: function(fileUrl) {
+                    var _this = this;
+                    api.ajax({
+                        url: qiniuBaseUrl,
+                        method: 'post',
+                        data: {
+                            values: {
+                                token: this.qiniuToken
+                            },
+                            files: {
+                                file: fileUrl
+                            }
+                        }
+                    }, function(ret, err) {
+                        if (ret) {
+                            _this.FNImageClipShow = false;
+                            FNImageClip.close();
+                            _this.avatar = ret.key;
+                            _this.submitImg();
+                        }
+                        if (err) {
+                            api.toast({
+                                msg: '网络错误，请稍后再试',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+                        }
+                    });
+                },
+                submitImg: function() {
+                    var _this = this;
+                    $$.ajaxData('MyVideo', {
+                        uid: $api.getStorage('uid'),
+                        type: 'photo',
+                        content: [{
+                            status: 0,
+                            description: '111',
+                            photo: _this.avatar
+                        }]
+                    }, function(ret, err) {
+                        if (ret.status) {
+                            _this.photos();
+                            api.sendEvent({
+                                name: 'refreshmyphotolist',
+                            });
+                        }
+                    })
+                },
+                openphoto_frame: function(id) {
+                    var _this = this;
+                    api.openWin({
+                        name: 'photo_list_frame',
+                        url: 'photo_list_frame.html',
+                        bounces: false,
+                        pageParam: {
+                            id: id,
+                            member_id: _this.uid
+                        }
+                    });
+                }
+
+            },
+        })
+    }
+</script>
+
+</html>

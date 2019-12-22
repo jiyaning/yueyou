@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>动态礼物列表</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/gifts_frame.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left" @click="closeFrame">
+						<i class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">{{title}}</h1>
+				</div>
+			</header>
+			<div class="flex-con flex-wrap flex-vertical">
+				<div class="tabGift">
+					<span @click="tabGift(0)" :class="tabIndex == 0 ? 'tabSelected' : ''">互动礼物</span>
+					<span @click="tabGift(2)" :class="tabIndex == 2 ? 'tabSelected' : ''">表白礼物</span>
+					<span @click="tabGift(1)" :class="tabIndex == 1 ? 'tabSelected' : ''">功能礼物</span>
+				</div>
+				<div class="giftlist flex-con">
+					<ul>
+						<li v-for="(item, index) in giftList" @click="dialogBox(item)">
+							<div class="gift-item-img">
+								<img :src="item.file" alt="">
+							</div>
+							<div class="gift-item-name">{{item.name}}</div>
+							<div class="gift-item-price">
+								<img src="../image/zuanshi.png" alt="">
+								<span style="font-family:Arial, Helvetica, sans-serif;">{{item.gold}}</span>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<div class="account-wrap">
+					<div class="account-balance">
+						<img src="../image/zuanshi.png" alt="">
+						<span>余额：{{api.pageParam.gold}}</span>
+					</div>
+					<div class="account-recharge" @click="openRecharge">
+						<span>充值</span>
+						<i class="iconfont icon-xiangyou"></i>
+					</div>
+				</div>
+			</div>
+			<div class="dialog-wrap" v-show="dialogShow">
+				<div class="close" @click="dialogHide">
+					<i class="iconfont icon-fork"></i>
+				</div>
+				<div class="dialog-header">
+					<div class="gift-img">
+						<img :src="giftImg" alt="">
+					</div>
+					<div class="gift-name">{{giftName}}</div>
+					<div class="gift-price">
+						<img src="../image/zuanshi.png" alt="">
+						<span>{{giftGold}}</span>
+					</div>
+				</div>
+				<div class="dialog-content">
+					<div class="input-wrap">
+						<div class="label">赠送数量：</div>
+						<div class="input">
+							<input v-model="giftNum" type="tel" placeholder="1">
+						</div>
+					</div>
+					<div class="input-wrap" v-if="(giftGold*giftNum)>99">
+						<div class="label">对Ta说：</div>
+						<div class="input">
+							<input v-model="description" type="text" placeholder="想对ta说……">
+						</div>
+					</div>
+				</div>
+				<div class="dialog-footer">
+					<div class="btn-wrap">
+						<button type="button" @click="giftbtn">赠送</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app, rong;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		api.setStatusBarStyle({
+			style: 'light'
+		});
+		rong = api.require('rongCloud2');
+		app = new Vue({
+			el: '#app',
+			data: {
+				title: '',
+				tabIndex: 0,
+				giftList: [],
+				giftId: '',
+				giftName: '',
+				giftImg: '',
+				giftNum: 1,
+				giftGold: '',
+				description: '',
+				giftSvga: '',
+				dialogShow: false,
+				flag: 0,
+			},
+			created: function () {
+				var _this = this;
+				_this.title = '给' + api.pageParam.member.name + '送礼物';
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getGiftList('0');
+			},
+			methods: {
+				closeFrame: function () {
+					api.closeFrame({
+						name: 'gifts_frame_dynamic'
+					});
+				},
+				getGiftList: function (type) {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Gifts', {
+						type: type,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.giftList = ret.data;
+						}
+					})
+				},
+				tabGift: function (i) {
+					var _this = this;
+					_this.tabIndex = i;
+					_this.flag = i;
+					_this.getGiftList(i);
+				},
+				dialogHide: function () {
+					var _this = this;
+					_this.dialogShow = false
+				},
+				dialogBox: function (item) {
+					var _this = this;
+					_this.dialogShow = true;
+					_this.giftId = item.id;
+					_this.giftName = item.name;
+					_this.giftImg = item.file;
+					_this.giftGold = item.gold;
+					_this.giftSvga = item.gift_animation == null ? '' : item.gift_animation;
+				},
+				giftbtn: function () {
+					var _this = this;
+					if (_this.giftId == '') {
+						api.toast({
+							msg: '请选择礼物',
+						});
+						return false;
+					}
+					if (_this.giftNum == '') {
+						api.toast({
+							msg: '请输入礼物数量',
+						});
+						return false;
+					}
+					if (_this.giftNum < 0 || _this.giftNum > 1314) {
+						api.toast({
+							msg: '请输入正确的礼物数量',
+						});
+						return false;
+					}
+					if (parseInt(_this.giftGold) > parseInt(api.pageParam.gold)) {
+						var dialogBox = api.require('dialogBox');
+						dialogBox.evaluation({
+							styles: {
+								bg: '#fff',
+								corner: 2,
+								w: 300,
+								title: {
+									marginT: 20,
+									size: 14,
+									h: 50,
+									color: '#000',
+									borderColor: '#eee',
+									borderWidth: 1
+								},
+								buttons: [{
+									w: 300,
+									h: 50,
+									color: '#0077ff',
+									size: 14,
+									borderColor: '#eee',
+									borderWidth: 1
+								}, {
+									w: 300,
+									h: 50,
+									color: '#0077ff',
+									size: 14,
+									borderColor: '#eee',
+									borderWidth: 1
+								}]
+							},
+							texts: {
+								title: '您的余额不足，无法赠送礼物',
+								buttons: [{
+									text: '去充值'
+								}, {
+									text: '取消'
+								}]
+							},
+							tapClose: true
+						}, function (ret) {
+							if (ret.index == 0) {
+								dialogBox.close({
+									dialogName: 'evaluation'
+								});
+								api.openWin({
+									name: 'recharge',
+									url: 'recharge.html',
+									slidBackEnabled: false
+								});
+							}
+							if (ret.index == 1) {
+								dialogBox.close({
+									dialogName: 'evaluation'
+								});
+							}
+						});
+						return false
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('DynamicGift', {
+						uid: $api.getStorage('uid'),
+						loves_id: api.pageParam.loves_id,
+						gift_id: _this.giftId,
+						description: _this.description,
+						number: _this.giftNum,
+						type: api.pageParam.costtype,
+						flag: _this.flag,
+					}, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: ret.msg,
+						});
+						if (ret.status) {
+							api.sendEvent({
+								name: 'gift2list',
+								extra: {}
+							});
+							if (_this.giftSvga != '') {
+								api.sendEvent({
+									name: 'svgaPlay',
+									extra: {
+										giftSvga: _this.giftSvga
+									}
+								});
+								var giveGiftExtra = {
+									fromId: $api.getStorage('uid'),
+									fromName: $api.getStorage('uname'),
+									fromAvatar: $api.getStorage('uavatar'),
+									giftId: _this.giftId,
+									giftName: _this.giftName,
+									giftImg: _this.giftImg,
+									giftNum: _this.giftNum,
+									giftGold: _this.giftGold,
+									description: _this.description,
+									giftSvga: _this.giftSvga
+								}
+								rong.sendCommandMessage({
+									conversationType: 'PRIVATE',
+									targetId: api.pageParam.loves_id,
+									name: 'give_gift',
+									data: JSON.stringify(giveGiftExtra)
+								}, function (ret, err) {});
+							}
+							setTimeout(function () {
+								_this.dialogHide();
+								_this.closeFrame();
+							}, 1000);
+						}
+					})
+				},
+
+				openRecharge: function () {
+					api.openWin({
+						name: 'recharge',
+						url: 'recharge.html',
+						slidBackEnabled: false
+					});
+				},
+			}
+		})
+	}
+</script>

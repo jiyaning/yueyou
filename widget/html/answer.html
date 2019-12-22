@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>接听</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/call.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="wrap" class="flex-wrap flex-vertical">
+      <div v-if="!isMinimize" :class="['call-wrap', 'flex-con', 'sex' + sex]">
+        <div @click="minimize" class="isMinimize">
+          <img src="../image/min_icon.png" alt="">
+        </div>
+        <div class="user-info">
+          <div class="name">{{name}}</div>
+          <div class="avatar">
+            <img :src="avatar" alt="">
+          </div>
+          <div class="info">
+            <span :class="['sex', 'sex' + sex]">
+              <i :class="['iconfont', 'icon-sex' + sex]"></i>{{age}}</span>
+            <span v-if="toMemberBalance != ''" class="toMember-info">{{toMemberBalance}}</span>
+          </div>
+          <div class="signature">{{signature}}</div>
+        </div>
+        <div v-if="!isConnect" class="tips">{{tips}}</div>
+        <div v-else>
+          <div class="timer">{{timeText}}</div>
+          <div class="menu-list">
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-haoyou"></i>
+              </div>
+              <div class="menu-text">关注</div>
+            </div> -->
+            <div class="menu-item">
+              <div class="menu-icon" @click="openGiftFrame">
+                <i class="iconfont icon-gift"></i>
+              </div>
+              <div class="menu-text">礼物</div>
+            </div>
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-jinggao"></i>
+              </div>
+              <div class="menu-text">举报</div>
+            </div> -->
+            <div class="menu-item">
+              <div class="menu-icon" @click="setMute">
+                <i :class="['iconfont', 'icon-jingyin', audioflag == true ? '' : 'active']"></i>
+              </div>
+              <div class="menu-text">静音</div>
+            </div>
+            <!-- <div class="menu-item">
+              <div class="menu-icon">
+                <i class="iconfont icon-gaopinzhiyinzhi"></i>
+              </div>
+              <div class="menu-text">高质</div>
+            </div> -->
+            <!-- <div class="menu-item">
+              <div class="menu-icon" @click="setSpeaker">
+                <i :class="'iconfont', 'icon-mianti', speakerflag ? 'active' : ''"></i>
+              </div>
+              <div class="menu-text">免提</div>
+            </div> -->
+          </div>
+        </div>
+        <div class="control-wrap">
+          <div v-if="!isConnect" @click="answer" class="control-item answer">
+            <i class="icon icon-answer"></i>
+            <span>接听</span>
+          </div>
+          <div @click="hangUp" class="control-item hangUp">
+            <i class="icon icon-hangUp"></i>
+            <span>挂断</span>
+          </div>
+        </div>
+        <div v-if="giveGiftNotice.length > 0" class="give-gift-notice-private-wrap notice1">
+          <div v-for="(item, index) in giveGiftNotice" :key="index" class="notice-item">
+            <div class="notice-info">
+              <div class="fromName">{{item.fromName}}</div>
+              <div class="giftName">送出<span>{{item.GiftName}}</span></div>
+            </div>
+            <div class="notice-img">
+              <div class="giftImg">
+                <img :src="item.GiftImg" alt="">
+              </div>
+              <div class="giftNumber">x{{item.GiftNumber}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="minimize" @click="maximize">
+        <i class="iconfont icon-call"></i>
+        <span>{{timeText}}</span>
+      </div>
+    </div>
+  </div>
+  <div id="svgaCanvas"></div>
+	<div id="svgaCanvas_tips"></div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript" src="../script/svga.min.js"></script>
+<script type="text/javascript">
+  var app, rong, agoraRtc, dialogBox;
+  apiready = function () {
+    rong = api.require('rongCloud2');
+    agoraRtc = api.require('agoraRtc');
+    dialogBox = api.require('dialogBox');
+    var player = new SVGA.Player('#svgaCanvas');
+		var parser = new SVGA.Parser('#svgaCanvas');
+    app = new Vue({
+      el: '#app',
+      data: {
+        id: '',
+        name: '',
+        avatar: '',
+        sex: '',
+        age: '',
+        signature: '',
+        isConnect: false,
+        tips: '',
+        extra: {},
+        type: '',
+        u_info: {},
+        m_info: {},
+        timeText: '00:00:00',
+        audioflag: true,
+        toMemberBalance: '',
+        talk_duration: '',
+        cost_gold: '',
+        isMinimize: false,
+        giveGiftNotice: []
+      },
+      created: function () {
+        var _this = this;
+        _this.playRing();
+        agoraRtc.init({
+          appId: agoraRtcAppId
+        });
+        agoraRtc.setChannelProfile({
+          profile: 0
+        }, function (ret) {
+          if (ret.code == 0) {
+            //success
+          }
+        });
+        api.addEventListener({
+          name: 'hangUp'
+        }, function (ret, err) {
+          if (ret) {
+            api.toast({
+              msg: '对方已挂断',
+            });
+            agoraRtc.destroy();
+            if (_this.isConnect) {
+              $$.ajaxData('ImCallStop', {
+                uid: _this.extra.fromId,
+                member_id: $api.getStorage('uid'),
+                type:6,
+              }, function (ret, err) {
+                if (ret.status) {
+                  var tempSecond = ret.data.talk_duration%60;
+                  var tempMinute = parseInt(ret.data.talk_duration/60);
+                  var tempHour = tempMinute > 0 ? parseInt(tempMinute/60) : 0;
+                  var tempSecondText = tempSecond < 10 ? ('0' + tempSecond) : tempSecond + '';
+                  var tempMinuteText = tempMinute < 10 ? ('0' + tempMinute) : tempMinute + '';
+                  var tempHourText = tempHour < 10 ? ('0' + tempHour) : tempHour + '';
+                  _this.talk_duration = tempMinuteText + ':' + tempSecondText;
+                  if (tempHour != 0) {
+                    _this.talk_duration = tempHourText + ':' + _this.talk_duration;
+                  }
+                  _this.cost_gold = ret.data.cost_gold;
+                  dialogBox.scene({
+                    rect: {
+                      w: 280,
+                      h: 180
+                    },
+                    texts: {
+                      title: '通话详情',
+                      okBtnTitle: '确定'
+                    },
+                    styles: {
+                      bg: '#fff',
+                      title: {
+                        bg: '#888',
+                        h: 50,
+                        size: 14,
+                        color: '#fff'
+                      },
+                      cell: {
+                        bg: '#fff',
+                        h: 40,
+                        text: {
+                          color: '#333',
+                          size: 14
+                        },
+                      },
+                      ok: {
+                        h: 50,
+                        bg: '#573e84',
+                        titleColor: '#fff',
+                        titleSize: 14
+                      }
+                    },
+                    optionDatas: [{
+                      text: '通话时长：' + _this.talk_duration
+                    }, {
+                      text: '收入钻石：' + _this.cost_gold + '钻石'
+                    }]
+                  }, function (ret, err) {
+                    if (ret && ret.eventType == 'ok') {
+                      dialogBox.close({
+                        dialogName: 'scene'
+                      });
+                      api.sendEvent({
+                        name: 'answer_hangup',
+                        extra: {key:' value'}
+                      });
+                      api.closeFrame({
+                        name: 'answer'
+                      });
+                    }
+                  });
+                }
+              })
+            } else {
+              api.sendEvent({
+                name: 'answer_hangup',
+                extra: {key:' value'}
+              });
+              api.closeFrame({
+                name: 'answer'
+              });
+            }
+          }
+        });
+        api.addEventListener({
+          name: 'answerHangUp'
+        }, function (ret, err) {
+          if (ret) {
+            _this.hangUp();
+          }
+        });
+        api.addEventListener({
+          name: 'answerFrameMinimize'
+        }, function(ret, err){
+          _this.isMinimize = true;
+          api.setFrameAttr({
+            name: 'answer',
+            rect: {
+              x: api.winWidth - 70,
+              y: 30,
+              w: 60,
+              h: 80
+            },
+          });
+        });
+        api.addEventListener({
+					name: 'svgaPlay'
+				}, function(ret, err){
+					if (ret.value.GiftSvga != '') {
+						$api.text($api.byId('svgaCanvas_tips'), ret.value.fromName + '送' + ret.value.toName + ret.value.GiftName + 'x' + ret.value.GiftNumber);
+						$api.css($api.byId('svgaCanvas'), 'display: block;');
+						$api.css($api.byId('svgaCanvas_tips'), 'display: block;');
+						parser.load(ret.value.GiftSvga, function(videoItem) {
+							player.loops = 1;
+							player.setVideoItem(videoItem);
+							player.startAnimation();
+							player.onFinished(function() {
+								$api.css($api.byId('svgaCanvas'),'display: none;');
+								$api.css($api.byId('svgaCanvas_tips'),'display: none;');
+							});
+						})
+					}
+				});
+        api.addEventListener({
+					name: 'give_gift_notice_private'
+				}, function(ret, err){
+          var message_content = JSON.parse(ret.value.result.message.content.data)
+					if (message_content.fromId != _this.extra.fromId) {
+						return false;
+					}
+					if(message_content.GiftSvga != '') {
+						$api.text($api.byId('svgaCanvas_tips'), message_content.fromName + '送' + message_content.toName + message_content.GiftName + 'x' + message_content.GiftNumber);
+						$api.css($api.byId('svgaCanvas'), 'display: block;');
+						$api.css($api.byId('svgaCanvas_tips'), 'display: block;');
+						parser.load(message_content.GiftSvga, function(videoItem) {
+							player.loops = 1;
+							player.setVideoItem(videoItem);
+							player.startAnimation();
+							player.onFinished(function() {
+								$api.css($api.byId('svgaCanvas'),'display: none;');
+								$api.css($api.byId('svgaCanvas_tips'),'display: none;');
+							});
+						})
+					} else {
+						if (parseInt(message_content.GiftGold) * parseInt(message_content.GiftNumber) < 1000) {
+							_this.giveGiftNotice.push({
+								fromName: message_content.fromName,
+								GiftName: message_content.GiftName,
+								GiftImg: message_content.GiftImg,
+								GiftNumber: message_content.GiftNumber,
+							})
+							setTimeout(function () {
+								_this.giveGiftNotice.pop();
+							}, 5000);
+						} else {
+							api.openFrame({
+								name: 'give_gift_notice_frame',
+								url: 'give_gift_notice_frame.html',
+								bounces: false,
+								rect: {
+									x: 0,
+									y: 200,
+									w: api.winWidth,
+									h: 200
+								},
+								pageParam: {
+									type: 'private',
+									con: message_content
+								}
+							});
+							setTimeout(function () {
+								api.closeFrame({
+									name: 'give_gift_notice_frame'
+								});
+							}, 5000);
+						}
+					}
+				});
+        api.addEventListener({
+					name: 'give_gift_notice'
+				}, function(ret, err){
+					var extraContent = JSON.parse(ret.value.result.message.content.data)
+					if ($api.getStorage('uid') == extraContent.extra.fromId || $api.getStorage('uid') == extraContent.extra.toId) {
+						// 自己送的礼物或者别人送给自己的礼物
+					} else {
+						api.openFrame({
+							name: 'give_gift_notice_frame',
+							url: 'give_gift_notice_frame.html',
+							bounces: false,
+							rect: {
+								x: 0,
+								y: 200,
+								w: api.winWidth,
+								h: 200
+							},
+							pageParam: {
+								type: 'all',
+								con: extraContent.extra
+							}
+						});
+						setTimeout(function () {
+							api.closeFrame({
+								name: 'give_gift_notice_frame'
+							});
+						}, 5000);
+					}
+				});
+        api.addEventListener({
+          name: 'answerFrameMinimize'
+        }, function(ret, err){
+          _this.isMinimize = true;
+          api.setFrameAttr({
+            name: 'answer',
+            rect: {
+              x: api.winWidth - 70,
+              y: 30,
+              w: 60,
+              h: 80
+            },
+          });
+        });
+      },
+      mounted: function () {
+        var _this = this;
+        _this.getPageParam();
+      },
+      methods: {
+        minimize: function () {
+          this.isMinimize = true;
+          api.setFrameAttr({
+            name: 'answer',
+            rect: {
+              x: api.winWidth - 70,
+              y: 30,
+              w: 60,
+              h: 80
+            },
+          });
+        },
+        maximize: function () {
+          this.isMinimize = false;
+          api.setFrameAttr({
+            name: 'answer',
+            rect: {
+              x: 0,
+              y: 0,
+              w: api.winWidth,
+              h: api.winHeight
+            },
+          });
+          api.sendEvent({
+            name: 'answerFrameMaximize',
+            extra: {key:' value'}
+          });
+        },
+        // 振铃
+        playRing: function () {
+          var _this = this;
+          api.startPlay({
+            path: 'widget://res/ring.mp3'
+          }, function (ret, err) {
+            if (ret) {
+              _this.playRing();
+            }
+          });
+        },
+
+        // 计时器
+        timer: function (t) {
+          var _this = this;
+          var time = t,
+            hour = 0,
+            minute = 0,
+            second = 0,
+            tempMinute = 0;
+          second = time % 60;
+          tempMinute = Math.floor(time / 60);
+          minute = tempMinute % 60;
+          hour = Math.floor(tempMinute / 60);
+          _this.timeText = hour < 10 ? '0' + hour + ':' : hour + ':';
+          _this.timeText += minute < 10 ? '0' + minute + ':' : minute + ':';
+          _this.timeText += second < 10 ? '0' + second : second + '';
+          time++;
+          setTimeout(function () {
+            _this.timer(time);
+          }, 1000);
+        },
+
+        getPageParam: function () {
+          var _this = this;
+          _this.extra = JSON.parse(api.pageParam.data);
+          _this.type = api.pageParam.name;
+          if (_this.type == 'voiceCall') {
+            _this.tips = _this.extra.fromName + '正在邀请你语音通话……'
+          }
+          if (_this.type == 'videoCall') {
+            _this.tips = _this.extra.fromName + '正在邀请你视频通话……'
+          }
+          $$.ajaxData('My', {
+            uid: _this.extra.fromId,
+          }, function (ret, err) {
+            if (ret.status) {
+              _this.id = ret.data.member_id;
+              _this.name = ret.data.name;
+              _this.avatar = ret.data.avatar;
+              _this.sex = ret.data.sex;
+              _this.age = ret.data.age;
+              _this.signature = ret.data.signature;
+            }
+          })
+          setTimeout(function () {
+            if (!_this.isConnect) {
+              var tempExtra = {
+                fromId: _this.extra.toId,
+                fromName: _this.extra.toName,
+                fromAvatar: _this.extra.toAvatar,
+                toId: _this.extra.fromId,
+                toName: _this.extra.fromName,
+                toAvatar: _this.extra.fromAvatar,
+              }
+              rong.sendCommandMessage({
+                conversationType: 'PRIVATE',
+                targetId: _this.extra.fromId,
+                name: 'hangUp',
+                data: JSON.stringify(tempExtra)
+              }, function (ret, err) {});
+              rong.sendRichContentMessage({
+                conversationType: 'PRIVATE',
+                targetId: _this.extra.fromId,
+                title: 'call_message',
+                description: '未接听',
+                imageUrl: '../image/hang_up.png',
+                extra: JSON.stringify(tempExtra)
+              }, function(ret, err) {});
+              api.closeFrame({
+                name: 'answer'
+              });
+            }
+          }, 32000);
+        },
+
+        // 接听
+        answer: function () {
+          var _this = this;
+          $$.ajaxData('ImCallDoing', {
+            uid: _this.extra.fromId,
+            member_id: $api.getStorage('uid'),
+          }, function (ret, err) {
+            if (ret.status) {
+              _this.u_info = ret.data.u_info;
+              _this.m_info = ret.data.m_info;
+              if (_this.m_info.sex == '2' && _this.m_info.level == '1') {
+                _this.toMemberBalance = '对方账户钻石余额：' + _this.u_info.gold
+              }
+              var tempExtra = {
+                fromId: _this.extra.toId,
+                fromName: _this.extra.toName,
+                fromAvatar: _this.extra.toAvatar,
+                toId: _this.extra.fromId,
+                toName: _this.extra.fromName,
+                toAvatar: _this.extra.fromAvatar,
+              }
+              rong.sendCommandMessage({
+                conversationType: 'PRIVATE',
+                targetId: _this.extra.fromId,
+                name: 'answer',
+                data: JSON.stringify(tempExtra)
+              }, function (ret, err) {});
+              _this.joinChannel_agoraRtc();
+            }
+          })
+        },
+
+        // 声网加入频道
+        joinChannel_agoraRtc: function () {
+          var _this = this;
+          agoraRtc.joinChannel({
+            channel: 'channel' + _this.extra.fromId + '&' + $api.getStorage('uid'),
+            uid: $api.getStorage('uid')
+          }, function (ret) {
+            if (ret.code == 0) {
+              _this.isConnect = true;
+              _this.timer(0);
+              api.stopPlay();
+            } else {
+              api.toast({
+                msg: '连接服务器失败'
+              })
+            }
+          });
+        },
+
+        openGiftFrame: function () {
+          var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('My', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							api.openFrame({
+								name: 'gifts_frame',
+								url: 'gifts_frame.html',
+								rect: {
+									x: 0,
+									y: 0,
+									w: api.winWidth,
+									h: api.winHeight
+								},
+								pageParam: {
+									gold: ret.data.gold,
+                  type: 1,
+                  member: {
+										member_id: _this.extra.fromId,
+										name: _this.extra.fromName
+									},
+								}
+							});
+						}
+					})
+        },
+
+        setMute: function () {
+          var _this = this;
+          if (_this.audioflag) {
+            _this.audioflag = false
+            agoraRtc.pauseAudio(function(ret) {
+              if (ret.code == 0) {
+                api.toast({
+                  msg: '设置静音'
+                })
+              }
+            });
+          } else {
+            _this.audioflag = true
+            agoraRtc.resumeAudio(function(ret) {
+              if (ret.code == 0) {
+                api.toast({
+                  msg: '取消静音'
+                })
+              }
+            });
+          }
+        },
+
+        // 挂断
+        hangUp: function () {
+          var _this = this;
+          var tempExtra = {
+            fromId: _this.extra.toId,
+            fromName: _this.extra.toName,
+            fromAvatar: _this.extra.toAvatar,
+            toId: _this.extra.fromId,
+            toName: _this.extra.fromName,
+            toAvatar: _this.extra.fromAvatar,
+          }
+          api.showProgress({
+            title: '',
+            text: '',
+          });
+          $$.ajaxData('ImCallStop', {
+            uid: _this.extra.fromId,
+            member_id: $api.getStorage('uid'),
+            type: 6,
+          }, function (ret, err) {
+            api.hideProgress();
+            if (ret.status) {
+              agoraRtc.leaveChannel(function (ret) {
+                if (ret.code == 0) {}
+              });
+              agoraRtc.destroy();
+              rong.sendCommandMessage({
+                conversationType: 'PRIVATE',
+                targetId: _this.extra.fromId,
+                name: 'hangUp',
+                data: JSON.stringify(tempExtra)
+              }, function (ret, err) {});
+              api.sendEvent({
+                name: 'answer_hangup',
+                extra: {key:' value'}
+              });
+              if (_this.isConnect) {
+                var tempSecond = ret.data.talk_duration%60;
+                var tempMinute = parseInt(ret.data.talk_duration/60);
+                var tempHour = tempMinute > 0 ? parseInt(tempMinute/60) : 0;
+                var tempSecondText = tempSecond < 10 ? ('0' + tempSecond) : tempSecond + '';
+                var tempMinuteText = tempMinute < 10 ? ('0' + tempMinute) : tempMinute + '';
+                var tempHourText = tempHour < 10 ? ('0' + tempHour) : tempHour + '';
+                _this.talk_duration = tempMinuteText + ':' + tempSecondText;
+                if (tempHour != 0) {
+                  _this.talk_duration = tempHourText + ':' + _this.talk_duration;
+                }
+                _this.cost_gold = ret.data.cost_gold;
+                dialogBox.scene({
+                  rect: {
+                    w: 280,
+                    h: 180
+                  },
+                  texts: {
+                    title: '通话详情',
+                    okBtnTitle: '确定'
+                  },
+                  styles: {
+                    bg: '#fff',
+                    title: {
+                      bg: '#888',
+                      h: 50,
+                      size: 14,
+                      color: '#fff'
+                    },
+                    cell: {
+                      bg: '#fff',
+                      h: 40,
+                      text: {
+                        color: '#333',
+                        size: 14
+                      },
+                    },
+                    ok: {
+                      h: 50,
+                      bg: '#573e84',
+                      titleColor: '#fff',
+                      titleSize: 14
+                    }
+                  },
+                  optionDatas: [{
+                    text: '通话时长：' + _this.talk_duration
+                  }, {
+                    text: '收入钻石：' + _this.cost_gold + '钻石'
+                  }]
+                }, function (ret, err) {
+                  if (ret && ret.eventType == 'ok') {
+                    rong.sendRichContentMessage({
+                      conversationType: 'PRIVATE',
+                      targetId: _this.extra.fromId,
+                      title: 'call_message',
+                      description: '通话时长：' + _this.talk_duration,
+                      imageUrl: '../image/hang_up1.png',
+                      extra: JSON.stringify(tempExtra)
+                    }, function(ret, err) {});
+                    api.sendEvent({
+                      name: 'refreshMessage'
+                    });
+                    dialogBox.close({
+                      dialogName: 'scene'
+                    });
+                    api.closeFrame({
+                      name: 'answer'
+                    });
+                  }
+                });
+              } else {
+                rong.sendRichContentMessage({
+                  conversationType: 'PRIVATE',
+                  targetId: _this.extra.fromId,
+                  title: 'call_message',
+                  description: '已拒绝',
+                  imageUrl: '../image/hang_up.png',
+                  extra: JSON.stringify(tempExtra)
+                }, function(ret, err) {});
+                api.closeFrame({
+                  name: 'answer'
+                });
+              }
+            }
+          })
+        },
+
+      },
+    })
+  }
+</script>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>礼物列表</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/give_gift_notice_frame.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div class="give-gift-notice">
+			<img class="bg" v-if="type == 'all'" src="../image/give_gift_notice_bg.png" alt="">
+			<img class="bg" v-if="type == 'private'" src="../image/give_gift_notice_private_bg.png" alt="">
+      <div class="notice">
+				<div class="fromMember">
+					<img :src="fromAvatar" alt="">
+					<span>{{fromName}}</span>
+				</div>
+				<em>赠送</em>
+				<div class="toMember">
+					<img :src="toAvatar" alt="">
+					<span>{{toName}}</span>
+				</div>
+				<div class="gift">
+					<img :src="giftImg" alt="">
+					<span class="giftNum">x{{giftNum}}</span>
+				</div>
+      </div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		app = new Vue({
+			el: '#app',
+			data: {
+				type: '',
+        fromName: '',
+				fromAvatar: '',
+        toName: '',
+				toAvatar: '',
+        giftName: '',
+        giftImg: '',
+        giftNum: ''
+      },
+			created: function () {
+				var _this = this;
+				_this.type = api.pageParam.type;
+        _this.fromName = api.pageParam.con.fromName;
+        _this.fromAvatar = api.pageParam.con.fromAvatar;
+        _this.toName = api.pageParam.con.toName;
+        _this.toAvatar = api.pageParam.con.toAvatar;
+        _this.giftName = api.pageParam.con.GiftName;
+        _this.giftImg = api.pageParam.con.GiftImg;
+        _this.giftNum = api.pageParam.con.GiftNumber;
+			},
+			mounted: function () {},
+			methods: {}
+		})
+	}
+</script>

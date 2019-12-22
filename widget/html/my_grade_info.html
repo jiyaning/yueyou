@@ -1,0 +1,148 @@
+<!Doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>等级说明</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/mygrade.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i @click="goback" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">等级说明</h1>
+				</div>
+			</header>
+			<nav id="nav1">
+				<p><span :class="['menu',zIndex == 1 ?'selected': '']" tapmode @click="meili(1)">魅力等级</span></p>
+				<p><span :class="['menu',zIndex == 2 ?'selected': '']" tapmode @click="meili(2)">富豪等级</span></p>
+			</nav>
+			<div class="infolist" v-if="zIndex == 1" id="infolist">
+				<div class="list">
+					<div class="title">
+						魅力标志
+					</div>
+					<div class="name">
+						等级名称
+					</div>
+					<div class="num">
+						升级要求（魅力值）
+					</div>
+				</div>
+				<div v-for="item in meili1" class="list" style="height: 45px;line-height: 45px;">
+					<div class="title">
+						<div class="box">
+							<img :src="item.icon" style="width: 90px;height: 90px;margin-top: -25px;margin-left: -25px;" />
+						</div>
+					</div>
+					<div class="name">
+						{{item.name}}
+					</div>
+					<div class="num">
+						{{item.value}}
+					</div>
+				</div>
+			</div>
+			<div class="infolist" v-if="zIndex == 2" id="infolist1">
+				<div class="list">
+					<div class="title">
+						富豪标志
+					</div>
+					<div class="name">
+						等级名称
+					</div>
+					<div class="num">
+						升级要求（富豪值）
+					</div>
+				</div>
+				<div v-for="item in dengji" class="list" style="height: 45px;line-height: 45px;">
+					<div class="title">
+						<div class="box">
+							<img :src="item.icon" style="width: 60px;height: 60px;margin-top: -7px;margin-left: -15px" />
+						</div>
+					</div>
+					<div class="name">
+						{{item.name}}
+					</div>
+					<div class="num">
+						{{item.value}}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				zIndex: 1,
+				dengji: [],
+				meili1: [],
+			},
+			mounted: function () {
+				var _this = this;
+				_this.getInfo1();
+				_this.getInfo2();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				meili: function (i) {
+					var _this = this;
+					_this.zIndex = i;
+				},
+				getInfo1: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyGrade', {
+						uid: $api.getStorage('uid'),
+						type: 2,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.meili1 = ret.data;
+						}
+					})
+				},
+				getInfo2: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MyGrade', {
+						uid: $api.getStorage('uid'),
+						type: 1,
+					}, function (ret, err) {
+						api.hideProgress();
+						if (ret.status) {
+							_this.dengji = ret.data;
+						}
+					})
+				},
+			},
+		})
+	}
+</script>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>今日推荐</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/tuijian.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<h1 class="title">今日推荐</h1>
+				</div>
+			</header>
+			<div class="top">
+				<p>今日推荐</p>
+				<p>不妨找他们聊聊吧，Ta们人气很高哦</p>
+			</div>
+			<div class="itemlist" >
+				<div class="items" v-for="(item ,index) in tuijianinfolist" :key="item.id">
+					<img :src="item.avatar" alt="">
+					<p>{{item.name}}</p>
+				</div>	
+			</div>
+			<div class="footer">
+				<p>
+					<span>一键关注</span>
+				</p>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		var FNImageClip = api.require('FNImageClip');
+		app = new Vue({
+			el: '#app',
+			data: {
+				tuijianinfolist:[]
+			},
+			created: function () {
+
+			},
+			mounted: function () {
+				var _this = this;
+				_this.tuijianlist();
+			},
+			methods: {
+				tuijianlist: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('TitauhiaiTeieMahana', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.tuijianinfolist = ret.data;
+						}
+					})
+				},
+			},
+		})
+	}
+</script>
+
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+  <title>标签列表</title>
+  <link rel="stylesheet" type="text/css" href="../css/api.css" />
+  <link rel="stylesheet" type="text/css" href="../css/label.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div id="wrap" class="flex-wrap flex-vertical">
+      <header id="header">
+        <div class="header-wrap">
+          <div class="header-left">
+            <i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+          </div>
+          <div class="title">选择打招呼对象</div>
+          <div class="header-right" @click="baocun">
+            <span>保存</span>
+          </div>
+        </div>
+      </header>
+      <div class="label flex-con">
+        <span @click="selectLabel(index)" v-if="sex == 2" :class="[item.is_selected == true ? 'selectLabel' : '']"
+          v-for="(item,index) in labelList" :key="item.id">{{item.tag}}</span>
+        <span @click="selectLabel(index)" v-if="sex == 1" :class="[item.is_selected == true ? 'selectLabel' : '']"
+          v-for="(item,index) in labelList1" :key="item.id">{{item.tag}}</span>
+      </div>
+      <p>最多只能选择3个标签</p>
+    </div>
+  </div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+  apiready = function () {
+    $api.fixStatusBar($api.dom('#header'));
+    app = new Vue({
+      el: '#app',
+      data: {
+        titleTxt: '',
+        sex: api.pageParam.sex,
+        labelList: [{
+            name: 'greet',
+            id: 1,
+            tag: '30分钟内充vip会员及续费VIP会员的',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 2,
+            tag: '30分钟内充值钻石的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 3,
+            tag: '10分钟内和别人挂完电话的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 4,
+            tag: '10分钟内收到别人礼物的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 5,
+            tag: '10分钟内送别人礼物的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 6,
+            tag: '6小时内发布求约信息的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 7,
+            tag: '富豪值达到1000的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 8,
+            tag: 'VIP会员剩余7天以上的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 9,
+            tag: '给同城约会、约拍、约聊的人打招呼',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 10,
+            tag: '给约游的人打招呼',
+            is_selected: false
+          }
+        ],
+        labelList1: [{
+            name: 'greet',
+            id: 1,
+            tag: '年龄18-21岁',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 2,
+            tag: '年龄22-26岁',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 3,
+            tag: '年龄27-30岁',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 4,
+            tag: '年龄31-36岁',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 5,
+            tag: '给自己喜欢的异性标签的人',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 6,
+            tag: '给御姐、模特、演艺人员打招呼',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 7,
+            tag: '给萝莉、学生打招呼',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 8,
+            tag: '给同城约会、约拍、约聊的人打招呼',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 9,
+            tag: '给约游的人打招呼',
+            is_selected: false
+          },
+          {
+            name: 'greet',
+            id: 10,
+            tag: '给魅力值超过3000的人打招呼',
+            is_selected: false
+          }
+        ],
+        selectedList: [{
+          id: '',
+          tag: ''
+        }],
+        clickNum: 0,
+      },
+      created: function () {},
+      mounted: function () {
+      },
+      methods: {
+        selectLabel: function (index) {
+          var _this = this;
+          if (_this.sex == 2) {
+            if (!_this.labelList[index].is_selected) {
+              if (_this.clickNum < 3) {
+                _this.labelList[index].is_selected = true;
+                _this.clickNum++;
+              } else {
+                api.toast({
+                  msg: '您最多只能选择3个标签',
+                  duration: 2000,
+                  location: 'bottom'
+                });
+              }
+            } else {
+              _this.labelList[index].is_selected = false;
+              _this.clickNum--;
+            }
+          }
+          if (_this.sex == 1) {
+            if (!_this.labelList1[index].is_selected) {
+              if (_this.clickNum < 3) {
+                _this.labelList1[index].is_selected = true;
+                _this.clickNum++;
+              } else {
+                api.toast({
+                  msg: '您最多只能选择3个标签',
+                  duration: 2000,
+                  location: 'bottom'
+                });
+              }
+            } else {
+              _this.labelList1[index].is_selected = false;
+              _this.clickNum--;
+            }
+          }
+        },
+        baocun: function () {
+          var _this = this;
+          if (_this.clickNum == 0) {
+            api.toast({
+              msg: '您至少需要选择1个标签',
+              duration: 2000,
+              location: 'bottom'
+            });
+            return false;
+          }
+          _this.selectedList = [];
+          if (_this.sex == 2) {
+            for (var i = 0; i < _this.labelList.length; i++) {
+              if (_this.labelList[i].is_selected == true) {
+                _this.selectedList.push({
+                  id: _this.labelList[i].id,
+                  tag: _this.labelList[i].tag
+                })
+              }
+            }
+          }
+          if (_this.sex == 1) {
+            for (var i = 0; i < _this.labelList1.length; i++) {
+              if (_this.labelList1[i].is_selected == true) {
+                _this.selectedList.push({
+                  id: _this.labelList1[i].id,
+                  tag: _this.labelList1[i].tag
+                })
+              }
+            }
+          }
+          api.sendEvent({
+            name: 'myEventgreet',
+            extra: {
+              key1: _this.selectedList
+            }
+          });
+          setTimeout(function () {
+            api.closeWin();
+          }, 1000);
+        }
+      },
+    })
+  }
+</script>

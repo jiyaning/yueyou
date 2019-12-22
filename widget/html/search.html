@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>搜索</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/search.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">搜索</h1>
+				</div>
+			</header>
+			<div class="flex-con">
+				<div class="content">
+					<div class="label">
+						<div class="title"> <i class="iconfont icon-sousuo"></i></div>
+						<input v-model="member_random_id" type="tel" placeholder="输入ID搜索你感兴趣的人">
+					</div>
+					<div class="search" @click="search">
+						<span>搜索</span>
+					</div>
+				</div>
+				<div class="list" @click="opensearch_condition">
+					<div class="box"> <i class="iconfont icon-shaixuantiaojian"></i></div>
+					<span>按条件查找</span>
+				</div>
+				<div class="search_list">
+					<div v-for="(item ,index) in searchlist" :key="item.id" class="friend" @click="openMemberDetail(item.member_id)">
+						<div class="personname">
+							<div class="hezi">
+								<img id="avatar" :src="item.avatar" alt="">
+							</div>
+						</div>
+						<div class="info">
+							<span class="name">{{item.name}}</span>
+							<!-- <span class="vip" v-if="item.level==1">
+								<i class="iconfont icon-vip1"></i>
+							</span> -->
+							<span class="sex">{{item.member_random_id}}
+							</span>
+						</div>
+						<span class="follow-icon"><i class="iconfont icon-xiangyou"></i></span>
+					</div>
+				</div>
+				<p v-if="showempty" style="margin-top:50px;text-align:center;color:#fff;font-size:16px;">暂无相关搜索</p>
+
+			</div>
+		</div>
+	</div>
+	</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				showempty: false,
+				member_random_id: '',
+				searchlist: ''
+			},
+			mounted: function () {
+
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				opensearch_condition: function () {
+					api.openWin({
+						name: 'search_condition',
+						url: ' search_condition.html',
+						bounces: false,
+						pageParam: {
+							key: 'value'
+						}
+					});
+				},
+				search: function () {
+					var _this = this;
+					if (_this.member_random_id == '') {
+						api.toast({
+							msg: '请输入ID',
+							duration: 2000,
+							location: 'bottom'
+						});
+						return false;
+					}
+					$$.ajaxData('MySearch', {
+						member_random_id: _this.member_random_id,
+					}, function (ret, err) {
+						if (ret.status) {
+							if (ret.data == '') {
+								_this.showempty = true;
+							} else {
+								_this.searchlist = ret.data;
+							}
+						}
+					})
+				},
+				openMemberDetail: function (id) {
+					if ($api.getStorage('uid') == id) {
+						api.openWin({
+							name: 'myinfo',
+							url: 'my_info.html',
+							slidBackEnabled: false
+						});
+					} else {
+						api.openWin({
+							name: 'member_detail',
+							url: 'member_detail.html',
+							slidBackEnabled: false,
+							pageParam: {
+								member_id: id
+							}
+						});
+					}
+				},
+			},
+		})
+	}
+</script>

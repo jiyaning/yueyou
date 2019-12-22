@@ -1,0 +1,114 @@
+// out: ../css/label.css
+@import 'common';
+#wrap,
+#app {
+  height: auto;
+}
+
+html,
+body {
+  background-color: #F7F7F7;
+}
+
+.label {
+  padding: 0 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  flex-wrap: wrap;
+  span {
+    margin: 5px;
+    padding: 3px 10px;
+    color: #fff;
+    border-radius: 20px;
+    box-sizing: border-box;
+    background: @main-color;
+    border: 1px solid @main-color;
+  }
+}
+
+.labeltitle {
+  font-size: 15px;
+  color: #757277;
+  font-weight: bold;
+}
+
+.helptitle {
+  color: #5f5c5c;
+}
+
+.help {
+  color: #b3aeae;
+  p {
+    line-height: 24px;
+    margin: 0;
+    color: #b3aeae;
+  }
+}
+
+.label span:nth-child(2n) {
+  background-color: #74daf1;
+  border: 1px solid #74daf1;
+}
+
+.label span:nth-child(3n) {
+  background-color: #11fbe5;
+  border: 1px solid #11fbe5;
+}
+
+.label span:nth-child(4n) {
+  background-color: #ff74a0;
+  border: 1px solid #ff74a0;
+}
+
+.label span:nth-child(5n) {
+  background-color: #fbdd48;
+  border: 1px solid #fbdd48;
+}
+
+.label span:nth-child(6n) {
+  background-color: #fd8787;
+  border: 1px solid #fd8787;
+}
+
+.label span:nth-child(7n) {
+  background-color: #95b3ea;
+  border: 1px solid #95b3ea;
+}
+
+.label span:nth-child(8n) {
+  background-color: #e89bdb;
+  border: 1px solid #e89bdb;
+}
+
+.label span:nth-child(9n) {
+  background-color: #f5c04a;
+  border: 1px solid #f5c04a;
+}
+
+.label span.selectLabel {
+  background-color: @main2-color;
+  border: 1px solid @main2-color;
+}
+
+p {
+  padding-left: 16px;
+  color: #555;
+  margin: 15px 0;
+  .iconfont {
+    margin-left: 6px;
+  }
+}
+
+.btn-wrap {
+  padding-top: 50px;
+  .btn1 {
+    width: 80%;
+    height: 40px;
+    line-height: 40px;
+    margin: 0 auto 0;
+    display: block;
+    background-color: @main2-color;
+    color: #fff;
+    border-radius: 30px;
+  }
+}

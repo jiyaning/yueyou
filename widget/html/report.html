@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>投诉举报</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">投诉举报</h1>
+				</div>
+			</header>
+			<div class="my-status flex-con">
+				<p style="line-height:40px;padding:0 10px;">请选择举报原因:</p>
+				<div class="statuslist">
+					<div class="item">
+						<label for="wurao">
+							<span>淫秽色情</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 1  ? 'true' : ''" value="1" type="radio" name="gifts" id="radio1"
+							 class="chk_1" />
+							<label for="radio1"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="wurao">
+							<span>广告骚扰</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 2  ? 'true' : ''" type="radio" value="2" name="gifts" id="radio2"
+							 class="chk_1" />
+							<label for="radio2"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="houtai">
+							<span>泄露隐私</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 3  ? 'true' : ''" type="radio" value="3" name="gifts" id="radio3"
+							 class="chk_1" />
+							<label for="radio3"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>恶意造谣</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 4  ? 'true' : ''" type="radio" value="4" name="gifts" id="radio4"
+							 class="chk_1" />
+							<label for="radio4"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>政治敏感</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 5  ? 'true' : ''" type="radio" value="5" name="gifts" id="radio5"
+							 class="chk_1" />
+							<label for="radio5"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>求约欺诈</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 6  ? 'true' : ''" type="radio" value="6" name="gifts" id="radio6"
+							 class="chk_1" />
+							<label for="radio6"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>暴力辱骂</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 7  ? 'true' : ''" type="radio" value="7" name="gifts" id="radio7"
+							 class="chk_1" />
+							<label for="radio7"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>红包任务未完成</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 8  ? 'true' : ''" type="radio" value="8" name="gifts" id="radio8"
+							 class="chk_1" />
+							<label for="radio8"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>违法（恐吓勒索、诈骗）</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 9  ? 'true' : ''" type="radio" value="9" name="gifts" id="radio9"
+							 class="chk_1" />
+							<label for="radio9"></label>
+						</div>
+					</div>
+				</div>
+				<div class="btn-wrap">
+					<button style="margin-top:20px;" @click="opencomplaints()" id="submit-btn" type="button">下一步</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+
+			},
+			methods: {
+				opencomplaints: function () {
+					api.openWin({
+						name: 'opencomplaints',
+						url: 'complaints.html',
+						pageParam: {
+							member_id:api.pageParam.member_id,
+							status: $api.dom('input[name=gifts]:checked').value,
+						}
+					});
+					api.closeWin();
+				},
+			}
+		})
+	}
+</script>
+
+</html>

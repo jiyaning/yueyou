@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的密友</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myfriends.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的密友</h1>
+					<div class="header-right">
+						<span @click="openfriendshelp()">帮助</span>
+					</div>
+				</div>
+			</header>
+			<div class="empty-data" v-if="friendslist.length == 0">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无密友~</div>
+			</div>
+			<div class="friendslist" style="margin-top:68px">
+				<div v-for="(item ,index) in friendslist" :key="item.id" class="friend flex-wrap" @click="openMemberDetail(item.member.member_id)">
+					<div class="personname">
+						<div class="hezi">
+							<img id="avatar" :src="item.member.avatar" alt="">
+						</div>
+					</div>
+					<div class="info">
+						<span class="name">{{item.member.name}}</span>
+						<span class="sex sex1" v-if="item.member.sex==1">
+							<i class="iconfont icon-nan"></i>{{item.member.age}}
+						</span>
+						<span class="sex sex2" v-else>
+							<i class="iconfont icon-nv"></i>{{item.member.age}}
+						</span>
+						<span class="vip" v-if="item.member.level==1">
+							<img class="vip1" src="../image/VIP.png" alt="" style="height:65%;margin-bottom: -2px;margin-left: -4px">
+						</span>
+						<p class="qianming" v-if="item.member.sale_column==null">暂无技能信息</p>
+						<p class="qianming" v-else>{{item.member.sale_column}}</p>
+					</div>
+					<span class="follow-icon"><i class="iconfont icon-xiangyou"></i></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				friendslist: [],
+				money: '',
+			},
+			mounted: function () {
+				this.friendlist();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				friendlist: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('Friend', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						if (ret.status) {
+							api.hideProgress();
+							_this.friendslist = ret.data.data;
+							_this.money = ret.extra;
+						}
+					})
+				},
+				openfriendshelp: function () {
+					api.alert({
+						title: '帮助',
+						msg: '达到' + this.money + '钻石消费值即可成为密友，密友之间可免费聊天。',
+						buttons: ['知道了']
+					});
+					return false;
+				},
+				openMemberDetail: function (id) {
+					api.openWin({
+						name: 'member',
+						url: 'member_detail.html',
+						slidBackEnabled: false,
+						pageParam: {
+							member_id: id
+						}
+					});
+				},
+			},
+		})
+	}
+</script>

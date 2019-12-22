@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>状态设置</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my.css" />
+
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">状态设置</h1>
+				</div>
+			</header>
+			<div class="my-status flex-con">
+				<div class="statuslist">
+					<div class="item">
+						<label for="wurao">
+							<span>在线</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 0  ? 'true' : ''" value="0" type="radio" name="gifts" id="radio1"
+							 class="chk_1" />
+							<label for="radio1"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="wurao">
+							<span>勿扰</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 1  ? 'true' : ''" type="radio" value="1" name="gifts" id="radio2"
+							 class="chk_1" />
+							<label for="radio2"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="houtai">
+							<span>繁忙转离线</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 2  ? 'true' : ''" type="radio" value="2" name="gifts" id="radio3"
+							 class="chk_1" />
+							<label for="radio3"></label>
+						</div>
+					</div>
+					<div class="item">
+						<label for="outline">
+							<span>只接听密友电话</span>
+						</label>
+						<div class="right">
+							<input :checked="api.pageParam.fake_status == 3  ? 'true' : ''" type="radio" value="3" name="gifts" id="radio4"
+							 class="chk_1" />
+							<label for="radio4"></label>
+						</div>
+					</div>
+				</div>
+				<div class="beizhu">
+					<p>1、约游状态分为四种：在线、勿扰、繁忙、离线</p>
+					<p>2、在线：接听所有人电话</p>
+					<div class="list1" v-show="list1Show">
+						<p>3、勿扰：拒绝接听所有人电话，只能给你发消息。</p>
+						<p>4、繁忙转离线：未接电话前，显示在线状态，接电话后不显示繁忙，显示离线状态</p>
+						<p>5、只接听密友电话：只有成为你的密友才能给你打电话</p>
+						<p @click="list1hide" class="list" style="text-align:center">收回</p>
+					</div>
+					<p @click="list1" class="list">{{title1}}</p>
+					<div class="btn">
+						<button @click="statusBtn" id="submit-btn" type="button">确定</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				list1Show: false,
+				title1: '查看更多规则 >>>',
+			},
+			methods: {
+				statusBtn: function () {
+					$$.ajaxData('MyStatus', {
+						uid: $api.getStorage('uid'),
+						status: $api.dom('input[name=gifts]:checked').value
+					}, function (ret, err) {
+						if (api.pageParam.level != 1) {
+							if ($api.dom('input[name=gifts]:checked').value == 2 || $api.dom('input[name=gifts]:checked').value == 3) {
+								api.confirm({
+									title: '提醒',
+									msg: ret.msg,
+									buttons: ['立即开通', '取消']
+								}, function (ret, err) {
+									if (ret.buttonIndex == 1) {
+										setTimeout(function () {
+											api.openWin({
+												name: 'my_vip',
+												url: 'my_vip.html',
+												slidBackEnabled: false
+											});
+										}, 500);
+									}
+									if (ret.buttonIndex == 2) {
+										return false;
+										api.closeWin();
+									}
+								});
+							}
+							else {
+								api.alert({
+									title: '提醒',
+									msg: ret.msg,
+									buttons: ['确定']
+								});
+							}
+						}
+						if (api.pageParam.level == 1) {
+							api.alert({
+								title: '提醒',
+								msg: ret.msg,
+								buttons: ['确定']
+							});
+						}
+						if (ret.status) {
+							api.sendEvent({
+								name: 'refreshMy',
+							});
+							setTimeout(function () {
+								api.closeWin();
+							}, 1500);
+						}
+					})
+				},
+				list1: function () {
+					this.list1Show = true;
+					this.title1 = ""
+				},
+				list1hide: function () {
+					this.list1Show = false;
+					this.title1 = "查看更多 >>>"
+				},
+			}
+		})
+	}
+</script>
+
+</html>

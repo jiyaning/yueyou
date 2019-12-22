@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"
+	/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>子约玩法攻略</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my.css" />
+</head>
+
+<body>
+	<div id="app" class="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">子约玩法攻略</h1>
+				</div>
+			</header>
+			<nav id="nav" class="nav">
+				<span @click="tab(1)" :class="['menu',zIndex == 1 ? 'selected' : '']">怎么约</span>
+				<span @click="tab(2)" :class="['menu',zIndex == 2 ? 'selected' : '']">福利约</span>
+				<span @click="tab(3)" :class="['menu',zIndex == 3 ? 'selected' : '']">特权</span>
+				<span @click="tab(4)" :class="['menu',zIndex == 4 ? 'selected' : '']">赚钱</span>
+				<span @click="tab(5)" :class="['menu',zIndex == 5 ? 'selected' : '']">规则</span>
+			</nav>
+			<div id="main" class="play-con flex-con">
+				<div class="play-list" v-if="zIndex==1">
+					<div class="play-item" style="padding-top:10px;">
+						<h3 style="padding:0;">子约简介</h3>
+						<p>子约是一个陌生人语音交友与约会平台，你可以找你喜欢的人与声音陪你语音聊天、玩游戏、谈情说爱、约会、约拍照以及约旅游。你还可以在这里租女友、处对象、奔现。</p>	
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>怎们轻松约会</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>完善你的资料</h5></div>
+							<p>取个好听的名字，上传帅气、漂亮的美照，录制一段你最好听最吸引人的语音。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-location"></i></span><h5>填写地区和标签</h5></div>
+							<p>填写你的所在地区，魅力标签以及喜欢的异性标签，子约将推荐同地区以及标签匹配的异性给你。同时向你推荐同地区及标签匹配的异性。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-guanzhu1"></i></span><h5>关注与动态</h5></div>
+							<p>关注更多约友，上传更多照片、视频、发布更多个人语音动态，全方位展示你的魅力。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-call"></i></span><h5>聊天打电话</h5></div>
+							<p>在同城约、约游、约聊版块里找异性聊天和打电话，你所看到的异性都是为你精挑细选的。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-xin"></i></span><h5>上求约墙</h5></div>
+							<p>在求约墙报名参加异性的约会，或者自己发布约拍、约游、同城约信息，让异性来约你。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-hongbao"></i></span><h5>红包约</h5></div>
+							<p>在求约墙抢任务红包，或者自己发布红包约，让异性完成你的红包任务，各种花样让你玩。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-hongbao"></i></span><h5>登上爱意墙</h5></div>
+							<p>送小礼物给你喜欢的异性，几块钱就能上墙表达爱意，让更多的Ta看到你，来主动约你</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-huangguan21"></i></span><h5>登上大神榜</h5></div>
+							<p>通过魅力排名与富豪排名，展示你的魅力与实力，让更多的Ta看到你，来主动约你。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-vip"></i></span><h5>成为Vip会员</h5></div>
+							<p>获得大量特权，并享受系统帮你推荐给更多异性，让你获得海量展示，让TA们主动来约你。</p>
+						</div>
+						<h4>总结：</h4>
+						<p>各位亲爱的约友，其实约会很简单，因为陌生社交最重要的就是第一感觉，而在互联网上，我们能展示就是我们的动人的文字、特色的声音、帅气漂亮的照片以及迷人的视频，而后通过你人格魅力与个人综合实力的展示，获取对方的芳心与爱意。</p>
+					
+					</div>
+				</div>
+				
+				<div class="play-list" v-if="zIndex==2">
+					<div class="play-item" style="padding-top:10px;">
+						<h3 style="padding:0;">子约福利</h3>
+						<p>在子约，你能玩尽你想玩的，同时你还能享受各种福利，邀请朋友注册APP或者成为我们的推广员，你就可以得到邀请奖励钻石，同时你还能获得朋友及你推广来的会员消费钻石的5%提成，朋友赚取钻石的5%提成，让你在子约免费就能各种约。</p>	
+					</div>
+					<div class="play-item">
+						<a @click="openShare" class="play_btn">免费获得钻石</a>
+					</div>
+						
+				</div>
+				<div class="play-list" v-if="zIndex==3">
+					<div class="play-item" style="padding-top:10px;">
+						<h3 style="padding:0;">约友不一样</h3>
+						<p>子约作为一个真人严肃的绿色交友平台，注册用户量大，有很多互动玩法，不排除可能会出现一些类似于酒托、饭托、骗子等不法分子，所以为了保障你的权益，请切勿相信任何转账要求。</p>	
+					</div>
+					<div class="play-item">
+						<h5>若出现以下情况，请及时投诉，避免财产损失：</h5>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>红包约任务</h5></div>
+							<p>抢红包者未在规定时间内完成规定任务的情况。（详情请查看规则）</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>求约墙</h5></div>
+							<p>约游、约拍、同城约中任意一种求约达成后，有一方出现未赴约的情况、饭托、酒托、骗子等让你产生损失情况。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>约聊</h5></div>
+							<p>在约聊板块，我们设有送礼物玩互动，包含疗伤谈心、叫醒、哄睡、连麦、PIA戏、网络游戏陪打等互动玩法，如果出现你送出礼物后，对方未完成的情况。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>投诉举报</h5></div>
+							<p>出现上述情况请立即投诉，若情况属实，我们将第一时间挽回你的财产损失，退还你的礼物并处罚违约方，处罚金额为礼物金额的20%，你将获得处罚金额的50%作为补偿。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>警告</h5></div>
+							<p>子约社交APP，不支持且严厉打击任何涉黄、涉赌、涉恐、涉政、涉暴力等违法行为，如果你遇到此类行为，请及时举报，我们将立马做封号处理。</p>
+						</div>
+					</div>
+				</div>
+				<div class="play-list" v-if="zIndex==4">
+					<div class="play-item" style="padding-top:10px;">
+						<h3 style="padding:0;">赚钱介绍</h3>
+						<p>子约不仅仅是一个绿色交友平台，也是一个你可以赚钱的平台，只要你有时间，善于聊天、会温暖人、有人格魅力、能给别人带来快乐或者游戏打得好、喜欢旅游、喜欢拍照等，你就能通过子约平台赚钱。</p>	
+					</div>
+					<div class="play-item" style="padding-top:10px;">
+						<h3 style="padding:0;">怎么赚更多钱</h3>
+						<p>你只需要淋漓尽致的展现出你的魅力与技能</p>	
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>第一步：魅力展示</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>昵称与头像</h5></div>
+							<p>别具一格的昵称，真实漂亮的头像</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>照片与视频</h5></div>
+							<p>上传更多真实漂亮的照片，上传更多可爱迷人的视频，充分展示自己</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>语音条</h5></div>
+							<p>在个人详情录制一段吸引人的语音条，用声音和内容展示你的魅力</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>求约墙</h5></div>
+							<p>发布约拍、约游、同城约，用语音和文字展示你的魅力</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>排名与曝光</h5></div>
+							<p>排名是你魅力标签匹配异性喜欢的标签后的结果，同时也与你与异性通话时间长短，收礼物多少有关，你越受欢迎曝光就越多，排名就越高，大神榜是最大的曝光平台。</p>
+						</div>
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>第二步：技能展示</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>入驻专线</h5></div>
+							<p>选择你的入驻专线，可选择3-6个，展示你的技能</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>我的技能</h5></div>
+							<p>在我的技能里输入你的技能，比如：叫醒、哄睡、闲聊、打游戏、约游、约拍、同城约等，并标注是否需要礼物，什么技能送什么礼物</p>
+						</div>
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>第三步：价格设定</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>电话费设定</h5></div>
+							<p>你需要设定好接电话每分钟收费金额，价格适中大话给你的人越多</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>微信费设置</h5></div>
+							<p>加你私人微信需付费查看。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>技能费设置</h5></div>
+							<p>你提供的每项技能设置不同价格的礼物，价格适中送你礼物的人越多</p>
+						</div>
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>第四步：推广邀请</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>成为我们的推广员</h5></div>
+							<p>成为我们的推广员，在微信、QQ或其他网站与APP邀请更多的朋友和陌生人一起来子约注册，注册就能获得钻石，同时还能获得你邀请的人的消费与收益的各5%提成。</p>
+						</div>
+					</div>
+				</div>
+				<div class="play-list" v-if="zIndex==5">
+					<div class="play-item" style="padding-top:10px;">
+						<h3 style="padding:0;">各版块玩法说明</h3>
+						<p>请各位约友严格遵守子约规则，避免被处罚。</p>	
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>一、约拍、约游、同城约</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>发布求约</h5></div>
+							<p>发布求约必须确保你的相册有3张以上真实个人照，同时个人魅力描述不能出现任何涉黄、涉赌、涉暴、涉政、联系方式等，否则发布不能通过。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>约会达成</h5></div>
+							<p>根据你喜欢，选择约TA，通过私聊或语音电话协商约会具体事宜，双方确认，即可点击达成约会按钮达成约会，开启你的约会之旅。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>赴约</h5></div>
+							<p>根据双方商定的具体时间地点赴约，开始你们的私人约会。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>举报投诉</h5></div>
+							<p>若遇到饭托、酒托、骗子或未赴约等情况，请及时举证投诉，我们将核实处理，给予未赴约方处罚。</p>
+						</div>
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>二、红包约</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>发布红包约</h5></div>
+							<p>在求约墙的红包约发布红包约任务。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>抢红包</h5></div>
+							<p>约友抢你的红包，开始完成你红包约任务。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>完成任务</h5></div>
+							<p>约友在1个小时内完成红包约任务，否则算未完成任务。特殊情况可提前协商完成时间。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>举报投诉</h5></div>
+							<p>如出现为在规定或协商的时间内按要求完成任务，请立即举证投诉，我们将核实处理，给予未完成方处罚。</p>
+						</div>
+					</div>
+					<div class="play-item">
+						<i class="icon1 iconfont icon-hongxin"></i>
+						<h3>三、约聊</h3>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>设定价格</h5></div>
+							<p>在我的技能里设定你每项技能的礼物价格</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>送礼物</h5></div>
+							<p>打电话时，约友按技能礼物价格送礼物</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>举报投诉</h5></div>
+							<p>约友在1个小时内完成红包约任务，否则算未完成任务。特殊情况可提前协商完成时间。</p>
+						</div>
+						<div class="info">
+							<div class="info-title"><span><i class="iconfont icon-ziliaoguanli"></i></span><h5>举报投诉</h5></div>
+							<p>若出现技能提供方未能按其所述完全完成，请及时举证投诉我们将核实处理，给予未完成方处罚。</p>
+						</div>
+						<h4>警告:</h4>
+						<p>子约社交APP，不支持且严厉打击任何涉黄、涉赌、涉恐、涉政、涉暴力、辱骂等违法违规行为，如果你遇到此类行为，请约友及时举报，我们将立马做封号处理。</p>
+					
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				zIndex:1,
+			},
+			created: function () {
+			},
+			mounted: function () {
+			},
+			methods: {	
+				tab:function(i){
+					var _this = this;
+					_this.zIndex = i;
+				},
+				openShare:function(){
+					api.openWin({
+						name: 'share',
+						url: 'share.html',
+						slidBackEnabled: false,
+					});
+				}
+			},
+			filters: {
+			}
+		})
+	}
+</script>

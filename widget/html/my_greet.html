@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>打招呼</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/my.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical my-greet">
+			<header id="header" style="position:fixed;width: 100%">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">打招呼设置</h1>
+					<div class="header-right" @click="show1can">
+						<span>帮助</span>
+					</div>
+				</div>
+			</header>
+			<div class="list" v-if="show1">
+				<div class="title">
+					<span>打招呼设置</span>
+				</div>
+				<p>自动打招呼是VIP特权，是让你可以更快捷、方便找到你喜欢的人聊天。</p>
+				<p class="titlecolor">规则：</p>
+				<p>自动打招呼分为三句，系统会帮助自动给你选择的对象发三句话。</p>
+				<p>1、开场白打招呼</p>
+				<p>(你可以设置三句开场白，系统随机选择发送1句给对方)</p>
+				<p>2、深入打招呼</p>
+				<p>（ 你可以设置三句聊天内容，系统随机选择发送1句)</p>
+				<p>3、语音展示你的声音</p>
+				<p>（你可以录三句语音消息，系统随机选择发送1句)</p>
+				<p>打招呼对象选择：</p>
+				<p>系统将会根据你选择的自动打招呼的对象，自动匹配你选择的对象，发送你设置好的内容。</p>
+				<p class="titlecolor">提醒:</p>
+				<p>1、 自动打招呼每条信息收费一钻石，你可以只设置二句话，也可以设置三句话。语音消息必须选择设置哦，更全面的完美展示你。</p>
+				<p>2、自动打招呼最低要求选择10人，最多100人，提前扣除打招呼所需的钻石。当打招呼进行中时不能暂停，自动打招呼完成后则可以继续设置打招呼。</p>
+				<p class="titlecolor">警告：</p>
+				<p>自动打招呼内容，严禁出现黄赌毒、暴力、政治等违法内容，一经发现与被举报，官方将立即封号。</p>
+				<div class="title" @click="show1nocan" style="border-top:1px solid #f7f7f7;margin-top: 10px;">
+					<span style="background-color:#f1d5e2;color: #333;padding: 5px 30px;border-radius: 8px;height: 24px;line-height: 24px;">知道了</span>
+				</div>
+			</div>
+			<div class="flex-con" style="margin-top:64px;">
+				<div class="renzheng">
+					<div class="title">
+						<div class="box">
+							<i class="iconfont icon-shouye"></i>
+						</div>
+						<span>问候</span>
+					</div>
+					<div class="content">
+						<div class="beizhu">
+							<div class="label">
+								<span>备选1</span><input type="text" v-model="form.one_1" placeholder="例如：在吗？">
+							</div>
+							<div class="label">
+								<span>备选2</span><input type="text" v-model="form.one_2" placeholder="例如：在干嘛呢？">
+							</div>
+							<div class="label">
+								<span>备选3</span><input type="text" v-model="form.one_3" placeholder="例如：有时间吗？">
+							</div>
+						</div>
+						<div v-if="form.one_1 != ''&& form.one_2 != ''&& form.one_3 != ''" class="btn1" @click="sure">
+							<button>确定</button>
+						</div>
+						<div v-else class="btn2">
+							<button>确定</button>
+						</div>
+					</div>
+				</div>
+				<div class="renzheng">
+					<div class="title">
+						<div class="box">
+							<i class="iconfont icon-comment"></i>
+						</div>
+						<span>聊天</span>
+					</div>
+					<div class="content">
+						<div class="beizhu">
+							<div class="label">
+								<span>备选1</span><input type="text" v-model="form.two_1" placeholder="例如：有空吗现在？">
+							</div>
+							<div class="label">
+								<span>备选2</span><input type="text" v-model="form.two_2" placeholder="例如：这会儿有时间吗？">
+							</div>
+							<div class="label">
+								<span>备选3</span><input type="text" v-model="form.two_3" placeholder="例如：能陪我聊会天吗？">
+							</div>
+						</div>
+						<div v-if="form.two_1 != ''&& form.two_2 != ''&& form.two_3 != ''" class="btn1" @click="sure">
+							<button>确定</button>
+						</div>
+						<div v-else class="btn2">
+							<button>确定</button>
+						</div>
+					</div>
+				</div>
+				<div class="renzheng">
+					<div class="title">
+						<div class="box">
+							<i class="iconfont icon-yuyin"></i>
+						</div>
+						<span>语音</span>
+					</div>
+					<div class="content">
+						<div class="beizhu1">
+							<div class="label">
+								<div v-if="!audioUrl1" class="btn-item" @touchstart="voiceTouchstart(1)" @touchend="voiceTouchend(1)">
+									<p>语音1</p>
+									<i class="iconfont icon-fabu-yuyin"></i>
+								</div>
+								<div v-if="!!audioUrl1" @click="playVoice(1)" class="btn-item">
+									<img :src="audioIcon1" alt="">
+									<span>{{audioDuration1}}</span>
+									<p>
+										<i @click="deleteAudio(1)" class="iconfont icon-guanbi"></i></p>
+								</div>
+							</div>
+							<div class="label">
+								<div v-if="!audioUrl2" class="btn-item" @touchstart="voiceTouchstart(2)" @touchend="voiceTouchend(2)">
+									<p>语音2</p>
+									<i class="iconfont icon-fabu-yuyin"></i>
+								</div>
+								<div v-if="!!audioUrl2" @click="playVoice(2)" class="btn-item">
+									<img :src="audioIcon2" alt="">
+									<span>{{audioDuration2}}</span>
+									<p>
+										<i @click="deleteAudio(2)" class="iconfont icon-guanbi"></i>
+									</p>
+								</div>
+							</div>
+							<div class="label">
+								<div v-if="!audioUrl3" class="btn-item" @touchstart="voiceTouchstart(3)" @touchend="voiceTouchend(3)">
+									<p>语音3</p>
+									<i class="iconfont icon-fabu-yuyin"></i>
+								</div>
+								<div v-if="!!audioUrl3" @click="playVoice(3)" class="btn-item">
+									<img :src="audioIcon3" alt="">
+									<span>{{audioDuration3}}</span>
+									<p>
+										<i @click="deleteAudio(3)" class="iconfont icon-guanbi"></i>
+									</p>
+								</div>
+							</div>
+						</div>
+						<div v-if="audioDuration3 != ''&& audioDuration2 != ''&& audioDuration3 != ''" class="btn1" @click="sure">
+							<button>确定</button>
+						</div>
+						<div v-else class="btn2" style="margin-top:72px">
+							<button>确定</button>
+						</div>
+					</div>
+				</div>
+				<div class="renzheng">
+					<div class="title">
+						<div class="box">
+							<i class="iconfont icon-user"></i>
+						</div>
+						<span>打招呼对象</span><span style="margin-left:150px;color: #573e84; border: 1px solid #573e84;box-sizing: border-box;padding: 10px 0;width: 60px;border-radius: 4px;height: 34px;line-height: 12px;text-align: center;"
+						 @click="openLabel(6)">选择</span>
+					</div>
+					<div class="content" style="height:110px;">
+						<div class="beizhu">
+							<p v-for="(item,index) in likeLabel">{{item.tag}}</p>
+						</div>
+						<div v-if="likeLabel != ''&& likeLabel !=null" class="btn1" @click="sure">
+							<button>确定</button>
+						</div>
+						<div v-else class="btn2">
+							<button>确定</button>
+						</div>
+					</div>
+				</div>
+				<div class="renzheng">
+					<div class="title">
+						<div class="box">
+							<i class="iconfont icon-user"></i>
+						</div>
+						<span>打招呼人数</span><input v-model="form.set_people" type="text" placeholder="人数为10--100" style="line-height:40px;text-align: center;width: 120px;">
+						<span v-if="form.set_people != ''&& form.set_people !=null" class="btn1" @click="sure1" style="margin-left:25px;"><button>确定</button></span>
+						<span v-else class="btn2" style="margin-left:34px;"><button style="width: 60px;padding: 10px 0;border: 1px solid #573e84;border-radius: 4px;color: #573e84">确定</button></span>
+					</div>
+				</div>
+			</div>
+			<div v-if="voiceGif" class="voice-gif">
+				<img src="../image/voice.gif" alt="">
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				audioZindex: null,
+				show1: false,
+				form: {
+					uid: $api.getStorage('uid'),
+					sex: api.pageParam.sex,
+					one_1: '',
+					one_2: '',
+					one_3: '',
+					two_1: '',
+					two_2: '',
+					two_3: '',
+					audio1: '',
+					audio2: '',
+					audio3: '',
+					timer_1: '',
+					timer_2: '',
+					timer_3: '',
+					set_people: '',
+					set_option: '',
+				},
+				voiceGif: false,
+				audioIcon1: '../image/stop.png',
+				audioIcon2: '../image/stop.png',
+				audioIcon3: '../image/stop.png',
+				audioUrl1: '',
+				audioUrl2: '',
+				audioUrl3: '',
+				qiniuToken: '',
+				audioDuration1: '',
+				audioDuration2: '',
+				audioDuration3: '',
+				likeLabel: '',
+			},
+			created: function () {
+				var _this = this;
+				api.addEventListener({
+					name: 'myEventgreet'
+				}, function (ret, err) {
+					_this.likeLabel = ret.value.key1;
+					_this.form.set_option = _this.likeLabel;
+				})
+
+			},
+			mounted: function () {
+				this.getQiniuToken();
+				this.getmygreetinfo();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				getmygreetinfo() {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MySaySelect', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.form.one_1 = ret.data.one_1;
+							_this.form.one_2 = ret.data.one_2;
+							_this.form.one_3 = ret.data.one_3;
+							_this.form.two_1 = ret.data.two_1;
+							_this.form.two_2 = ret.data.two_2;
+							_this.form.two_3 = ret.data.two_3;
+							_this.form.audio1 = ret.data.audio1;
+							_this.form.audio2 = ret.data.audio2;
+							_this.form.audio3 = ret.data.audio3;
+							_this.form.timer_1 = ret.data.timer_1;
+							_this.form.timer_2 = ret.data.timer_2;
+							_this.form.timer_3 = ret.data.timer_3;
+							_this.form.set_people = ret.data.set_people;
+							_this.form.set_option = ret.data.set_option;
+						}
+					})
+				},
+				// 获取七牛token
+				getQiniuToken: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('qniu', {
+						uid: $api.getStorage('uid'),
+					}, function (ret, err) {
+						api.refreshHeaderLoadDone();
+						api.hideProgress();
+						if (ret.status) {
+							_this.qiniuToken = ret.data;
+						}
+					})
+				},
+				uploadFiles: function (fileUrl) {
+					var _this = this;
+					api.ajax({
+						url: qiniuBaseUrl,
+						method: 'post',
+						data: {
+							values: {
+								token: _this.qiniuToken
+							},
+							files: {
+								file: fileUrl
+							}
+						}
+					}, function (ret, err) {
+						if (ret) {
+							_this.form['audio' + _this.audioZindex] = ret.key;
+						}
+						if (err) {
+							api.toast({
+								msg: '网络错误，请稍后再试',
+								duration: 2000,
+								location: 'bottom'
+							});
+						}
+					});
+				},
+				voiceTouchstart: function (i) {
+					this.voiceGif = true;
+					api.startRecord({
+						path: 'fs://ziyue_' + (+new Date()) + '.amr'
+					});
+				},
+				show1can: function () {
+					var _this = this;
+					_this.show1 = true;
+				},
+				show1nocan: function () {
+					var _this = this;
+					_this.show1 = false;
+				},
+				voiceTouchend: function (i) {
+					var _this = this;
+					_this.voiceGif = false;
+					_this.audioZindex = i;
+					api.stopRecord(function (ret, err) {
+						if (ret) {
+							if (i == 1) {
+								_this.audioDuration1 = ret.duration;
+								_this.form.timer_1 = ret.duration;
+								_this.audioUrl1 = ret.path;
+							}
+							if (i == 2) {
+								_this.audioDuration2 = ret.duration;
+								_this.form.timer_2 = ret.duration;
+								_this.audioUrl2 = ret.path;
+							}
+							if (i == 3) {
+								_this.audioDuration3 = ret.duration;
+								_this.form.timer_3 = ret.duration;
+								_this.audioUrl3 = ret.path;
+							}
+							_this.uploadFiles(ret.path);
+						}
+					});
+				},
+				// 播放语音
+				playVoice: function (i) {
+					var _this = this;
+					var audioPath = '';
+					_this.audioZindex = i;
+					if (_this.audioZindex == 1) {
+						audioPath = _this.audioUrl1;
+						_this.audioIcon1 = '../image/playing.gif';
+					}
+					if (_this.audioZindex == 2) {
+						audioPath = _this.audioUrl2;
+						_this.audioIcon2 = '../image/playing.gif';
+					}
+					if (_this.audioZindex == 3) {
+						audioPath = _this.audioUrl3;
+						_this.audioIcon3 = '../image/playing.gif';
+					}
+					api.startPlay({
+						path: audioPath
+					}, function (ret, err) {
+						if (_this.audioZindex == 1) {
+							_this.audioIcon1 = '../image/stop.png';
+						}
+						if (_this.audioZindex == 2) {
+							_this.audioIcon2 = '../image/stop.png';
+						}
+						if (_this.audioZindex == 3) {
+							_this.audioIcon3 = '../image/stop.png';
+						}
+					});
+				},
+				deleteAudio: function (i) {
+					var _this = this;
+					_this.audioZindex = i;
+					if (_this.audioZindex == 1) {
+						_this.form.audio_1 = '';
+						_this.form.timer_1 = '';
+						_this.audioUrl1 = '';
+					}
+					if (_this.audioZindex == 2) {
+						_this.form.audio_2 = '';
+						_this.form.timer_2 = '';
+						_this.audioUrl2 = '';
+					}
+					if (_this.audioZindex == 3) {
+						_this.form.audio_3 = '';
+						_this.form.timer_3 = '';
+						_this.audioUrl3 = '';
+					}
+				},
+				sure: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('MySay', _this.form, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: '设置成功',
+							duration: 2000,
+							location: 'bottom'
+						});
+					})
+				},
+				sure1: function () {
+					var _this = this;
+					if (isNaN(_this.form.set_people)) {
+						api.alert({
+							title: '提醒',
+							msg: '请输入正确的打招呼人数',
+							buttons: ['知道了']
+						});
+						return false;
+					} else if (Math.floor(_this.form.set_people) != _this.form.set_people) {
+						api.alert({
+							title: '提醒',
+							msg: '打招呼人数须为整数',
+							buttons: ['知道了']
+						});
+						return false;
+					} else if (_this.form.set_people < 10 || _this.form.set_people > 100) {
+						api.alert({
+							title: '提醒',
+							msg: '打招呼人数须为30--100人',
+							buttons: ['知道了']
+						});
+						return false;
+					} else if (_this.form.timer_1 < 5 || _this.form.timer_2 < 5 || _this.form.timer_3 < 5) {
+						api.alert({
+							title: '提醒',
+							msg: '打招呼语音时长不能低于5秒',
+							buttons: ['知道了']
+						});
+						return false;
+					}
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					if (_this.likeLabel != null && _this.likeLabel != '') {
+						// for (var i = 0; i < _this.likeLabel.length; i++) {
+						// 	_this.form.set_option += _this.likeLabel[i].id + ',';
+						// }
+						_this.form.set_option = _this.likeLabel;
+					}
+					$$.ajaxData('MySay', _this.form, function (ret, err) {
+						api.hideProgress();
+						api.toast({
+							msg: '设置成功',
+							duration: 2000,
+							location: 'bottom'
+						});
+					})
+				},
+				openLabel: function () {
+					var _this = this;
+					api.openWin({
+						name: 'label1',
+						url: 'label1.html',
+						bounces: false,
+						pageParam: {
+							key: 'value',
+							sex: _this.form.sex,
+						}
+					});
+				},
+			},
+		})
+	}
+</script>
+
+</html>

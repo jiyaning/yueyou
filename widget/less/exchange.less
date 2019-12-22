@@ -1,0 +1,59 @@
+// out: ../css//exchange.css
+@import 'common';
+
+html,
+body {
+	background-color: #F7F7F7;
+}
+
+.label {
+	display: flex;
+	padding: 0 10px;
+	line-height: 48px;
+	background-color: #fff;
+	box-sizing: border-box;
+	border-bottom: 1px solid #efefef;
+
+	.value {
+		flex: 1;
+		display: flex;
+		align-items: center;
+	}
+
+	input {
+		width: 100%;
+		outline: none;
+		line-height: 30px;
+	}
+
+	.title {
+		width: 100px;
+	}
+
+	.all {
+		background-color: @main2-color;
+		color: #fff;
+		float: right;
+		border-radius: 6px;
+		height: 30px;
+		line-height: 30px;
+		box-sizing: border-box;
+		margin-top: 9px;
+		padding: 0 6px;
+	}
+}
+
+.btn {
+	margin-top: 20px;
+
+	button {
+		width: 80%;
+		height: 40px;
+		line-height: 40px;
+		margin: 50px auto 0;
+		display: block;
+		background-color: #573e84;
+		color: #fff;
+		border-radius: 30px;
+	}
+}

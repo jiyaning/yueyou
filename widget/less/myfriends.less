@@ -1,0 +1,151 @@
+// out: ../css/myfriends.css
+@import 'common';
+html,
+body {
+  background-color: #f7f7f7;
+}
+
+#wrap,
+#app,
+#main {
+  height: auto;
+}
+
+header {
+  position: fixed;
+  width: 100%;
+}
+
+nav {
+  position: fixed;
+  margin-top: 62px;
+  .flex-wrap();
+  width: 100%;
+  padding: 10px 0;
+  box-sizing: border-box;
+  background-color: #fff;
+  justify-content: space-around;
+  margin-bottom: 5px;
+  .menu {
+    width: 80px;
+    line-height: 30px;
+    border-radius: 25px;
+    background-color: #f7f7f7;
+    color: #101010;
+    text-align: center;
+    padding: 2px 10px;
+    box-shadow: 0px 2px 2px 0px rgba(120, 120, 120, 0.239);
+    &.selected {
+      background-color: @main2-color;
+      color: #fff;
+    }
+  }
+}
+
+.empty-data {
+  width: 100%;
+  text-align: center;
+  padding-top: 100px;
+  .empty-img {
+    width: 150px;
+    margin: 80px auto 10px;
+    display: block;
+  }
+  .empty-text {
+    font-size: 12px;
+    text-align: center;
+    display: block;
+  }
+}
+
+.friendslist {
+  margin-top: 115px;
+  .friend {
+    height: 70px;
+    border-bottom: 1px solid #d9d9d9;
+    .personname {
+      width: 13%;
+      line-height: 50px;
+      text-align: center;
+      margin: 10px;
+      .hezi {
+        width: 50px;
+        height: 50px;
+        img {
+          height: 100%;
+          border-radius: 50%;
+        }
+      }
+    }
+    .info {
+      line-height: 20px;
+      padding-top: -10px;
+      span {
+        height: 25px;
+        line-height: 25px;
+      }
+      .name {
+        font-size: 16px;
+      }
+      .sex {
+        width: 40px;
+        height: 16px;
+        line-height: 16px;
+        text-align: center;
+        margin: 6px 0;
+        margin-top: 20px;
+        color: #fff;
+        border-radius: 4px;
+        .iconfont {
+          font-size: 14px;
+        }
+      }
+      .sex1 {
+        background-color: @sex1-color;
+      }
+      .sex2 {
+        background-color: @sex2-color;
+      }
+      .qianming {
+        color: #e4dbdb;
+      }
+    }
+  }
+}
+
+.follow-icon {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  line-height: 50px;
+  .iconfont {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.promotedetail {
+  display: flex;
+  justify-content:space-around;
+  line-height: 50px;
+  border-bottom:1px solid #555; 
+  .promotelabel {
+    width: 100px;
+    display: flex;
+    .imgbox {
+      width: 20px;
+      height: 20px;
+      margin: 4px 4px 0;
+      img {
+        width: 100%;
+      }
+    }
+  }
+  .promotetitle,{
+    width: 20%;
+  }
+  .promotetime{
+    width: 40%;
+  }
+}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的收益</title>
+	<link rel="stylesheet" type="text/css" href="../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../css/myprofit.css" />
+</head>
+
+<body>
+	<div id="app" v-cloak>
+		<div id="wrap" class="flex-wrap flex-vertical">
+			<header id="header">
+				<div class="header-wrap">
+					<div class="header-left">
+						<i onclick="api.closeWin();" class="iconfont icon-fanhui"></i>
+					</div>
+					<h1 class="title">我的收益</h1>
+				</div>
+			</header>
+			<div class="empty-data" v-if="profitlist.length == 0">
+				<img class="empty-img" src="../image/empty.png">
+				<div class="empty-text">暂无收益~</div>
+			</div>
+			<div class="profitlist">
+				<div class="profit" v-for="(item, index) in profitlist" :key="item.id">
+					<div v-if="item.type == 1 || item.type == 2 || item.type == 3 || item.type == 4">
+						<div class="namebox">
+							<div class="imgbox">
+								<div class="imgbox1">
+									<img id="avatar" :src="item.member.avatar" alt="">
+								</div>
+							</div>
+							<div class="nametitle">
+								<p class="names"><span>{{item.member.name}}</span></p>
+								<p><span>送给您的礼物</span></p>
+							</div>
+						</div>
+						<div class="giftbox">
+							<div class="imgbox">
+								<div class="imgbox1">
+									<img id="avatar" :src="item.gift.file" alt="">
+								</div>
+							</div>
+							<div class="nametitle">
+								<p><span>礼物：</span><span class="gift">{{item.gift.name}}</span></p>
+								<div>
+									<span>价格：</span>
+									<span>{{item.gold}}</span>
+									<div class="zuanshibox">
+										<img src="../image/zuanshi.png" alt="">
+									</div>
+								</div>
+								<p><span>时间：</span><span>{{item.created_at}}</span></p>
+							</div>
+						</div>
+					</div>
+					<div v-if="item.type == 15">
+						<div class="namebox">
+							<div class="imgbox">
+								<div class="imgbox1">
+									<img id="avatar" :src="item.member.avatar" alt="">
+								</div>
+							</div>
+							<div class="nametitle">
+								<p class="names"><span>{{item.member.name}}</span></p>
+								<p><span>来自Ta的红包</span></p>
+							</div>
+						</div>
+						<div class="giftbox">
+							<div class="imgbox">
+								<div class="imgbox1">
+									<img id="avatar" :src="item.gift.file" alt="">
+								</div>
+							</div>
+							<div class="nametitle">
+								<p><span>红包：</span><span class="gift">{{item.gift.name}}</span></p>
+								<div>
+									<span>价格：</span>
+									<span>{{item.gift.gold}}</span>
+									<div class="zuanshibox">
+										<img src="../image/zuanshi.png" alt="">
+									</div>
+								</div>
+								<p><span>时间：</span><span>{{item.created_at}}</span></p>
+							</div>
+						</div>
+					</div>
+					<div v-if="item.type == 5">
+						<div class="namebox">
+							<div class="imgbox">
+								<div class="imgbox1">
+									<img id="avatar" :src="item.member.avatar" alt="">
+								</div>
+							</div>
+							<div class="nametitle">
+								<p class="names"><span>{{item.member.name}}</span></p>
+								<p><span>与Ta聊天</span></p>
+								<div class="cost">
+									<span>收益：{{item.gold}}</span>
+									<div class="zuanshibox">
+										<img src="../image/zuanshi.png" alt="">
+									</div>
+								</div>
+								<p><span>时间：</span><span>{{item.created_at}}</span></p>
+							</div>
+						</div>
+					</div>
+					<div v-if="item.type == 6">
+						<div class="namebox">
+							<div class="imgbox">
+								<div class="imgbox1">
+									<img id="avatar" :src="item.member.avatar" alt="">
+								</div>
+							</div>
+							<div class="nametitle">
+								<p class="names"><span>{{item.member.name}}</span></p>
+								<p><span>与Ta语音通话</span></p>
+								<div class="cost">
+									<span>收益：{{item.gold}}</span>
+									<div class="zuanshibox">
+										<img src="../image/zuanshi.png" alt="">
+									</div>
+								</div>
+								<p><span>时间：</span><span>{{item.created_at}}</span></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script>
+	var app;
+	apiready = function () {
+		$api.fixStatusBar($api.dom('#header'));
+		app = new Vue({
+			el: '#app',
+			data: {
+				profitlist: [],
+				page: 1,
+			},
+			created: function () {
+				var _this = this;
+				api.setRefreshHeaderInfo({
+					bgColor: '#141414',
+					textColor: '#fff',
+					textDown: '下拉刷新...',
+					textUp: '松开刷新...'
+				}, function (ret, err) {
+					if (!!$api.getStorage('token')) {
+						setTimeout(function () {
+							_this.page = 1;
+							_this.profitlist = [];
+							_this.profit();
+						}, 1000);
+					}
+				});
+				api.addEventListener({
+					name: 'scrolltobottom',
+					extra: {
+						threshold: 0
+					}
+				}, function (ret, err) {
+					_this.profit();
+				});
+			},
+			mounted: function () {
+				this.profit();
+			},
+			methods: {
+				// 后退
+				goback: function () {
+					api.closeWin();
+				},
+				profit: function () {
+					var _this = this;
+					api.showProgress({
+						title: '',
+						text: ''
+					});
+					$$.ajaxData('wallet', {
+						uid: $api.getStorage('uid'),
+						type: 'charm',
+						page: _this.page,
+					}, function (ret, err) {
+						if (ret.status) {
+							api.refreshHeaderLoadDone();
+							api.hideProgress();
+							if (ret.data.data.length != 0) {
+								_this.page++;
+								for (var i = 0; i < ret.data.data.length; i++) {
+									_this.profitlist.push(ret.data.data[i]);
+								}
+							} else {
+								api.toast({
+									msg: '没有更多了',
+								});
+								return false;
+							}
+						}
+					})
+				}
+			},
+			filters: {
+				timeFormat: function (value) {
+					var now = new Date().getTime(),
+						oldTime = new Date(value).getTime(),
+						difference = now - oldTime;
+					result = '',
+						minute = 1000 * 60,
+						hour = minute * 60,
+						day = hour * 24,
+						halfamonth = day * 15,
+						month = day * 30,
+						year = month * 12,
+						_year = difference / year,
+						_month = difference / month,
+						_week = difference / (7 * day),
+						_day = difference / day,
+						_hour = difference / hour,
+						_min = difference / minute;
+					if (_year >= 1) {
+						result = ~~(_year) + " 年前"
+					} else if (_month >= 1) {
+						result = ~~(_month) + " 个月前"
+					} else if (_week >= 1) {
+						result = ~~(_week) + " 周前"
+					} else if (_day >= 1) {
+						result = ~~(_day) + " 天前"
+					} else if (_hour >= 1) {
+						result = ~~(_hour) + " 小时前"
+					} else if (_min >= 1) {
+						result = ~~(_min) + " 分钟前"
+					} else result = "刚刚";
+					return result;
+				},
+			}
+		})
+	}
+</script>
+
+</html>
